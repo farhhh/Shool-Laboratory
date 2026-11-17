@@ -1,0 +1,12 @@
+[build]
+  command = "npm run build"
+  publish = "."
+
+# ВРЕМЕННО: не показывать сайт в поисковой выдаче до официального запуска.
+# Это не защита паролем: любой, у кого есть URL, всё равно сможет открыть сайт.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

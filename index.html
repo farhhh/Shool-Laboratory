@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0912">
+  <meta name="description" content="Интерактивные образовательные симуляции для школьников и учителей.">
+  <title>Научные симуляции — интерактивная лаборатория</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0912;
+      --surface: rgba(29, 26, 36, .92);
+      --surface-2: #272330;
+      --surface-3: #322d3d;
+      --text: #e8e0ee;
+      --muted: #bdb5c8;
+      --line: #4b4556;
+      --accent: #d0bcff;
+      --accent-dark: #281a45;
+      --blue: #8edcff;
+      --ok: #9be3a8;
+      --radius: 22px;
+      font-family: "Roboto Flex", Roboto, system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { min-width: 320px; scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(900px 620px at 10% 12%, rgba(120,70,200,.22), transparent 62%),
+        radial-gradient(800px 600px at 92% 88%, rgba(40,150,210,.14), transparent 60%),
+        var(--bg);
+      font: 400 14px/1.5 "Roboto Flex", Roboto, system-ui, sans-serif;
+    }
+    body::before {
+      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: -1;
+      background: linear-gradient(115deg, transparent 28%, rgba(255,90,90,.035) 38%, rgba(255,200,70,.035) 44%, rgba(90,255,150,.03) 50%, rgba(80,170,255,.04) 56%, rgba(170,100,255,.04) 62%, transparent 72%);
+    }
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
+    button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .shell { width: min(1440px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar { display:flex; align-items:center; gap:14px; padding:26px 0 22px; }
+    .brand-mark {
+      display:grid; place-items:center; width:48px; height:48px; flex:0 0 48px;
+      border-radius:17px; color:#241738; font-size:25px;
+      background: radial-gradient(circle at 30% 25%, #fff, #d0bcff 38%, #8d70ce 100%);
+      box-shadow: 0 0 35px rgba(208,188,255,.24);
+    }
+    .brand-copy { min-width:0; }
+    .eyebrow { color:var(--accent); font-size:11px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
+    .brand-copy h1 { margin:2px 0 0; font-size:clamp(19px, 2.3vw, 25px); line-height:1.1; letter-spacing:-.6px; font-weight:900; }
+    .top-spacer { flex:1; }
+    .top-note { display:flex; align-items:center; gap:8px; padding:9px 13px; border:1px solid rgba(255,255,255,.09); border-radius:999px; color:var(--muted); background:rgba(29,26,36,.58); font-size:12px; white-space:nowrap; }
+    .top-note span { color:var(--ok); font-size:14px; }
+    .layout { display:grid; grid-template-columns:minmax(0,1fr) 246px; gap:24px; align-items:start; padding-bottom:26px; }
+    .main { min-width:0; }
+    .intro {
+      position:relative; overflow:hidden; padding:clamp(22px,3.5vw,34px); border:1px solid rgba(255,255,255,.09);
+      border-radius:28px; background:linear-gradient(130deg, rgba(42,34,57,.93), rgba(23,20,31,.9));
+      box-shadow:0 18px 60px rgba(0,0,0,.22);
+    }
+    .intro::after { content:""; position:absolute; width:260px; height:260px; right:-80px; top:-125px; border-radius:50%; background:radial-gradient(circle, rgba(208,188,255,.25), transparent 68%); pointer-events:none; }
+    .intro-label { display:inline-flex; align-items:center; gap:8px; color:var(--accent); font-size:12px; font-weight:700; }
+    .intro-label::before { content:""; width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 12px var(--accent); }
+    .intro h2 { max-width:680px; margin:10px 0 8px; font-size:clamp(27px,4.2vw,43px); line-height:1.04; letter-spacing:-1.2px; font-weight:900; }
+    .intro p { max-width:650px; margin:0; color:var(--muted); font-size:14px; }
+    .stats { display:flex; flex-wrap:wrap; gap:9px; margin-top:22px; }
+    .stat { display:flex; align-items:center; gap:7px; padding:8px 11px; border:1px solid rgba(255,255,255,.08); border-radius:12px; background:rgba(255,255,255,.035); color:var(--muted); font-size:12px; }
+    .stat b { color:var(--text); font-weight:700; font-variant-numeric:tabular-nums; }
+    .catalog-head { display:flex; align-items:end; justify-content:space-between; gap:16px; margin:30px 0 14px; }
+    .catalog-head h2 { margin:0; font-size:20px; letter-spacing:-.4px; }
+    .catalog-head p { margin:3px 0 0; color:var(--muted); font-size:12px; }
+    .search-wrap { position:relative; width:min(290px, 42%); }
+    .search-wrap .search-icon { position:absolute; left:13px; top:50%; transform:translateY(-50%); color:#a69bb6; font-size:16px; pointer-events:none; }
+    #search { width:100%; height:42px; padding:0 14px 0 38px; border:1px solid var(--line); border-radius:14px; outline:none; color:var(--text); background:rgba(29,26,36,.8); }
+    #search::placeholder { color:#92899e; }
+    #search:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(208,188,255,.09); }
+    .filters { display:flex; gap:8px; overflow-x:auto; padding:2px 1px 12px; scrollbar-width:thin; scrollbar-color:var(--line) transparent; }
+    .filter { min-height:36px; display:flex; align-items:center; gap:8px; padding:0 13px; flex:0 0 auto; border:1px solid var(--line); border-radius:12px; color:var(--muted); background:rgba(29,26,36,.65); cursor:pointer; transition:.18s ease; }
+    .filter:hover { background:var(--surface-3); color:var(--text); }
+    .filter.active { border-color:transparent; color:#211831; background:var(--accent); font-weight:700; }
+    .filter-count { opacity:.7; font-size:11px; }
+    .groups { display:flex; flex-direction:column; gap:25px; }
+    .category { min-width:0; }
+    .category-head { display:flex; align-items:center; gap:10px; margin:10px 0 12px; }
+    .category-icon { display:grid; place-items:center; width:35px; height:35px; flex:0 0 35px; border:1px solid rgba(255,255,255,.09); border-radius:12px; background:rgba(255,255,255,.045); font-size:17px; }
+    .category-title { margin:0; font-size:17px; font-weight:800; letter-spacing:-.2px; }
+    .category-sub { display:block; margin-top:1px; color:#91899d; font-size:11px; }
+    .category-count { margin-left:auto; color:#91899d; font-size:11px; }
+    .cards { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:13px; }
+    .card {
+      display:flex; flex-direction:column; min-width:0; overflow:hidden; border:1px solid rgba(255,255,255,.09); border-radius:20px;
+      background:linear-gradient(160deg, rgba(35,31,44,.96), rgba(25,22,32,.96));
+      box-shadow:0 12px 30px rgba(0,0,0,.15); transition:transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+    .card:hover { transform:translateY(-3px); border-color:rgba(208,188,255,.42); box-shadow:0 18px 40px rgba(0,0,0,.28), 0 0 24px rgba(208,188,255,.06); }
+    .thumb { position:relative; aspect-ratio:16/8.6; overflow:hidden; background:radial-gradient(circle at 25% 18%, rgba(208,188,255,.34), transparent 40%), linear-gradient(135deg,#312943,#171521 70%); }
+    .thumb::after { content:""; position:absolute; inset:0; background:linear-gradient(0deg, rgba(13,10,19,.55), transparent 70%); pointer-events:none; }
+    .thumb img { position:relative; z-index:1; width:100%; height:100%; display:block; object-fit:cover; transition:transform .45s ease; }
+    .card:hover .thumb img { transform:scale(1.035); }
+    .thumb-fallback { position:absolute; inset:0; display:grid; place-items:center; font-size:44px; color:rgba(232,224,238,.88); text-shadow:0 8px 30px rgba(0,0,0,.45); }
+    .thumb-tag { position:absolute; z-index:2; left:12px; top:12px; padding:5px 9px; border:1px solid rgba(255,255,255,.12); border-radius:9px; color:#f1eaff; background:rgba(15,12,22,.58); backdrop-filter:blur(10px); font-size:10px; font-weight:700; }
+    .card-body { display:flex; flex-direction:column; flex:1; padding:15px 16px 16px; }
+    .card-title { margin:0; font-size:17px; line-height:1.22; font-weight:800; letter-spacing:-.25px; }
+    .card-desc { min-height:42px; margin:8px 0 14px; color:var(--muted); font-size:12px; line-height:1.55; }
+    .card-meta { display:flex; flex-wrap:wrap; gap:6px; margin-top:auto; padding-bottom:13px; }
+    .meta-pill { padding:4px 8px; border-radius:8px; color:#c8bfd3; background:rgba(255,255,255,.055); font-size:10px; }
+    .open-link { display:flex; justify-content:center; align-items:center; gap:8px; width:100%; min-height:40px; padding:0 12px; border-radius:12px; color:#251a39; background:var(--accent); font-weight:800; font-size:12px; transition:filter .15s ease, transform .15s ease; }
+    .open-link:hover { filter:brightness(1.08); }
+    .open-link span { font-size:16px; line-height:1; }
+    .empty { padding:30px 18px; border:1px dashed var(--line); border-radius:18px; color:var(--muted); text-align:center; background:rgba(29,26,36,.4); }
+    .sidebar { position:sticky; top:18px; padding-top:3px; }
+    .ad-link { display:block; position:relative; min-height:510px; overflow:hidden; border:1px dashed rgba(208,188,255,.38); border-radius:22px; background:linear-gradient(160deg, rgba(37,32,48,.95), rgba(22,19,29,.96)); transition:border-color .2s, transform .2s; }
+    .ad-link:hover { transform:translateY(-2px); border-color:var(--accent); }
+    .ad-link::before,.ad-link::after { content:""; position:absolute; border-radius:50%; pointer-events:none; }
+    .ad-link::before { width:230px; height:230px; left:-110px; top:70px; background:radial-gradient(circle,rgba(208,188,255,.18),transparent 68%); }
+    .ad-link::after { width:210px; height:210px; right:-110px; bottom:30px; background:radial-gradient(circle,rgba(100,180,255,.16),transparent 70%); }
+    .ad-inner { position:relative; z-index:1; min-height:510px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center; }
+    .ad-small { color:#a79cb9; font-size:10px; letter-spacing:.18em; text-transform:uppercase; }
+    .ad-symbol { display:grid; place-items:center; width:76px; height:76px; margin:23px 0; border:1px solid rgba(208,188,255,.25); border-radius:25px; color:var(--accent); background:rgba(208,188,255,.08); font-size:32px; box-shadow:0 0 45px rgba(208,188,255,.1); }
+    .ad-inner strong { max-width:180px; font-size:21px; line-height:1.15; letter-spacing:-.5px; }
+    .ad-inner p { margin:12px 0 0; color:#a79fb2; font-size:11px; }
+    .ad-cta { margin-top:25px; padding:9px 13px; border:1px solid rgba(208,188,255,.28); border-radius:11px; color:var(--accent); font-size:11px; font-weight:700; }
+    .sidebar-note { margin:12px 4px 0; color:#797184; font-size:10px; text-align:center; }
+    footer { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 0 26px; border-top:1px solid rgba(255,255,255,.08); }
+    .footer-copy { color:#797184; font-size:11px; }
+    .footer-actions { display:flex; align-items:center; gap:10px; }
+    .support-link { padding:7px 2px; color:#90879b; font-size:11px; transition:color .2s; }
+    .support-link:hover { color:var(--accent); }
+    .feedback-link { display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border:1px solid rgba(208,188,255,.26); border-radius:12px; color:var(--text); background:rgba(208,188,255,.09); font-size:11px; font-weight:700; transition:background .2s,border-color .2s; }
+    .feedback-link:hover { border-color:var(--accent); background:rgba(208,188,255,.16); }
+    .error { padding:20px; border:1px solid rgba(255,180,171,.22); border-radius:16px; color:#ffcbc5; background:rgba(90,31,26,.18); }
+    @media (min-width:1250px) { .cards { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+    @media (max-width:900px) { .layout { grid-template-columns:minmax(0,1fr) 205px; gap:16px; } .ad-link,.ad-inner { min-height:420px; } .ad-inner { padding:18px; } .ad-inner strong { font-size:18px; } }
+    @media (max-width:700px) {
+      .shell { width:min(100% - 26px, 620px); }
+      .topbar { padding:18px 0 16px; }
+      .top-note { display:none; }
+      .layout { grid-template-columns:1fr; gap:20px; }
+      .intro { border-radius:23px; }
+      .catalog-head { align-items:stretch; flex-direction:column; margin-top:24px; }
+      .search-wrap { width:100%; }
+      .cards { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+      .card-body { padding:12px; }
+      .card-title { font-size:15px; }
+      .card-desc { min-height:54px; font-size:11px; }
+      .sidebar { position:static; }
+      .ad-link,.ad-inner { min-height:150px; }
+      .ad-inner { flex-direction:row; justify-content:flex-start; gap:14px; padding:18px; text-align:left; }
+      .ad-symbol { width:48px; height:48px; flex:0 0 48px; margin:0; border-radius:16px; font-size:22px; }
+      .ad-text { flex:1; }
+      .ad-inner strong { display:block; max-width:none; font-size:15px; }
+      .ad-inner p { margin:5px 0 0; }
+      .ad-small { display:none; }
+      .ad-cta { margin:0; flex:0 0 auto; }
+      .sidebar-note { display:none; }
+    }
+    @media (max-width:430px) {
+      .cards { grid-template-columns:1fr; }
+      .thumb { aspect-ratio:16/7.5; }
+      .card-desc { min-height:0; }
+      footer { align-items:flex-start; flex-direction:column; }
+      .footer-actions { width:100%; justify-content:space-between; }
+      .feedback-link { padding:9px 11px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand-mark" aria-hidden="true">⚛</div>
+      <div class="brand-copy">
+        <div class="eyebrow">Интерактивная образовательная платформа</div>
+        <h1>Научные симуляции</h1>
+      </div>
+      <div class="top-spacer"></div>
+      <div class="top-note"><span>●</span> Учись через эксперимент</div>
+    </header>
+
+    <div class="layout">
+      <main class="main">
+        <section class="intro">
+          <div class="intro-label">Виртуальная лаборатория</div>
+          <h2>Изучай науку.<br>Проверяй на практике.</h2>
+          <p>Интерактивные модели, в которых можно экспериментировать, наблюдать закономерности и лучше понимать школьные предметы.</p>
+          <div class="stats">
+            <div class="stat">🧪 <b id="total-count">4</b> симуляции</div>
+            <div class="stat">📚 <b id="category-count">3</b> категории</div>
+            <div class="stat">✦ Для учеников и учителей</div>
+          </div>
+        </section>
+
+        <section class="catalog" aria-label="Каталог симуляций">
+          <div class="catalog-head">
+            <div>
+              <h2>Каталог симуляций</h2>
+              <p>Выбери предмет или найди нужную лабораторию</p>
+            </div>
+            <label class="search-wrap">
+              <span class="search-icon" aria-hidden="true">⌕</span>
+              <input id="search" type="search" placeholder="Поиск симуляции…" autocomplete="off" aria-label="Поиск симуляции">
+            </label>
+          </div>
+          <nav class="filters" id="filters" aria-label="Фильтр по предметам">
+            <button class="filter active" type="button" data-category="all">Все предметы <span class="filter-count" id="all-count">4</span></button>
+          </nav>
+          <div class="groups" id="groups" aria-live="polite">
+            <div class="empty">Загружаем каталог симуляций…</div>
+          </div>
+        </section>
+      </main>
+
+      <aside class="sidebar" aria-label="Рекламное место">
+        <a class="ad-link" href="advertising.html" aria-label="Узнать о размещении рекламы">
+          <div class="ad-inner">
+            <div class="ad-small">Партнёрство</div>
+            <div class="ad-symbol" aria-hidden="true">✧</div>
+            <div class="ad-text">
+              <strong>Здесь могла быть ваша реклама</strong>
+              <p>Расскажите о своём проекте нашей аудитории</p>
+            </div>
+            <span class="ad-cta">Подробнее ↗</span>
+          </div>
+        </a>
+        <p class="sidebar-note">Рекламное место · скоро</p>
+      </aside>
+    </div>
+
+    <footer>
+      <div class="footer-copy">© <span id="year"></span> Научные симуляции · Учиться интересно</div>
+      <div class="footer-actions">
+        <a class="support-link" href="support.html">поддержать проект</a>
+        <a class="feedback-link" href="feedback.html">✎ Нашли проблему или есть идеи?</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    (() => {
+      const $ = (selector, root = document) => root.querySelector(selector);
+      const groupsEl = $('#groups');
+      const filtersEl = $('#filters');
+      const searchEl = $('#search');
+      const categoryIcons = { astonomia: '🪐', astronomy: '🪐', himia: '⚗️', chemistry: '⚗️', physics: '⚛️' };
+      let catalog = [];
+      let activeCategory = 'all';
+
+      const escapeHtml = (value = '') => String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+      const iconFor = category => category.icon || categoryIcons[String(category.folder || category.name || '').toLowerCase()] || '🔬';
+
+      function renderFilters() {
+        const total = catalog.reduce((sum, category) => sum + category.items.length, 0);
+        $('#total-count').textContent = total;
+        $('#category-count').textContent = catalog.length;
+        $('#all-count').textContent = total;
+        filtersEl.innerHTML = `<button class="filter ${activeCategory === 'all' ? 'active' : ''}" type="button" data-category="all">Все предметы <span class="filter-count">${total}</span></button>` +
+          catalog.map(category => `<button class="filter ${activeCategory === category.folder ? 'active' : ''}" type="button" data-category="${escapeHtml(category.folder)}">${iconFor(category)} ${escapeHtml(category.name)} <span class="filter-count">${category.items.length}</span></button>`).join('');
+      }
+
+      function cardMarkup(item, category) {
+        const tags = [item.level, item.duration, ...(Array.isArray(item.tags) ? item.tags.slice(0, 2) : [])].filter(Boolean);
+        const placeholder = `<div class="thumb-fallback" aria-hidden="true">${iconFor(category)}</div>`;
+        const image = item.image ? `<img src="${escapeHtml(item.image)}" alt="" loading="lazy" onerror="this.remove()">` : '';
+        const meta = tags.length ? `<div class="card-meta">${tags.map(tag => `<span class="meta-pill">${escapeHtml(tag)}</span>`).join('')}</div>` : '<div class="card-meta"></div>';
+        return `<article class="card">
+          <div class="thumb">${placeholder}${image}<span class="thumb-tag">${escapeHtml(category.name)}</span></div>
+          <div class="card-body">
+            <h3 class="card-title">${escapeHtml(item.title)}</h3>
+            <p class="card-desc">${escapeHtml(item.description || 'Описание пока не добавлено.')}</p>
+            ${meta}
+            <a class="open-link" href="${escapeHtml(item.url)}">Открыть симуляцию <span aria-hidden="true">↗</span></a>
+          </div>
+        </article>`;
+      }
+
+      function render() {
+        const query = searchEl.value.trim().toLocaleLowerCase('ru');
+        const visible = catalog.map(category => ({
+          ...category,
+          items: category.items.filter(item => {
+            const inCategory = activeCategory === 'all' || category.folder === activeCategory;
+            const haystack = `${item.title} ${item.description} ${(item.tags || []).join(' ')} ${category.name}`.toLocaleLowerCase('ru');
+            return inCategory && (!query || haystack.includes(query));
+          })
+        })).filter(category => category.items.length);
+
+        if (!visible.length) {
+          groupsEl.innerHTML = `<div class="empty">Ничего не найдено. Попробуй изменить запрос или выбрать другой предмет.</div>`;
+          return;
+        }
+        groupsEl.innerHTML = visible.map(category => `<section class="category">
+          <div class="category-head">
+            <div class="category-icon">${iconFor(category)}</div>
+            <div><h3 class="category-title">${escapeHtml(category.name)}</h3><span class="category-sub">Симуляции по предмету</span></div>
+            <span class="category-count">${category.items.length} ${category.items.length === 1 ? 'проект' : 'проекта'}</span>
+          </div>
+          <div class="cards">${category.items.map(item => cardMarkup(item, category)).join('')}</div>
+        </section>`).join('');
+      }
+
+      filtersEl.addEventListener('click', event => {
+        const button = event.target.closest('[data-category]');
+        if (!button) return;
+        activeCategory = button.dataset.category;
+        renderFilters();
+        render();
+      });
+      searchEl.addEventListener('input', render);
+      $('#year').textContent = new Date().getFullYear();
+
+      fetch('./catalog.json', { cache: 'no-store' })
+        .then(response => { if (!response.ok) throw new Error('Не удалось загрузить catalog.json'); return response.json(); })
+        .then(data => {
+          catalog = Array.isArray(data.categories) ? data.categories : [];
+          catalog = catalog.filter(category => Array.isArray(category.items) && category.items.length);
+          renderFilters();
+          render();
+          if (!catalog.length) groupsEl.innerHTML = '<div class="empty">Пока не найдено ни одной симуляции. Проверь папку <b>Simulations</b> и запусти сборку каталога.</div>';
+        })
+        .catch(error => {
+          console.error(error);
+          groupsEl.innerHTML = '<div class="error">Не удалось загрузить каталог. Убедись, что рядом с index.html лежит файл <b>catalog.json</b>, а сайт открыт через веб-сервер, а не напрямую с диска.</div>';
+        });
+    })();
+  </script>
+</body>
+</html>
