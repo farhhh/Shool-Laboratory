@@ -55,7 +55,7 @@ const DIRS=[[1,0],[0,1],[-1,0],[0,-1]],key=p=>p[0]+','+p[1],GW=100;
 const D={
 ind:{n:'Катушка индуктивности',k:'Накопитель энергии',col:'#c3a6ff',d:'Провод, свёрнутый в витки. Мешает току меняться: ток растёт и спадает не мгновенно.',f:'U = L·ΔI/Δt, W = L·I²/2. Для постоянного тока в установившемся режиме катушка — просто провод.'},
 led:{n:'Светодиод',k:'Полупроводник',col:'#ff6b8a',d:'Пропускает ток только в одну сторону: от анода к катоду (остриё треугольника смотрит на катод). Светится от ≈2 В.',f:'Рабочий ток ≈ 20 мА. Без резистора светодиод сгорит: R = (U − 2 В)/0,02 А.'},
-fuse:{n:'Предохранитель',k:'Защита',col:'#ffcf70',d:'Тонкая проволочка: плавится, когда ток больше номинала, и размыкает цепь.',f:'При коротком замыкании он перегорает первым и спасает батарею и провода.'},
+fuse:{n:'Предохранитель',k:'Защита',col:'#ffcf70',d:'Тонкая проволочка: плавится, когда ток больше номинала, и размыкает цепь.',f:'При коротком замыкании он перегорает первым и спасает батарею и провода. Чтобы защитить светодиод (он гибнет при токе > 60 мА), нужен номинал меньше ≈ 50 мА, то есть 0,05 А.'},
 btn:{n:'Кнопка',k:'Коммутация',col:'#9be3a8',d:'Замыкает цепь, пока вы держите её нажатой. Нажмите и держите.',f:'Тот же разрыв цепи, что у ключа, но без фиксации — как звонок или клавиша.'},
 cap:{n:'Конденсатор',k:'Накопитель заряда',col:'#8edcff',d:'Две пластины с зазором. Заряжается и копит энергию, а постоянный ток через него потом не идёт.',f:'q = C·U, W = C·U²/2. Заряд идёт за время порядка τ = R·C.'},
 vm:{n:'Вольтметр',k:'Измерительный прибор',col:'#ffb0c8',d:'Круг с буквой V. Подключается параллельно участку и показывает напряжение. Его сопротивление огромно (≈10 МОм).',f:'Включите вольтметр последовательно — он «разорвёт» цепь, и ток почти исчезнет.'},
@@ -214,7 +214,7 @@ if(e.t==='bat')ctl=`<div class="field">Э.д.с. E<b id="vE">${e.v} В</b></div>
 if(e.t==='res')ctl=`<div class="field">Сопротивление R<b id="vR">${e.v} Ом</b></div><input type="range" id="rR" min="1" max="200" step="1" value="${e.v}">`;
 if(e.t==='cap')ctl=`<div class="field">Ёмкость C<b id="vC">${e.v} мФ</b></div><input type="range" id="rC" min="1" max="1000" step="1" value="${e.v}"><button class="btn secondary" id="dis">Разрядить</button>`;
 if(e.t==='ind')ctl=`<div class="field">Индуктивность L<b id="vL">${e.v} мГн</b></div><input type="range" id="rL" min="10" max="5000" step="10" value="${e.v}"><button class="btn secondary" id="dis">Обнулить ток</button>`;
-if(e.t==='fuse')ctl=`<div class="field">Номинал<b id="vF">${e.v} А</b></div><input type="range" id="rF" min=".1" max="5" step=".1" value="${e.v}"><button class="btn secondary" id="fix">Заменить предохранитель</button>`;
+if(e.t==='fuse')ctl=`<div class="field">Номинал<b id="vF">${e.v} А</b></div><input type="range" id="rF" min=".01" max="5" step=".01" value="${e.v}"><button class="btn secondary" id="fix">Заменить предохранитель</button>`;
 if(e.t==='led')ctl=`<button class="btn secondary" id="fix">Заменить светодиод</button>`;
 if(e.t==='sw')ctl=`<button class="btn secondary" id="tsw">${e.on?'Разомкнуть':'Замкнуть'}</button>`;
 P.innerHTML=`<button class="x" id="cl">✕</button><div class="hero"><div class="orb" style="--acc:${d.col}"></div><div><div class="kind" style="color:${d.col}">${d.k}</div><h2>${d.n}</h2></div></div><div class="fact">${d.d}<br><br>${d.f}</div><div class="grid" id="tiles"></div><div class="fm" id="pf" style="margin-top:10px"></div>${graphHTML(e)}${ctl}<button class="btn" id="del">Удалить элемент</button>`;
