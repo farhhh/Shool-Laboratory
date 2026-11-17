@@ -8,7 +8,7 @@
 :root{color-scheme:dark;--bg:#0b0912;--s1:#1d1a24;--s2:#272330;--s3:#322d3d;--on:#e8e0ee;--on2:#cbc3d4;--ol:#4b4556;--pr:#d0bcff;--acc:#d0bcff;--ok:#9be3a8;--er:#ffb4ab;box-sizing:border-box}
 *{box-sizing:border-box;margin:0}html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--on);font:400 14px/1.45 "Roboto Flex",Roboto,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
 body{background:radial-gradient(900px 620px at 12% 18%,rgba(120,70,200,.24),transparent 62%),radial-gradient(800px 600px at 92% 88%,rgba(40,150,210,.15),transparent 60%),var(--bg)}
-canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:block}button,input{font:inherit;color:inherit}button{border:0;background:none;cursor:pointer}
+#scene{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:block}#gr{position:static;display:block;width:100%;height:auto}button,input{font:inherit;color:inherit}button{border:0;background:none;cursor:pointer}
 .glass{background:rgba(29,26,36,.94);border:1px solid rgba(255,255,255,.09);box-shadow:0 10px 30px rgba(0,0,0,.5)}
 #top{position:fixed;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:10px;padding:9px 12px 9px 18px;border-radius:28px;z-index:5}
 #top h1{font:900 19px/1 "Roboto Flex";letter-spacing:-.4px;flex:1;white-space:nowrap;background:linear-gradient(90deg,#ffe29a,#ffb0c8,var(--pr));-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -38,12 +38,12 @@ canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:b
 <body>
 <canvas id="scene" aria-label="Поле для сборки электрической цепи"></canvas>
 <header id="top" class="glass"><h1>Электрическая лаборатория</h1><span class="pill" id="readout">⚡</span></header>
-<nav id="nav"><button class="chip" data-p="simple">Простая цепь</button><button class="chip" data-p="short">Замыкание + и −</button><button class="chip" data-p="par">Параллельное соединение</button><button class="chip" data-p="clear">Пустое поле</button></nav>
+<nav id="nav"><button class="chip" data-p="simple">Простая цепь</button><button class="chip" data-p="short">Замыкание + и −</button><button class="chip" data-p="par">Параллельное соединение</button><button class="chip" data-p="rc">Заряд конденсатора</button><button class="chip" data-p="led">Светодиод и резистор</button><button class="chip" data-p="clear">Пустое поле</button></nav>
 <div id="hud" class="glass"></div>
 <aside id="panel"></aside>
 <div id="dock" class="glass">
 <button class="tg tool" data-tool="wire">Провод</button><button class="tg tool" data-tool="erase">Ластик</button><button class="tg primary" id="add">＋ Элементы</button><span class="sep"></span>
-<button class="tg" id="rot">↻ Повернуть</button><button class="tg" id="home" title="К центру">⌖</button><button class="tg" id="flow">Ток: условный</button><button class="tg" id="grid">Сетка</button><button class="tg" id="level">Режим: кратко</button>
+<button class="tg" id="rot">↻ Повернуть</button><button class="tg" id="home" title="К центру">⌖</button><button class="tg" id="ts">Время: 1×</button><button class="tg" id="flow">Ток: условный</button><button class="tg" id="grid">Сетка</button><button class="tg" id="level">Режим: кратко</button>
 </div>
 <div id="menu" class="glass"></div>
 <div id="toast"></div>
@@ -53,6 +53,9 @@ const $=s=>document.querySelector(s),cv=$('#scene'),ctx=cv.getContext('2d');
 let W,H,DPR,c=36,ox=0,oy=0,tool=null,rot=0,showGrid=false,electrons=false,detail=false,sel=null,hover=null,drag=null,els=[],nid=0,dirty=true,T=0,last=0;
 const DIRS=[[1,0],[0,1],[-1,0],[0,-1]],key=p=>p[0]+','+p[1],GW=100;
 const D={
+ind:{n:'Катушка индуктивности',k:'Накопитель энергии',col:'#c3a6ff',d:'Провод, свёрнутый в витки. Мешает току меняться: ток растёт и спадает не мгновенно.',f:'U = L·ΔI/Δt, W = L·I²/2. Для постоянного тока в установившемся режиме катушка — просто провод.'},
+led:{n:'Светодиод',k:'Полупроводник',col:'#ff6b8a',d:'Пропускает ток только в одну сторону: от анода к катоду (остриё треугольника смотрит на катод). Светится от ≈2 В.',f:'Рабочий ток ≈ 20 мА. Без резистора светодиод сгорит: R = (U − 2 В)/0,02 А.'},
+fuse:{n:'Предохранитель',k:'Защита',col:'#ffcf70',d:'Тонкая проволочка: плавится, когда ток больше номинала, и размыкает цепь.',f:'При коротком замыкании он перегорает первым и спасает батарею и провода.'},
 btn:{n:'Кнопка',k:'Коммутация',col:'#9be3a8',d:'Замыкает цепь, пока вы держите её нажатой. Нажмите и держите.',f:'Тот же разрыв цепи, что у ключа, но без фиксации — как звонок или клавиша.'},
 cap:{n:'Конденсатор',k:'Накопитель заряда',col:'#8edcff',d:'Две пластины с зазором. Заряжается и копит энергию, а постоянный ток через него потом не идёт.',f:'q = C·U, W = C·U²/2. Заряд идёт за время порядка τ = R·C.'},
 vm:{n:'Вольтметр',k:'Измерительный прибор',col:'#ffb0c8',d:'Круг с буквой V. Подключается параллельно участку и показывает напряжение. Его сопротивление огромно (≈10 МОм).',f:'Включите вольтметр последовательно — он «разорвёт» цепь, и ток почти исчезнет.'},
@@ -62,7 +65,7 @@ bulb:{n:'Лампа накаливания',k:'Потребитель',col:'#ffd
 res:{n:'Резистор',k:'Потребитель',col:'#8edcff',d:'Ограничивает ток, превращая энергию в тепло. На схеме — прямоугольник.',f:'Закон Ома: I = U/R. Больше R — меньше ток.'},
 sw:{n:'Ключ',k:'Коммутация',col:'#9be3a8',d:'Замыкает и размыкает цепь. Нажмите на него, чтобы переключить.',f:'Разомкнутый ключ — это воздушный зазор: сопротивление огромное, тока нет.'},
 wire:{n:'Провод',k:'Проводник',col:'#cbc3d4',d:'Почти не мешает току, но сопротивление у него не нулевое (здесь 0,01 Ом на клетку).',f:'При огромном токе даже провод греется: Q = I²·R·t. Поэтому нужны предохранители.'}};
-const mk=(t,a,b,o={})=>({id:++nid,t,a,b,v:t==='bat'?6:t==='res'?20:t==='cap'?100:0,r:.5,on:t!=='btn',vc:0,I:0,dv:0,P:0,h:0,br:0,g:1,...o});
+const mk=(t,a,b,o={})=>({id:++nid,t,a,b,v:t==='bat'?6:t==='res'?20:t==='cap'?100:t==='ind'?1000:t==='fuse'?1:0,r:.5,on:t!=='btn',vc:0,il:0,fw:false,dead:false,I:0,dv:0,P:0,h:0,br:0,g:1,...o});
 const comp=(t,x,y,d,o)=>mk(t,[x,y],[x+DIRS[d][0]*2,y+DIRS[d][1]*2],o);
 function addWire(x1,y1,x2,y2){const sx=Math.sign(x2-x1),sy=Math.sign(y2-y1),n=Math.abs(x2-x1)+Math.abs(y2-y1);let x=x1,y=y1;for(let i=0;i<n;i++){const nx=x+sx,ny=y+sy;if(!els.some(e=>e.t==='wire'&&((key(e.a)==x+','+y&&key(e.b)==nx+','+ny)||(key(e.b)==x+','+y&&key(e.a)==nx+','+ny))))if(!covered([x,y],[nx,ny]))els.push(mk('wire',[x,y],[nx,ny]));x=nx;y=ny}}
 const onSeg=(p,a,b)=>(a[0]==b[0]&&p[0]==a[0]&&p[1]>=Math.min(a[1],b[1])&&p[1]<=Math.max(a[1],b[1]))||(a[1]==b[1]&&p[1]==a[1]&&p[0]>=Math.min(a[0],b[0])&&p[0]<=Math.max(a[0],b[0]));
@@ -74,25 +77,33 @@ const PRE={
 simple(x,y){addWire(x-4,y-3,x-4,y-1);addWire(x-4,y+1,x-4,y+3);addWire(x-4,y-3,x-1,y-3);addWire(x+1,y-3,x+4,y-3);addWire(x+4,y-3,x+4,y+3);addWire(x+4,y+3,x+1,y+3);addWire(x-1,y+3,x-4,y+3);els.push(comp('bat',x-4,y-1,1),comp('bulb',x-1,y-3,0),comp('sw',x+1,y+3,2))},
 short(x,y){addWire(x-4,y-3,x-4,y-1);addWire(x-4,y+1,x-4,y+3);addWire(x-4,y-3,x+4,y-3);addWire(x+4,y-3,x+4,y+3);addWire(x+4,y+3,x+1,y+3);addWire(x-1,y+3,x-4,y+3);els.push(comp('bat',x-4,y-1,1),comp('sw',x+1,y+3,2,{on:false}));toast('Замкните ключ — и посмотрите, что будет')},
 par(x,y){addWire(x-5,y-3,x-5,y-1);addWire(x-5,y+1,x-5,y+3);addWire(x-5,y-3,x+4,y-3);addWire(x-5,y+3,x+4,y+3);els.push(comp('bat',x-5,y-1,1));for(const[bx,t]of[[-1,'bulb'],[2,'bulb'],[4,'res']]){addWire(x+bx,y-3,x+bx,y-1);addWire(x+bx,y+1,x+bx,y+3);els.push(comp(t,x+bx,y-1,1))}},
+rc(x,y){addWire(x-4,y-3,x-4,y-1);addWire(x-4,y+1,x-4,y+3);addWire(x-4,y-3,x-1,y-3);addWire(x+1,y-3,x+4,y-3);addWire(x+4,y-3,x+4,y-1);addWire(x+4,y+1,x+4,y+3);addWire(x+4,y+3,x+1,y+3);addWire(x-1,y+3,x-4,y+3);els.push(comp('bat',x-4,y-1,1),comp('res',x-1,y-3,0),comp('cap',x+4,y-1,1),comp('sw',x+1,y+3,2,{on:false}));toast('Замкните ключ, выберите конденсатор — в подробном режиме будет график')},
+led(x,y){addWire(x-4,y-3,x-4,y-1);addWire(x-4,y+1,x-4,y+3);addWire(x-4,y-3,x-3,y-3);addWire(x-1,y-3,x,y-3);addWire(x+2,y-3,x+4,y-3);addWire(x+4,y-3,x+4,y+3);addWire(x+4,y+3,x-4,y+3);els.push(comp('bat',x-4,y-1,1),comp('led',x-3,y-3,0),comp('res',x,y-3,0,{v:200}));toast('Уберите резистор и замкните цепь проводом — светодиод сгорит')},
 clear(){}};
 function load(n){els=[];sel=null;const[cx,cy]=center();PRE[n](cx,cy);dirty=true;panel()}
 /* ---------- расчёт: метод узловых потенциалов ---------- */
-const SW=t=>t==='sw'||t==='btn',hasCap=()=>els.some(e=>e.t==='cap');
-function solve(dt){
-const idx=new Map();for(const e of els)for(const p of[e.a,e.b]){const k=key(p);if(!idx.has(k))idx.set(k,idx.size)}
+const SW=t=>t==='sw'||t==='btn',hasDyn=()=>els.some(e=>e.t==='cap'||e.t==='ind'||e.t==='led'||e.t==='fuse'),VF=2;
+const Eof=e=>e.t==='bat'?e.v:e.t==='cap'?e.vc:e.t==='ind'?-e.il/e.g:(e.t==='led'&&e.fw&&!e.dead)?VF:0;
+function solve(dt,rdt){rdt=rdt||dt;const act=els.filter(e=>!e.mv);els.forEach(e=>{if(e.mv)e.I=e.dv=e.P=e.h=e.br=0});
+const leds=act.filter(e=>e.t==='led'&&!e.dead);let V;
+for(let it=0;it<(leds.length?12:1);it++){
+const idx=new Map();for(const e of act)for(const p of[e.a,e.b]){const k=key(p);if(!idx.has(k))idx.set(k,idx.size)}
 const n=idx.size,A=Array.from({length:n},()=>new Float64Array(n+1));
-for(const e of els){const i=idx.get(key(e.a)),j=idx.get(key(e.b));
-const g=e.t==='wire'||e.t==='am'?GW:e.t==='bat'?1/e.r:e.t==='bulb'?1/12:e.t==='res'?1/e.v:e.t==='vm'?1e-7:e.t==='cap'?(e.v/1000)/dt:SW(e.t)&&!e.on?1e-7:GW;
-e.g=g;e.i=i;e.j=j;A[i][i]+=g;A[j][j]+=g;A[i][j]-=g;A[j][i]-=g;const E=e.t==='bat'?e.v:e.t==='cap'?e.vc:0;if(E){A[i][n]+=E*g;A[j][n]-=E*g}}
+for(const e of act){const i=idx.get(key(e.a)),j=idx.get(key(e.b));
+const g=e.t==='wire'||e.t==='am'?GW:e.t==='bat'?1/e.r:e.t==='bulb'?1/12:e.t==='res'?1/e.v:e.t==='vm'?1e-7:e.t==='cap'?(e.v/1000)/dt:e.t==='ind'?dt/(e.v/1000):e.t==='led'?(e.dead||!e.fw?1e-9:.1):e.t==='fuse'?(e.dead?1e-7:20):SW(e.t)&&!e.on?1e-7:GW;
+e.g=g;e.i=i;e.j=j;A[i][i]+=g;A[j][j]+=g;A[i][j]-=g;A[j][i]-=g;const E=Eof(e);if(E){A[i][n]+=E*g;A[j][n]-=E*g}}
 for(let i=0;i<n;i++)A[i][i]+=1e-9;
 for(let k=0;k<n;k++){let p=k;for(let r=k+1;r<n;r++)if(Math.abs(A[r][k])>Math.abs(A[p][k]))p=r;[A[k],A[p]]=[A[p],A[k]];const pv=A[k][k];
 for(let r=k+1;r<n;r++){const f=A[r][k]/pv;if(!f)continue;for(let q=k;q<=n;q++)A[r][q]-=f*A[k][q]}}
-const V=new Float64Array(n);for(let i=n-1;i>=0;i--){let s=A[i][n];for(let q=i+1;q<n;q++)s-=A[i][q]*V[q];V[i]=s/A[i][i]}
-for(const e of els){e.dv=V[e.i]-V[e.j];const open=SW(e.t)&&!e.on,E=e.t==='bat'?e.v:e.t==='cap'?e.vc:0;
-e.I=open?0:(e.dv-E)*e.g;
-e.P=open||e.t==='vm'||e.t==='cap'?0:e.t==='bat'?e.I*e.I*e.r:e.I*e.I/e.g;
-e.h=e.t==='bat'?e.P/4:e.t==='res'?e.P/5:(e.t==='wire'||SW(e.t))?e.P/1:0;e.br=e.t==='bulb'?e.P/3:0}
-for(const e of els)if(e.t==='cap')e.vc=e.dv}
+V=new Float64Array(n);for(let i=n-1;i>=0;i--){let s=A[i][n];for(let q=i+1;q<n;q++)s-=A[i][q]*V[q];V[i]=s/A[i][i]}
+let ch=false;for(const e of leds){const nf=V[e.i]-V[e.j]>VF;if(nf!==e.fw){e.fw=nf;ch=true}}if(!ch)break}
+for(const e of act){e.dv=V[e.i]-V[e.j];const open=SW(e.t)&&!e.on;
+e.I=open?0:(e.dv-Eof(e))*e.g;
+e.P=open||e.t==='vm'||e.t==='cap'||e.t==='ind'?0:e.t==='bat'?e.I*e.I*e.r:e.t==='led'?Math.max(0,e.I*e.dv):e.I*e.I/e.g;
+e.h=e.t==='bat'?e.P/4:e.t==='res'?e.P/5:(e.t==='wire'||SW(e.t))?e.P/1:e.t==='fuse'?(e.hot||0)/.15:0;e.br=e.t==='bulb'?e.P/3:e.t==='led'&&!e.dead?Math.max(0,e.I)/.02:0;
+if(e.t==='fuse'&&!e.dead){const r=Math.abs(e.I)/e.v;e.hot=r>1?(e.hot||0)+rdt*r*r:Math.max(0,(e.hot||0)-rdt*.5);if(e.hot>.15)e.dead=true}
+if(e.t==='led'&&!e.dead){e.burn=e.I>.06?(e.burn||0)+rdt:Math.max(0,(e.burn||0)-rdt);if(e.burn>.25)e.dead=true}}
+for(const e of act){if(e.t==='cap')e.vc=e.dv;if(e.t==='ind')e.il=e.I}}
 /* ---------- рисование ---------- */
 const px=p=>[ox+p[0]*c,oy+p[1]*c],f2=x=>Math.abs(x)<.005?'0':Math.abs(x)<10?x.toFixed(2):x.toFixed(1);
 const mix=(h)=>{const k=Math.min(1,h*1.3),a=[185,176,198],b=[255,90,40];return`rgb(${a.map((v,i)=>Math.round(v+(b[i]-v)*k))})`};
@@ -105,6 +116,12 @@ if(e.t==='bulb'){const R=c*.6,b=Math.min(e.br,1.6);lead(-L/2,-R,col);lead(R,L/2,
 if(b>.02){ctx.globalCompositeOperation='lighter';const r=c*(1.1+b*1.3),g=ctx.createRadialGradient(0,0,R*.4,0,0,r);g.addColorStop(0,`rgba(255,220,120,${Math.min(.9,b*.7)})`);g.addColorStop(1,'rgba(255,200,80,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,r,0,7);ctx.fill();ctx.globalCompositeOperation='source-over'}
 const lit=Math.min(1,e.br*1.6);ctx.beginPath();ctx.arc(0,0,R,0,7);const g2=ctx.createRadialGradient(0,0,0,0,0,R);g2.addColorStop(0,`rgb(${29+226*lit},${26+190*lit},${36+60*lit})`);g2.addColorStop(1,`rgb(${29+200*lit},${26+150*lit},${36+20*lit})`);ctx.fillStyle=g2;ctx.fill();ctx.strokeStyle=lit>.1?'#ffe29a':'#cbc3d4';ctx.lineWidth=2.2;ctx.stroke();
 const q=R*.707;ctx.strokeStyle=lit>.3?'#8a5200':'#cbc3d4';ctx.beginPath();ctx.moveTo(-q,-q);ctx.lineTo(q,q);ctx.moveTo(-q,q);ctx.lineTo(q,-q);ctx.stroke()}
+else if(e.t==='ind'){const r=c*.18;lead(-L/2,-r*4,col);lead(r*4,L/2,col);ctx.strokeStyle='#c3a6ff';ctx.lineWidth=2.6;ctx.beginPath();for(let k=0;k<4;k++){const x=-r*3+k*r*2;ctx.moveTo(x-r,0);ctx.arc(x,0,r,Math.PI,0)}ctx.stroke()}
+else if(e.t==='led'){const s=c*.3,b=e.dead?0:Math.min(e.br,1.5);lead(-L/2,-s,col);lead(s,L/2,col);
+if(b>.05){ctx.globalCompositeOperation='lighter';const r=c*(1+b*1.2),g=ctx.createRadialGradient(0,0,0,0,0,r);g.addColorStop(0,`rgba(255,70,90,${Math.min(.85,b*.6)})`);g.addColorStop(1,'rgba(255,40,60,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,r,0,7);ctx.fill();ctx.globalCompositeOperation='source-over'}
+const lc=e.dead?'#6b5f78':'#ff6b8a';ctx.beginPath();ctx.moveTo(-s,-s);ctx.lineTo(-s,s);ctx.lineTo(s,0);ctx.closePath();ctx.fillStyle=`rgba(255,100,120,${Math.min(.9,b)})`;ctx.fill();ctx.strokeStyle=lc;ctx.lineWidth=2.2;ctx.stroke();ctx.beginPath();ctx.moveTo(s,-s);ctx.lineTo(s,s);for(const o of[-s*.2,s*.5]){ctx.moveTo(o,-s*1.3);ctx.lineTo(o+s*.7,-s*2.1);ctx.moveTo(o+s*.7,-s*2.1);ctx.lineTo(o+s*.2,-s*2.05);ctx.moveTo(o+s*.7,-s*2.1);ctx.lineTo(o+s*.65,-s*1.6)}ctx.stroke();
+if(e.dead){ctx.strokeStyle='#ff8f7a';ctx.beginPath();ctx.moveTo(-s,-s);ctx.lineTo(s,s);ctx.moveTo(-s,s);ctx.lineTo(s,-s);ctx.stroke()}}
+else if(e.t==='fuse'){const w=c*1.2,h=c*.38;lead(-L/2,-w/2,col);lead(w/2,L/2,col);ctx.fillStyle='#1d1a24';ctx.fillRect(-w/2,-h/2,w,h);ctx.strokeStyle=e.dead?'#6b5f78':col;ctx.lineWidth=2.2;ctx.strokeRect(-w/2,-h/2,w,h);ctx.strokeStyle=e.dead?'#ff8f7a':'#ffcf70';ctx.lineWidth=1.6;ctx.beginPath();if(e.dead){ctx.moveTo(-w/2,0);ctx.lineTo(-w*.12,0);ctx.moveTo(w*.12,0);ctx.lineTo(w/2,0)}else{ctx.moveTo(-w/2,0);ctx.lineTo(w/2,0)}ctx.stroke()}
 else if(e.t==='cap'){const gp=c*.14,q=Math.min(1,Math.abs(e.vc||0)/12);lead(-L/2,-gp,col);lead(gp,L/2,col);if(q>.02){ctx.fillStyle=`rgba(142,220,255,${q*.4})`;ctx.fillRect(-gp,-c*.45,gp*2,c*.9)}ctx.strokeStyle='#8edcff';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-gp,-c*.45);ctx.lineTo(-gp,c*.45);ctx.moveTo(gp,-c*.45);ctx.lineTo(gp,c*.45);ctx.stroke()}
 else if(e.t==='vm'||e.t==='am'){const R=c*.6,mc=D[e.t].col;lead(-L/2,-R,col);lead(R,L/2,col);ctx.beginPath();ctx.arc(0,0,R,0,7);ctx.fillStyle='#1d1a24';ctx.fill();ctx.strokeStyle=mc;ctx.lineWidth=2.2;ctx.stroke();ctx.fillStyle=mc;ctx.font='700 '+Math.round(c*.6)+'px Roboto Flex';ctx.textAlign='center';ctx.textBaseline='middle';ctx.save();ctx.rotate(-an);ctx.fillText(e.t==='vm'?'V':'A',0,1);ctx.restore();ctx.textBaseline='alphabetic'}
 else if(e.t==='res'){const w=c*1.3,h=c*.5;lead(-L/2,-w/2,col);lead(w/2,L/2,col);ctx.fillStyle='#1d1a24';ctx.fillRect(-w/2,-h/2,w,h);ctx.strokeStyle=col;ctx.lineWidth=2.2;ctx.strokeRect(-w/2,-h/2,w,h)}
@@ -126,6 +143,9 @@ else if(e.t==='btn')lines.push(e.on?'нажата':'кнопка');
 else if(e.t==='cap'){lines.push('C = '+e.v+' мФ');if(detail)lines.push('U = '+f2(e.dv)+' В','q = '+f2(e.v*e.dv)+' мКл')}
 else if(e.t==='vm')lines.push('U = '+f2(e.dv)+' В');
 else if(e.t==='am')lines.push('I = '+f2(e.I)+' А');
+else if(e.t==='ind'){lines.push('L = '+e.v/1000+' Гн');if(detail)lines.push('I = '+f2(e.I)+' А','W = '+f2(e.v*e.I*e.I/2)+' мДж')}
+else if(e.t==='led'){lines.push(e.dead?'сгорел':'светодиод');if(detail)lines.push('I = '+f2(e.I*1000)+' мА')}
+else if(e.t==='fuse'){lines.push(e.dead?'перегорел':'≤ '+e.v+' А');if(detail)lines.push('I = '+f2(e.I)+' А')}
 if(!lines.length)return;const[ax,ay]=px(e.a),[bx,by]=px(e.b),x=(ax+bx)/2,y=(ay+by)/2,hz=Math.abs(bx-ax)>Math.abs(by-ay);
 ctx.font='500 11.5px Roboto Flex';ctx.fillStyle='#e8e0ee';ctx.textAlign=hz?'center':'left';
 lines.forEach((t,i)=>{if(hz)ctx.fillText(t,x,y-c*.95-(lines.length-1-i)*14);else ctx.fillText(t,x+c*.95,y+(i-(lines.length-1)/2)*14+4)})}
@@ -140,9 +160,10 @@ const deg=new Map();els.forEach(e=>[e.a,e.b].forEach(p=>deg.set(key(p),(deg.get(
 ctx.fillStyle='#e8e0ee';deg.forEach((d,k)=>{if(d>=3){const[x,y]=px(k.split(',').map(Number));ctx.beginPath();ctx.arc(x,y,c*.11,0,7);ctx.fill()}});
 if(drag?.k==='wire'){const[a,b]=[px(drag.s),px(drag.e)];ctx.strokeStyle='rgba(208,188,255,.7)';ctx.setLineDash([6,5]);ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(...a);ctx.lineTo(...b);ctx.stroke();ctx.setLineDash([])}
 if(hover){const[x,y]=px(hover);ctx.strokeStyle='rgba(208,188,255,.8)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x,y,6,0,7);ctx.stroke();
-if(D[tool]&&tool!=='wire'){const g=comp(tool,hover[0],hover[1],rot);ctx.globalAlpha=.5;body(g);ctx.globalAlpha=1}}ctx.restore()}
+if(D[tool]&&tool!=='wire'){const g=comp(tool,hover[0],hover[1],rot);ctx.globalAlpha=.5;body(g);ctx.globalAlpha=1}}ctx.restore();ring()}
+function ring(){const q=grab?{x:ptr.x,y:ptr.y,p:1}:pend&&pend.t0?{x:pend.x,y:pend.y,p:Math.min(1,(performance.now()-pend.t0)/380)}:null;if(!q)return;const x=q.x+26,y=q.y-26;ctx.lineWidth=4;ctx.strokeStyle='rgba(255,255,255,.2)';ctx.beginPath();ctx.arc(x,y,12,0,7);ctx.stroke();ctx.strokeStyle='#d0bcff';ctx.beginPath();ctx.arc(x,y,12,-Math.PI/2,-Math.PI/2+q.p*Math.PI*2);ctx.stroke();if(grab){ctx.fillStyle='#d0bcff';ctx.beginPath();ctx.arc(x,y,5,0,7);ctx.fill()}}
 /* ---------- ввод и камера ---------- */
-const cam={x:0,y:0,z:1},ptrs=new Map();let pinch=null,panning=null,pend=null,space=false;
+const cam={x:0,y:0,z:1},ptrs=new Map();const ptr={x:0,y:0};let pinch=null,panning=null,pend=null,space=false,grab=null;function startGrab(){const el=pend.el,g0=snap({clientX:pend.x,clientY:pend.y});grab={el,a0:[...el.a],b0:[...el.b],g0};el.mv=true;pend=null;dirty=true}
 const toW=ev=>[(ev.clientX-cam.x)/cam.z,(ev.clientY-cam.y)/cam.z],snap=ev=>{const w=toW(ev);return[Math.round(w[0]/c),Math.round(w[1]/c)]};
 function zoomAt(sx,sy,k){const z=Math.max(.35,Math.min(3,cam.z*k)),r=z/cam.z;cam.x=sx-(sx-cam.x)*r;cam.y=sy-(sy-cam.y)*r;cam.z=z}
 function hit(ev){const[X,Y]=toW(ev);let best=null,bd=c*.5;for(const e of els){const[ax,ay]=px(e.a),[bx,by]=px(e.b),dx=bx-ax,dy=by-ay,t=Math.max(0,Math.min(1,((X-ax)*dx+(Y-ay)*dy)/(dx*dx+dy*dy))),d=Math.hypot(X-ax-t*dx,Y-ay-t*dy);if(d<bd||(d<c*.5&&e.t!=='wire'&&best?.t==='wire')){bd=d;best=e}}return best}
@@ -157,8 +178,8 @@ if(tool==='wire')drag={k:'wire',s:p,e:p};
 else if(D[tool])place(tool,p);
 else if(tool==='erase'){drag={k:'erase'};erase(ev)}
 else{const el=hit(ev),t=termAt(ev);if(el&&el.t==='btn'){el.on=true;dirty=true}
-if(t)drag={k:'wire',s:t,e:t,click:el};else if(el)pend={el,x:ev.clientX,y:ev.clientY};else panning={x:ev.clientX,y:ev.clientY,moved:false,auto:true}}});
-addEventListener('pointermove',ev=>{if(ptrs.has(ev.pointerId))ptrs.set(ev.pointerId,[ev.clientX,ev.clientY]);
+if(t)drag={k:'wire',s:t,e:t,click:el};else if(el){const pd=pend={el,x:ev.clientX,y:ev.clientY};if(el===sel&&el.t!=='wire'){pd.t0=performance.now();setTimeout(()=>{if(pend===pd)startGrab()},380)}}else panning={x:ev.clientX,y:ev.clientY,moved:false,auto:true}}});
+addEventListener('pointermove',ev=>{if(ptrs.has(ev.pointerId))ptrs.set(ev.pointerId,[ev.clientX,ev.clientY]);ptr.x=ev.clientX;ptr.y=ev.clientY;if(grab){const p=snap(ev),sh=[p[0]-grab.g0[0],p[1]-grab.g0[1]];grab.el.a=[grab.a0[0]+sh[0],grab.a0[1]+sh[1]];grab.el.b=[grab.b0[0]+sh[0],grab.b0[1]+sh[1]];dirty=true;return}
 if(pinch&&ptrs.size>=2){const[a,b]=[...ptrs.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]),mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;cam.x+=mx-pinch.mx;cam.y+=my-pinch.my;zoomAt(mx,my,d/pinch.d);pinch={d,mx,my};return}
 const p=snap(ev);hover=ev.target===cv?p:null;
 if(pend&&Math.hypot(ev.clientX-pend.x,ev.clientY-pend.y)>6){panning={x:pend.x,y:pend.y,moved:true};pend=null}
@@ -166,6 +187,7 @@ if(panning){const dx=ev.clientX-panning.x,dy=ev.clientY-panning.y;if(panning.mov
 else if(drag?.k==='wire'){const dx=p[0]-drag.s[0],dy=p[1]-drag.s[1];drag.e=Math.abs(dx)>=Math.abs(dy)?[p[0],drag.s[1]]:[drag.s[0],p[1]]}
 else if(drag?.k==='erase')erase(ev)});
 addEventListener('pointerup',ev=>{ptrs.delete(ev.pointerId);if(ptrs.size<2)pinch=null;
+if(grab){const e=grab.el;e.mv=false;els=els.filter(x=>x===e||!(onSeg(x.a,e.a,e.b)&&onSeg(x.b,e.a,e.b)));grab=null;dirty=true;pend=drag=panning=null;return}
 if(drag?.k==='wire'){if(drag.s[0]==drag.e[0]&&drag.s[1]==drag.e[1]){if(drag.click){const e=drag.click;if(e.t==='sw')e.on=!e.on;sel=e;panel()}}else addWire(...drag.s,...drag.e)}
 if(pend){const e=pend.el;if(e.t==='sw')e.on=!e.on;sel=e;panel()}
 if(panning?.auto&&!panning.moved){sel=null;panel()}
@@ -175,15 +197,15 @@ cv.addEventListener('wheel',ev=>{ev.preventDefault();zoomAt(ev.clientX,ev.client
 addEventListener('keydown',ev=>{if(ev.key==='r'||ev.key==='к')rot=(rot+1)%4;if(ev.key==='Escape'){setTool(null);sel=null;panel()}if(ev.key===' '){space=true;ev.preventDefault()}if((ev.key==='Delete'||ev.key==='Backspace')&&sel){els=els.filter(e=>e!==sel);sel=null;panel();dirty=true}});
 addEventListener('keyup',ev=>{if(ev.key===' ')space=false});
 document.querySelectorAll('.tool').forEach(b=>b.onclick=()=>setTool(tool===b.dataset.tool?null:b.dataset.tool));
-$('#menu').innerHTML=['bat','bulb','res','cap','sw','btn','vm','am'].map(t=>`<button data-t="${t}"><i style="color:${D[t].col};background:${D[t].col}"></i>${D[t].n}</button>`).join('');
+$('#menu').innerHTML=['bat','bulb','led','res','cap','ind','fuse','sw','btn','vm','am'].map(t=>`<button data-t="${t}"><i style="color:${D[t].col};background:${D[t].col}"></i>${D[t].n}</button>`).join('');
 $('#menu').onclick=e=>{const b=e.target.closest('button');if(b)setTool(b.dataset.t)};
-$('#add').onclick=()=>$('#menu').classList.toggle('on');
+$('#add').onclick=()=>{if(D[tool]&&tool!=='wire')setTool(null);else $('#menu').classList.toggle('on')};$('#ts').onclick=e=>{ts=ts===1?.2:ts===.2?.05:1;e.target.textContent='Время: '+ts+'×';e.target.classList.toggle('on',ts!==1)};
 $('#home').onclick=()=>center();
 document.querySelectorAll('#nav .chip').forEach(b=>b.onclick=()=>load(b.dataset.p));
 $('#rot').onclick=()=>{rot=(rot+1)%4};
 $('#flow').onclick=e=>{electrons=!electrons;e.target.textContent='Ток: '+(electrons?'электроны':'условный');e.target.classList.toggle('on',electrons)};
 $('#grid').onclick=e=>{showGrid=!showGrid;e.target.classList.toggle('on',showGrid)};
-$('#level').onclick=e=>{detail=!detail;e.target.textContent='Режим: '+(detail?'подробно':'кратко');e.target.classList.toggle('on',detail);dirty=true};
+$('#level').onclick=e=>{detail=!detail;e.target.textContent='Режим: '+(detail?'подробно':'кратко');e.target.classList.toggle('on',detail);panel();dirty=true};
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2800)}
 /* ---------- панель и HUD ---------- */
 function panel(){const e=sel,P=$('#panel');if(!e){document.body.classList.remove('panel-open');return}
@@ -191,15 +213,27 @@ const d=D[e.t];let ctl='';
 if(e.t==='bat')ctl=`<div class="field">Э.д.с. E<b id="vE">${e.v} В</b></div><input type="range" id="rE" min="1" max="24" step=".5" value="${e.v}"><div class="field">Внутреннее сопротивление r<b id="vr">${e.r} Ом</b></div><input type="range" id="rr" min=".05" max="2" step=".05" value="${e.r}">`;
 if(e.t==='res')ctl=`<div class="field">Сопротивление R<b id="vR">${e.v} Ом</b></div><input type="range" id="rR" min="1" max="200" step="1" value="${e.v}">`;
 if(e.t==='cap')ctl=`<div class="field">Ёмкость C<b id="vC">${e.v} мФ</b></div><input type="range" id="rC" min="1" max="1000" step="1" value="${e.v}"><button class="btn secondary" id="dis">Разрядить</button>`;
+if(e.t==='ind')ctl=`<div class="field">Индуктивность L<b id="vL">${e.v} мГн</b></div><input type="range" id="rL" min="10" max="5000" step="10" value="${e.v}"><button class="btn secondary" id="dis">Обнулить ток</button>`;
+if(e.t==='fuse')ctl=`<div class="field">Номинал<b id="vF">${e.v} А</b></div><input type="range" id="rF" min=".1" max="5" step=".1" value="${e.v}"><button class="btn secondary" id="fix">Заменить предохранитель</button>`;
+if(e.t==='led')ctl=`<button class="btn secondary" id="fix">Заменить светодиод</button>`;
 if(e.t==='sw')ctl=`<button class="btn secondary" id="tsw">${e.on?'Разомкнуть':'Замкнуть'}</button>`;
-P.innerHTML=`<button class="x" id="cl">✕</button><div class="hero"><div class="orb" style="--acc:${d.col}"></div><div><div class="kind" style="color:${d.col}">${d.k}</div><h2>${d.n}</h2></div></div><div class="fact">${d.d}<br><br>${d.f}</div><div class="grid" id="tiles"></div><div class="fm" id="pf" style="margin-top:10px"></div>${ctl}<button class="btn" id="del">Удалить элемент</button>`;
+P.innerHTML=`<button class="x" id="cl">✕</button><div class="hero"><div class="orb" style="--acc:${d.col}"></div><div><div class="kind" style="color:${d.col}">${d.k}</div><h2>${d.n}</h2></div></div><div class="fact">${d.d}<br><br>${d.f}</div><div class="grid" id="tiles"></div><div class="fm" id="pf" style="margin-top:10px"></div>${graphHTML(e)}${ctl}<button class="btn" id="del">Удалить элемент</button>`;
 document.body.classList.add('panel-open');$('#cl').onclick=()=>{sel=null;panel();dirty=true};$('#del').onclick=()=>{els=els.filter(x=>x!==e);sel=null;panel();dirty=true};
 const bind=(id,lab,fn,u)=>{const r=$(id);if(r)r.oninput=()=>{fn(+r.value);$(lab).textContent=r.value+' '+u;dirty=true}};
-bind('#rE','#vE',v=>e.v=v,'В');bind('#rr','#vr',v=>e.r=v,'Ом');bind('#rR','#vR',v=>e.v=v,'Ом');bind('#rC','#vC',v=>e.v=v,'мФ');if($('#dis'))$('#dis').onclick=()=>{e.vc=0;dirty=true};
+bind('#rE','#vE',v=>e.v=v,'В');bind('#rr','#vr',v=>e.r=v,'Ом');bind('#rR','#vR',v=>e.v=v,'Ом');bind('#rC','#vC',v=>e.v=v,'мФ');if($('#dis'))$('#dis').onclick=()=>{e.vc=0;e.il=0;dirty=true};bind('#rL','#vL',v=>e.v=v,'мГн');bind('#rF','#vF',v=>e.v=v,'А');if($('#fix'))$('#fix').onclick=()=>{e.dead=false;e.hot=0;e.burn=0;dirty=true};
 if($('#tsw'))$('#tsw').onclick=()=>{e.on=!e.on;panel();dirty=true}}
+const graphHTML=e=>(e.t==='cap'||e.t==='ind')?(detail?'<canvas id="gr" width="300" height="140" style="width:100%;border-radius:14px;background:#14111b;margin-top:10px"></canvas><div id="grl" style="margin-top:4px;font-size:12px;color:var(--on2)"></div>':'<div style="margin-top:10px;font-size:12px;color:var(--on2)">Включите «Режим: подробно» — появится график U(t) и I(t).</div>'):'';
+function graph(){const g=$('#gr');if(!g||!sel||!sel.hist||sel.hist.length<2)return;const x=g.getContext('2d'),w=g.width,h=g.height,Hh=sel.hist;x.clearRect(0,0,w,h);
+const mu=Math.max(.01,...Hh.map(p=>Math.abs(p[1]))),mi=Math.max(.001,...Hh.map(p=>Math.abs(p[2]))),t0=Hh[0][0],t1=Hh[Hh.length-1][0];
+const cur=(k,m,col)=>{x.strokeStyle=col;x.lineWidth=2;x.beginPath();Hh.forEach((p,j)=>{const X=8+(p[0]-t0)/(t1-t0||1)*(w-16),Y=h/2-(p[k]/m)*(h/2-14);j?x.lineTo(X,Y):x.moveTo(X,Y)});x.stroke()};
+x.strokeStyle='rgba(255,255,255,.12)';x.beginPath();x.moveTo(0,h/2);x.lineTo(w,h/2);x.stroke();cur(1,mu,'#8edcff');cur(2,mi,'#ffd27a');
+$('#grl').innerHTML=`<span style="color:#8edcff">━ U(t), макс ${f2(mu)} В</span> &nbsp; <span style="color:#ffd27a">━ I(t), макс ${f2(mi)} А</span><br>последние ${f2(t1-t0)} с модельного времени`}
 function tilesFor(e,t){const I=Math.abs(e.I),U=Math.abs(e.dv),R=SW(e.t)&&!e.on?'∞':f2(1/e.g),T4=(a,b)=>`<div class="tile"><small>${a}</small><b>${b}</b></div>`;let h,f;
 if(e.t==='bat'){h=T4('Ток отдачи I',f2(-e.I)+' А')+T4('Напряжение на клеммах',f2(e.dv)+' В')+T4('Тепло в r: I²·r',f2(e.P)+' Вт')+T4('Мощность E·I',f2(-e.I*e.v)+' Вт');f=`U = E − I·r = ${e.v} − ${f2(-e.I)}·${e.r} = ${f2(e.dv)} В`}
 else if(e.t==='cap'){h=T4('Напряжение U',f2(e.dv)+' В')+T4('Ток I',f2(e.I)+' А')+T4('Заряд q = C·U',f2(e.v*e.dv)+' мКл')+T4('Энергия W',f2(e.v*e.dv*e.dv/2)+' мДж');f=`q = C·U = ${e.v}·${f2(e.dv)} = ${f2(e.v*e.dv)} мКл<small>W = C·U²/2; время зарядки ~ τ = R·C</small>`}
+else if(e.t==='ind'){h=T4('Ток I',f2(e.I)+' А')+T4('Напряжение U',f2(e.dv)+' В')+T4('Энергия W = L·I²/2',f2(e.v*e.I*e.I/2)+' мДж')+T4('Индуктивность L',e.v/1000+' Гн');f='U = L·ΔI/Δt<small>пока ток меняется — на катушке есть напряжение; в установившемся режиме U ≈ 0</small>'}
+else if(e.t==='led'){h=T4('Ток I',f2(e.I*1000)+' мА')+T4('Напряжение U',f2(e.dv)+' В')+T4('Яркость',Math.round(Math.min(e.br,1)*100)+'%')+T4('Состояние',e.dead?'сгорел':e.fw?'светит':'закрыт');f='Падение напряжения ≈ 2 В, рабочий ток ≈ 20 мА<small>Ток > 60 мА убивает светодиод</small>'}
+else if(e.t==='fuse'){h=T4('Ток I',f2(I)+' А')+T4('Номинал',e.v+' А')+T4('Нагрев нити',Math.round(Math.min(1,(e.hot||0)/.15)*100)+'%')+T4('Состояние',e.dead?'перегорел':'цел');f='Перегорает, если I > '+e.v+' А достаточно долго'}
 else if(e.t==='vm'){h=T4('Показание U',f2(e.dv)+' В')+T4('Сопротивление','≈10 МОм');f='U = φ₁ − φ₂ — разность потенциалов'}
 else if(e.t==='am'){h=T4('Показание I',f2(e.I)+' А')+T4('Сопротивление','0,01 Ом');f='I = Δq/Δt — заряд за секунду'}
 else{h=T4('Напряжение U',f2(U)+' В')+T4('Ток I',f2(I)+' А')+T4('Мощность P',f2(e.P)+' Вт')+T4('Сопротивление R',R+' Ом');f=`U = I·R = ${f2(I)}·${R} = ${f2(U)} В<small>P = U·I = I²·R = ${f2(e.P)} Вт</small>`}
@@ -209,17 +243,18 @@ if(sel){const e=sel,I=Math.abs(e.I),U=Math.abs(e.dv),t=$('#tiles');if(t){
 tilesFor(e,t)}}
 if(b){const Id=-b.I,Ut=b.dv,Rx=Id>1e-6?Ut/Id:Infinity,pt=els.reduce((s,e)=>s+e.P,0)||1,pb=bats.reduce((s,e)=>s+e.P,0),pw=els.filter(e=>e.t==='wire'||SW(e.t)).reduce((s,e)=>s+e.P,0),po=pt-pb-pw;
 const st=Id<1e-3?'open':(Rx<1&&Id>1)?'short':'ok',hot=els.filter(e=>e.h>1||e.br>2.5);rd='I = '+f2(Id)+' А';
-const vd={open:['warn','Цепь разомкнута — тока нет. Замкните ключ или соедините провода.'],short:['no','⚠ Короткое замыкание! '+(detail?'':'Плюс соединён с минусом почти без сопротивления: ток огромный, вся энергия уходит в тепло.')],ok:['ok','Цепь замкнута — по ней течёт ток.']}[st];
+const vd={open:['warn',els.some(e=>e.t==='cap'&&Math.abs(e.vc)>.05)?'Конденсатор зарядился — постоянный ток через него не идёт. Так и должно быть: ток течёт, только пока идёт зарядка.':'Цепь разомкнута — тока нет. Замкните ключ или соедините провода.'],short:['no','⚠ Короткое замыкание! '+(detail?'':'Плюс соединён с минусом почти без сопротивления: ток огромный, вся энергия уходит в тепло.')],ok:['ok','Цепь замкнута — по ней течёт ток.']}[st];
 h+=`<div class="verdict ${vd[0]}">${vd[1]}</div>`;
 if(detail&&st!=='open')h+=`<b class="t">Закон Ома для полной цепи</b><span class="fm">I = E/(R+r) = ${b.v}/(${f2(Rx)}+${b.r}) = ${f2(Id)} А<small>R — сопротивление внешней цепи</small></span><span class="fm">U = E − I·r = ${f2(Ut)} В<small>напряжение на клеммах батареи</small></span><span class="fm">P = I²·R = ${f2(Id*Id*Rx)} Вт<small>во внешней цепи; Q = I²·R·t</small></span>`;
 if(st==='short'){h+=`<b class="t">Где выделяется тепло?</b>`+[['Батарея (r)',pb,'#ffb86b'],['Провода',pw,'#ff7a5a'],['Нагрузка',po,'#8edcff']].map(([n,p,col])=>`<div class="grow"><span class="gl">${n}</span><span class="bar2"><i style="width:${p/pt*100}%;background:${col}"></i></span><b>${Math.round(p/pt*100)}%</b></div>`).join('')+
 `<div class="note" style="margin-top:6px">${detail?`R≈${f2(Rx)} Ом ≪ r, поэтому I = E/(R+r) ≈ ${f2(Id)} А. Мощность тепла P = I²·R растёт как квадрат тока и выделяется там, где сопротивление есть: больше всего — внутри батареи (r = ${b.r} Ом), и немного во всех проводах.`:'Греется там, где ток встречает сопротивление: сильнее всего — внутри самой батареи, и чуть-чуть в проводах.'}</div>`}
-if(hot.length&&st!=='short')h+=`<div class="verdict warn">🔥 Перегрев: ${[...new Set(hot.map(e=>D[e.t].n))].join(', ')}</div>`}
+const dead=els.filter(e=>e.dead);if(dead.length)h+=`<div class="verdict no">💥 Вышел из строя: ${[...new Set(dead.map(e=>D[e.t].n))].join(', ')}. Замените в панели элемента.</div>`;if(hot.length&&st!=='short')h+=`<div class="verdict warn">🔥 Перегрев: ${[...new Set(hot.map(e=>D[e.t].n))].join(', ')}</div>`}
 else h+=`<div class="verdict warn">Поставьте батарею («＋ Элементы» снизу) или выберите готовый пример сверху.</div>`;
 h+=`<div class="lg"><i style="background:${electrons?'#7fd3ff':'#ffd27a'}"></i>${electrons?'Электроны движутся от «−» к «+»':'Условный ток: от «+» к «−»'}</div><div class="note" style="margin-top:6px">Двигать поле — тяните мышью, масштаб — колесо или щипок. Провод — кнопка «Провод» или тяните от конца провода. Элементы — «＋ Элементы»; Esc — отмена, R — поворот.</div>`;
 $('#hud').innerHTML='<b class="t">Анализ цепи</b>'+h;$('#readout').textContent='⚡ '+rd}
-let fr=0;
-function loop(t){requestAnimationFrame(loop);const dt=Math.max(.001,Math.min(.05,(t-last)/1000||.016));last=t;T=t/1000;const dd=dirty;dirty=false;if(dd||hasCap()){solve(dt);if(dd||++fr%6==0)ui()}draw()}
+let fr=0,ts=1,st=0;
+function loop(t){requestAnimationFrame(loop);const dt=Math.max(.001,Math.min(.05,(t-last)/1000||.016));last=t;T=t/1000;const dd=dirty;dirty=false;
+if(dd||hasDyn()){const sd=dt*ts;solve(sd,dt);st+=sd;fr++;if(fr%2==0)els.forEach(e=>{if(e.t==='cap'||e.t==='ind'){(e.hist=e.hist||[]).push([st,e.dv,e.I]);if(e.hist.length>300)e.hist.shift()}});if(dd||fr%6==0)ui()}draw();graph()}
 cv.style.cursor='grab';addEventListener('resize',resize);resize();load('simple');requestAnimationFrame(loop);
 })();
 </script>
