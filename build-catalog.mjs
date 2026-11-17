@@ -33,7 +33,7 @@ for (const definition of CATEGORY_DEFINITIONS) {
 }
 
 function safeUrl(relativePath) {
-  return relativePath.split(path.sep).map(encodeURIComponent).join('/');
+  return String(relativePath).replace(/\\/g, '/').split('/').filter(Boolean).map(encodeURIComponent).join('/');
 }
 
 function parseMetadata(text, fallbackTitle) {

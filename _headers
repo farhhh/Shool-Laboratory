@@ -2,3 +2,9 @@
   X-Robots-Tag: noindex, nofollow, noarchive
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
+
+/catalog.json
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/Simulations/*
+  Cache-Control: no-cache, must-revalidate
