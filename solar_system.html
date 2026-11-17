@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Солнечная система</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#0b0912;--s1:#1d1a24;--s2:#272330;--s3:#322d3d;--on:#e8e0ee;--on2:#cbc3d4;--ol:#4b4556;--pr:#d0bcff;--onpr:#381e72;--acc:#d0bcff;--ok:#9be3a8;--er:#ffb4ab;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--on);font:400 14px/1.45 "Roboto Flex",Roboto,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:block}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;position:relative;overflow:hidden}
+button:focus-visible{outline:2px solid var(--pr);outline-offset:2px}
+.glass{background:rgba(29,26,36,.72);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border:1px solid rgba(255,255,255,.07)}
+#top{position:fixed;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:10px;padding:8px 8px 8px 18px;border-radius:28px;z-index:5}
+#top h1{font:900 19px/1 "Roboto Flex",sans-serif;letter-spacing:-.3px;flex:1;white-space:nowrap;background:linear-gradient(90deg,#ffe29a,#ffb0c8,var(--pr));-webkit-background-clip:text;background-clip:text;color:transparent}
+.pill{padding:8px 14px;border-radius:16px;background:var(--s2);font-weight:500;white-space:nowrap}
+#score{color:#ffe29a;transition:.3s}#score.pop{transform:scale(1.2);background:#5b4a14}
+#nav{position:fixed;left:12px;right:12px;top:calc(72px + env(safe-area-inset-top,0px));display:flex;gap:8px;overflow-x:auto;padding:2px;z-index:4;scrollbar-width:none}
+#nav::-webkit-scrollbar{display:none}
+.chip{display:flex;align-items:center;gap:8px;height:34px;padding:0 14px 0 10px;border-radius:10px;border:1px solid var(--ol);background:rgba(29,26,36,.7);backdrop-filter:blur(10px);white-space:nowrap;font-weight:500;transition:.2s}
+.chip i{width:14px;height:14px;border-radius:50%;box-shadow:0 0 8px currentColor}
+.chip.on{background:var(--c);color:#14101c;border-color:transparent}
+.chip.on i{box-shadow:0 0 0 2px #14101c55}
+#dock{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:32px;z-index:5;transition:transform .4s cubic-bezier(.2,0,0,1);max-width:calc(100% - 16px);flex-wrap:wrap;justify-content:center}
+#fab{width:56px;height:56px;border-radius:18px;background:var(--pr);color:var(--onpr);font-size:22px;box-shadow:0 6px 20px #d0bcff44}
+.seg{display:flex;border:1px solid var(--ol);border-radius:20px;overflow:hidden}
+.seg button{padding:10px 14px;font-weight:500;border-right:1px solid var(--ol)}
+.seg button:last-child{border:0}
+.seg .on{background:#4a4458;color:#eaddff}
+.tg{height:40px;padding:0 14px;border-radius:12px;border:1px solid var(--ol);font-weight:500}
+.tg.on{background:#4a4458;color:#eaddff;border-color:transparent}
+.tg.hot.on{background:#ff8a5c;color:#2b1000}
+#sheet{position:fixed;z-index:6;background:var(--s1);border-radius:28px;overflow:auto;transition:transform .5s cubic-bezier(.2,0,0,1);box-shadow:0 20px 60px #000a;
+right:12px;top:calc(118px + env(safe-area-inset-top,0px));bottom:12px;width:372px;transform:translateX(120%);padding:20px}
+#sheet::before{content:"";position:absolute;inset:0 0 auto;height:200px;background:radial-gradient(circle at 20% 0,var(--acc),transparent 70%);opacity:.28;pointer-events:none}
+body.open #sheet{transform:none}
+.hero{display:flex;gap:16px;align-items:center;position:relative}
+.orb{flex:none;width:72px;height:72px;border-radius:50%;box-shadow:0 0 36px var(--acc),inset -14px -10px 22px #000a;animation:spin 6s linear infinite}
+@keyframes spin{to{filter:hue-rotate(0)}}
+.kind{color:var(--acc);font-weight:500}
+h2{font:900 34px/1.05 "Roboto Flex",sans-serif;letter-spacing:-.8px}
+.x{position:absolute;right:10px;top:10px;width:40px;height:40px;border-radius:50%;background:var(--s2);z-index:2}
+.fact{margin:18px 0;padding:14px 16px;border-radius:20px 20px 20px 6px;background:var(--s2);color:var(--on2);position:relative}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.t{padding:12px 14px;border-radius:16px;background:var(--s2)}
+.t small{display:block;color:var(--on2);font-size:12px}
+.t b{font-weight:500;font-size:15px}
+.cmp{margin:14px 0;padding:14px;border-radius:16px;background:var(--s2)}
+.bar{height:10px;border-radius:5px;background:var(--s3);margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc);border-radius:5px;transition:width .8s cubic-bezier(.2,0,0,1)}
+.btn{width:100%;height:48px;border-radius:24px;background:var(--acc);color:#14101c;font-weight:700;font-size:15px}
+.btn[disabled]{background:var(--s3);color:var(--ok)}
+.opt{display:block;width:100%;text-align:left;padding:12px 16px;margin-top:8px;border-radius:14px;border:1px solid var(--ol);transition:.2s}
+.opt.good{background:#1f4d2c;border-color:var(--ok)}
+.opt.bad{background:#5a1f1a;border-color:var(--er);animation:sh .35s}
+@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+#quiz p{margin-top:14px;font-weight:700;font-size:16px}
+#dlg{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .3s}
+#dlg.on{opacity:1;pointer-events:auto}
+#dlg .card{width:min(92vw,420px);background:var(--s1);border-radius:28px;padding:24px;transform:scale(.9) translateY(20px);transition:transform .4s cubic-bezier(.2,0,0,1);box-shadow:0 24px 70px #000b}
+#dlg.on .card{transform:none}
+#dlg h3{font:900 26px/1.1 "Roboto Flex",sans-serif;letter-spacing:-.5px}
+#dlg p{color:var(--on2);margin:8px 0 18px}
+#dt{width:100%;padding:14px 16px;border-radius:14px;border:2px solid var(--pr);background:var(--s2);color:var(--on);font:500 18px "Roboto Flex",sans-serif;color-scheme:dark}
+#pre{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.row{display:flex;gap:8px;margin-top:22px}.row .btn{flex:1;background:var(--pr)}.row .g{background:var(--s3);color:var(--on)}
+#date{cursor:pointer}
+#odlg{position:fixed;inset:0;z-index:20;display:grid;place-items:center end;padding:12px;background:none;opacity:0;pointer-events:none;transition:opacity .3s}
+#odlg.on{opacity:1}#odlg:not(.on) .card{pointer-events:none}
+#odlg .card{pointer-events:auto;width:min(94vw,400px);max-height:92vh;overflow:auto;background:var(--s1);border-radius:28px;padding:22px;transform:scale(.9) translateY(20px);transition:transform .4s cubic-bezier(.2,0,0,1);box-shadow:0 24px 70px #000b}
+#odlg.on .card{transform:none}
+#odlg h3{font:900 24px/1.1 "Roboto Flex",sans-serif;letter-spacing:-.5px;margin-bottom:12px}
+#opre{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.sl{margin:12px 0 2px;display:flex;justify-content:space-between;color:var(--on2)}.sl b{color:var(--on);font-weight:500}
+#odlg input[type=range]{width:100%;accent-color:var(--pr)}
+#ores{margin-top:14px;padding:14px 16px;border-radius:20px;background:var(--s2);border-left:6px solid var(--oc,#d0bcff)}
+#ores h4{font:900 22px/1.1 "Roboto Flex",sans-serif;color:var(--oc,#d0bcff)}
+#ores .gg{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin:10px 0;font-size:12px;color:var(--on2)}#ores .gg b{display:block;color:var(--on);font-size:13px;font-weight:500}
+#ores p{color:var(--on2)}
+.fl{display:flex;gap:8px;align-items:flex-end;margin-top:10px}.fl label{flex:1;color:var(--on2);font-size:12px}.fl input,.fl select{display:block;width:100%;margin-top:4px;padding:10px 12px;border-radius:12px;border:1px solid var(--ol);background:var(--s2);color:var(--on);font:500 16px "Roboto Flex",sans-serif}.fl select{width:92px;margin:0;padding:10px 6px}#odlg input[type=range]{margin:8px 0 0}
+#vc{display:none;pointer-events:auto;border-radius:20px;padding:12px 14px;font-size:12px;color:var(--on2);min-width:250px}#vc b{display:block;color:var(--on);font-size:14px;margin-bottom:6px}#vc input{width:100%;accent-color:#ff8a5c}
+@media(max-width:840px){#odlg{place-items:end center}#odlg .card{max-height:58vh}}
+#lc{position:fixed;left:12px;top:calc(118px + env(safe-area-inset-top,0px));z-index:4;display:flex;flex-direction:column;gap:8px;align-items:flex-start;max-width:min(320px,calc(100% - 24px));pointer-events:none}
+#sc{display:none;border-radius:20px;padding:12px 14px;font-size:12px;line-height:1.5;color:var(--on2)}
+#sc b{display:block;color:var(--on);font-size:14px;margin-bottom:8px}
+#sbar{display:flex;align-items:center;gap:8px;margin-bottom:8px;color:var(--on);font-weight:500}
+#sbar i{display:block;height:8px;border:2px solid var(--pr);border-top:0;border-radius:0 0 3px 3px;width:100px}
+.pill.on{background:var(--pr);color:var(--onpr)}
+#rl{display:none;border-radius:16px;padding:10px 14px;font-weight:500;max-width:calc(100% - 24px)}
+#snack{position:fixed;left:50%;bottom:calc(110px + env(safe-area-inset-bottom,0px));transform:translate(-50%,40px);opacity:0;background:#e8e0ee;color:#322f35;padding:14px 20px;border-radius:14px;z-index:9;transition:.35s;pointer-events:none;max-width:90%;text-align:center;font-weight:500}
+#snack.on{opacity:1;transform:translate(-50%,0)}
+.rip{position:absolute;border-radius:50%;background:currentColor;opacity:.25;transform:scale(0);animation:r .6s ease-out forwards;pointer-events:none}
+@keyframes r{to{transform:scale(1);opacity:0}}
+.acts{display:flex;gap:8px;margin-top:14px}.acts .btn{flex:1}.acts .gb{flex:none;width:auto;padding:0 18px;background:var(--s3);color:var(--on)}
+.mh{margin-top:14px;color:var(--on2);font-size:12px}.mch{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.mch button{display:flex;align-items:center;gap:7px;padding:7px 12px 7px 9px;border-radius:10px;border:1px solid var(--ol);font-weight:500;background:var(--s2)}
+.mch i{width:10px;height:10px;border-radius:50%}
+#gal{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgba(5,4,10,.84);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .3s}
+#gal.on{opacity:1;pointer-events:auto}
+#gal .gc{width:min(96vw,980px);max-height:96vh;display:flex;flex-direction:column;gap:12px;background:var(--s1);border-radius:28px;padding:16px;transform:scale(.94);transition:transform .4s cubic-bezier(.2,0,0,1);box-shadow:0 24px 70px #000b}
+#gal.on .gc{transform:none}
+.gh{display:flex;align-items:center;gap:10px;padding-left:6px}.gh h3{flex:1;font:900 22px/1.1 "Roboto Flex",sans-serif;letter-spacing:-.4px}.gh .x{position:static;flex:none}
+#gn{color:var(--on2);font-weight:500}
+.gv{position:relative;height:min(58vh,560px);border-radius:18px;background:#000;overflow:hidden;display:grid;place-items:center;touch-action:pan-y}
+.gv img{max-width:100%;max-height:100%;object-fit:contain;opacity:0;transition:opacity .35s}.gv img.ok{opacity:1}
+.ld{position:absolute;width:38px;height:38px;border:3px solid #ffffff22;border-top-color:var(--acc);border-radius:50%;animation:rot 1s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.ge{position:absolute;color:var(--on2);text-align:center;padding:20px}
+.ga{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(29,26,36,.75);font-size:20px;z-index:2}.ga.l{left:10px}.ga.r{right:10px}
+.gcap{padding:0 6px;color:var(--on2);font-size:13px}.gcap b{display:block;color:var(--on);font-weight:500;font-size:15px;margin-bottom:2px}.gcap a{color:var(--acc);text-decoration:none}
+.gno{padding:10px 14px;border-radius:14px;background:var(--s2);color:var(--on2);font-size:13px}
+.gt{display:flex;gap:8px;overflow-x:auto;padding:2px;scrollbar-width:thin}
+.gt button{flex:none;width:88px;height:62px;border-radius:12px;border:2px solid transparent;opacity:.55;background:#000;transition:.2s}
+.gt button.on{border-color:var(--acc);opacity:1}.gt img{width:100%;height:100%;object-fit:cover;display:block}
+@media(max-width:840px){.gv{height:46vh}.gt button{width:70px;height:50px}}
+@media(max-width:840px){
+#sheet{left:8px;right:8px;width:auto;top:auto;bottom:8px;max-height:56vh;transform:translateY(120%)}
+body.open #dock{transform:translate(-50%,160%)}
+#top h1{font-size:16px}.pill.d{display:none}.lb{display:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<header id="top" class="glass"><h1>Солнечная система</h1><button class="pill rp" id="tReal" aria-label="Реальный масштаб">📏<span class="lb"> Реальный масштаб</span></button><button class="pill rp" id="tNB" aria-label="Физика орбит">🌌<span class="lb"> Физика орбит</span></button><span class="pill d" id="date"></span><span class="pill" id="score">★ 0/8</span></header>
+<nav id="nav"></nav>
+<div id="lc"><div id="rl" class="glass"></div><div id="sc" class="glass"><b>📏 Реальный масштаб</b><div id="sbar"><i></i><span></span></div>Если Солнце — мяч диаметром 20 см, то Земля — песчинка 1,8 мм в 21 м от него, Юпитер — шарик 2 см в 112 м, а Нептун — 7 мм в 645 м.<br>Свет летит от Солнца до Земли 8 мин 20 с, а до Нептуна — 4 ч 10 мин.</div><div id="vc" class="glass"><b>☄ Скорость запуска</b><input type="range" id="vs" min="1.9" max="4.5" step=".01"><span id="vt"></span></div></div>
+<aside id="sheet" aria-live="polite"></aside>
+<div id="dock" class="glass">
+<button id="fab" class="rp" aria-label="Пауза">⏸</button>
+<div class="seg" id="spd"></div>
+<button class="tg rp on" id="tOrb">Орбиты</button>
+<button class="tg rp on" id="tLbl">Подписи</button>
+<button class="tg rp on" id="tGrav">Гравитация</button>
+<button class="tg rp" id="tDate">📅 Дата</button>
+<button class="tg rp" id="tObj">🕳 Объект</button>
+<button class="tg hot rp" id="tCom">☄ Комета</button>
+</div>
+<div id="dlg" role="dialog" aria-modal="true"><div class="card"><h3>Выбери дату</h3><p>Планеты встанут так, как они стояли (или будут стоять) в этот день. Расчёт по орбитальным элементам NASA JPL для 1800–2050 годов.</p><input type="date" id="dt" min="1800-01-01" max="2050-12-31"><div id="pre"></div><div class="row"><button class="btn g rp" id="dNo">Отмена</button><button class="btn rp" id="dOk">Показать</button></div></div></div>
+<div id="odlg" role="dialog"><div class="card"><h3>🕳 Космический объект</h3><div id="opre"></div>
+<div class="fl"><label>Масса<input type="number" id="nm" step="any" min="0"></label><select id="um"></select></div><input type="range" id="sm" min="20" max="42" step=".01">
+<div class="fl"><label>Радиус<input type="number" id="nr" step="any" min="0"></label><select id="ur"></select></div><input type="range" id="sr" min="-3" max="15.5" step=".01">
+<div id="ores"></div>
+<div class="row"><button class="btn g rp" id="oMove">⤢ Переместить</button><button class="btn g rp" id="oSun">☀ На место Солнца</button></div>
+<div class="row"><button class="btn g rp" id="oDel">Удалить</button><button class="btn rp" id="oOk">Готово</button></div></div></div>
+<div id="gal" role="dialog" aria-modal="true" aria-label="Галерея"><div class="gc"><div class="gh"><h3 id="gtt"></h3><span id="gn"></span><button class="x rp" id="gx" aria-label="Закрыть">✕</button></div>
+<div class="gv" id="gv"><div class="ld" id="gld"></div><div class="ge" id="ger" hidden>Не удалось загрузить фото. Проверь интернет</div><img id="gim" alt="" draggable="false"><button class="ga l rp" id="gp" aria-label="Назад">‹</button><button class="ga r rp" id="gnx" aria-label="Вперёд">›</button></div>
+<div class="gcap" id="gcp"></div><div class="gt" id="gth"></div><div class="gno" id="gno"></div></div></div>
+<div id="snack"></div>
+<script>
+// name,color,size,orbit,periodDays,diameterKm,distMln,day,temp,moons,fact,quiz
+const D=[
+["Солнце","#ffc247",38,0,0,1392700,0,"25 земных суток","+5 500 °C на поверхности","8 планет","На Солнце приходится 99,86 % массы всей системы. Всё остальное — лишь пылинки рядом с ним.","Звезда"],
+["Меркурий","#b9b2a8",5,95,88,4879,58,"176 земных суток","от −180 до +430 °C","нет","Солнечные сутки на Меркурии длятся дольше его года: за один оборот вокруг Солнца планета успевает повернуться лишь полтора раза.",["Сколько длится год на Меркурии?",["88 суток","225 суток","365 суток"],0],"Планета земной группы"],
+["Венера","#e8c27a",9,140,225,12104,108,"243 земных суток","+465 °C","нет","Венера горячее Меркурия, хотя и дальше от Солнца: плотная атмосфера работает как парник. Вращается она в обратную сторону.",["Какая планета самая горячая?",["Меркурий","Венера","Марс"],1],"Планета земной группы"],
+["Земля","#4f9df7",9.5,190,365.25,12742,150,"24 часа","в среднем +15 °C","1 (Луна)","Земля — единственное известное место с жизнью. Океаны покрывают 71 % её поверхности.",["Сколько естественных спутников у Земли?",["0","1","2"],1],"Планета земной группы"],
+["Марс","#d1603d",7,240,687,6779,228,"24 ч 37 мин","около −60 °C","2","На Марсе стоит гора Олимп — вулкан высотой около 22 км, почти втрое выше Эвереста.",["Почему Марс красный?",["Из-за оксидов железа","Из-за лавы","Из-за водорослей"],0],"Планета земной группы"],
+["Юпитер","#d9a77a",22,330,4333,139820,778,"9 ч 56 мин","около −110 °C","95+","Большое красное пятно — шторм, который бушует более 350 лет и по размеру не уступает Земле.",["Какая планета самая большая?",["Сатурн","Юпитер","Нептун"],1],"Газовый гигант"],
+["Сатурн","#e8d49e",19,415,10759,116460,1434,"10 ч 33 мин","около −140 °C","146+","Средняя плотность Сатурна меньше плотности воды: в достаточно большом океане он бы плавал.",["Из чего состоят кольца Сатурна?",["Из газа","Из льда и камней","Из лунной пыли"],1],"Газовый гигант"],
+["Уран","#8fdde3",13,490,30687,50724,2871,"17 ч 14 мин","около −195 °C","28","Уран вращается «лёжа на боку»: ось наклонена почти на 98°, поэтому полярный день там длится 42 года.",["Что необычного в вращении Урана?",["Он вращается лёжа на боку","Он не вращается","Он вращается быстрее всех"],0],"Ледяной гигант"],
+["Нептун","#5c7cf5",12.5,560,60190,49244,4495,"16 ч 6 мин","около −200 °C","16","На Нептуне дуют самые быстрые ветры в системе — свыше 2 000 км/ч. Один год здесь равен 165 земным.",["Какая планета дальше всех от Солнца?",["Уран","Нептун","Сатурн"],1],"Ледяной гигант"]];
+// moons: name,parent,diameterKm,distanceKm,periodDays,discovered,color,fact
+const MN=[
+["Луна",3,3474,384400,27.32,"известна с древности","#cfcfd6","Луна всегда повёрнута к Земле одной стороной: вокруг своей оси она оборачивается ровно за то же время, что и вокруг Земли. С 1969 по 1972 год на ней побывали 12 человек."],
+["Фобос",4,22.5,9376,.319,"1877, Асаф Холл","#9c8878","Фобос облетает Марс быстрее, чем тот вращается, поэтому восходит на западе и заходит на востоке — дважды за сутки. Он медленно приближается к планете и через 30–50 млн лет разрушится."],
+["Деймос",4,12.4,23463,1.263,"1877, Асаф Холл","#b8a48e","Деймос такой маленький, что вторая космическая скорость на нём — около 20 км/ч: разогнавшийся велосипедист улетел бы в космос. «Фобос» и «Деймос» по-гречески — «страх» и «ужас»."],
+["Ио",5,3643,421700,1.769,"1610, Галилео Галилей","#e8d35a","Самое вулканически активное тело Солнечной системы: на Ио больше 400 действующих вулканов. Их разогревают приливные силы Юпитера, который постоянно «мнёт» спутник."],
+["Европа",5,3122,671100,3.551,"1610, Галилео Галилей","#d8c8a8","Под ледяной коркой Европы — солёный океан, в котором примерно вдвое больше воды, чем во всех океанах Земли. Это одно из главных мест для поиска жизни: к Европе летит зонд Europa Clipper."],
+["Ганимед",5,5268,1070400,7.155,"1610, Галилео Галилей","#a89c8c","Самый большой спутник в Солнечной системе — он даже больше Меркурия. И единственный спутник, у которого есть собственное магнитное поле."],
+["Каллисто",5,4821,1882700,16.689,"1610, Галилео Галилей","#7a6e62","Одна из самых изрытых кратерами поверхностей в Солнечной системе: ей около 4 млрд лет, и с тех пор она почти не менялась."],
+["Мимас",6,396,185500,.942,"1789, Уильям Гершель","#c8c8c8","Кратер Гершель шириной 139 км — почти треть всего Мимаса. Удар, который его оставил, едва не расколол спутник пополам."],
+["Энцелад",6,504,238000,1.37,"1789, Уильям Гершель","#f4f8ff","У южного полюса из трещин бьют гейзеры водяного пара и льда — из них состоит кольцо E Сатурна. Энцелад отражает почти весь падающий свет: это одно из самых белых тел системы."],
+["Титан",6,5150,1221900,15.945,"1655, Христиан Гюйгенс","#e0a64e","Единственный спутник с плотной атмосферой. На Титане идут дожди, текут реки и плещутся моря — только из жидкого метана и этана. В 2005 году на него сел зонд «Гюйгенс»."],
+["Япет",6,1469,3560800,79.32,"1671, Джованни Кассини","#b09878","Одна половина Япета тёмная, как уголь, другая — светлая, как снег. А по экватору тянется хребет высотой до 20 км."],
+["Миранда",7,472,129900,1.413,"1948, Джерард Койпер","#b8bcbe","Миранда выглядит собранной из кусков: каньоны, террасы и «заплатки» разного возраста. Здесь обрыв Верона высотой около 20 км — самый высокий известный утёс в Солнечной системе."],
+["Титания",7,1578,436300,8.706,"1787, Уильям Гершель","#c4b6a8","Самый большой спутник Урана. Спутники Урана названы в честь героев Шекспира и Поупа: Титания — королева фей из «Сна в летнюю ночь»."],
+["Оберон",7,1523,583500,13.463,"1787, Уильям Гершель","#a8968a","Назван в честь короля фей из той же пьесы Шекспира. Это самый дальний из крупных спутников Урана, его древняя поверхность густо покрыта кратерами."],
+["Тритон",8,2707,354800,-5.877,"1846, Уильям Ласселл","#e2cfc6","Тритон обращается вокруг Нептуна в обратную сторону — значит, когда-то планета его захватила. Это одно из самых холодных мест системы, −235 °C, и всё же на нём бьют азотные гейзеры."]];
+const GEN={3:'Земли',4:'Марса',5:'Юпитера',6:'Сатурна',7:'Урана',8:'Нептуна'};
+const MO=MN.map((m,k)=>({k,p:m[1],n:MN.slice(0,k).filter(q=>q[1]==m[1]).length,ph:k*2.39,x:0,y:0,R:0,r:0}));
+// gallery: file on Wikimedia Commons, caption, credit
+const GAL=[
+[["The Sun by the Atmospheric Imaging Assembly of NASA's Solar Dynamics Observatory - 20100819.jpg","Солнце в ультрафиолетовом свете","NASA/SDO, 2010"],["Magnificent CME Erupts on the Sun - August 31.jpg","Выброс корональной массы: облако плазмы улетает в космос","NASA/SDO, 2012"],["Solar Dynamics Observatory Shows Sun's Rainbow of Wavelengths.jpg","Одно и то же Солнце в разных длинах волн","NASA/SDO"],["NASA's SDO Sees Giant Filament on the Sun (15874510543).jpg","Гигантское тёмное волокно — плазма, которую держит магнитное поле","NASA/SDO, 2015"],["Magnetic loops on the sun.jpg","Магнитные петли над поверхностью Солнца","NASA/SDO"],["2024 Total Solar Eclipse Corona.jpg","Солнечная корона во время полного затмения 8 апреля 2024","Brucewaters / Wikimedia Commons"]],
+[["Mercury in true color.jpg","Меркурий в естественных цветах","NASA/MESSENGER, 2008"],["Mercury in color - Prockter07-edit1.jpg","Снимок с первого пролёта зонда MESSENGER","NASA/JHUAPL, 2008"],["Colors of the Innermost Planet 2.jpg","Цвета усилены, чтобы были видны разные горные породы","NASA/MESSENGER"],["PIA16549 - Mercury's north pole.jpg","Северный полюс. В вечной тени здешних кратеров нашли водяной лёд","NASA/MESSENGER"],["Akutagawa crater MESSENGER WAC.jpg","Кратер Акутагава: кратеры Меркурия называют в честь писателей и художников","NASA/MESSENGER"],["A Color View of the Solar System's Innermost Planet.jpg","Меркурий целиком в цвете","NASA/MESSENGER"]],
+[["Venus-real color.jpg","Венера в естественных цветах — сплошные облака","NASA/Mariner 10, 1974"],["PIA23791-Venus-NewlyProcessedView-20200608.jpg","Узоры облаков в усиленном контрасте","NASA/JPL-Caltech, Mariner 10"],["Surface of Venus from Venera 13.jpg","Поверхность Венеры — снимок «Венеры-13», 1982","СССР, «Венера-13»; обработка NASA/LPI"],["Venera 14 surface image.jpg","Камни и край посадочного аппарата «Венеры-14»","СССР, «Венера-14», 1982"],["Venus globe.jpg","Рельеф под облаками — радарная карта «Магеллана»","NASA/JPL, Magellan"],["PIA00103 Venus - 3-D Perspective View of Lavinia Planitia.jpg","Ударные кратеры на равнине Лавиния (радар, объёмный вид)","NASA/JPL, Magellan"]],
+[["The Blue Marble (remastered).jpg","«Голубой мрамор» — снимок экипажа «Аполлона-17», 1972","NASA"],["NASA-Apollo8-Dec24-Earthrise.jpg","«Восход Земли» над Луной, «Аполлон-8», 1968","NASA / Билл Андерс"],["ISS-42 Earth from the ISS.jpg","Вид из иллюминатора МКС","NASA/ESA, Саманта Кристофоретти, 2014"],["ISS-49 Earth seen from space.jpg","Земля с камеры на корпусе МКС","NASA, 2016"],["ISS065-E-352313 - View of Earth.jpg","Снимок с МКС с высоты 417 км","NASA/JSC, 2021"],["Pale Blue Dot.png","«Бледно-голубая точка»: Земля с 6 млрд км, «Вояджер-1»","NASA/JPL, 1990"]],
+[["OSIRIS Mars true color.jpg","Марс в естественных цветах","ESA/MPS, Rosetta, 2007"],["Mars Valles Marineris.jpeg","Долины Маринер — каньон длиной около 4000 км","NASA/USGS, Viking"],["PIA23623-CuriosityRoverPanorama-Nov24-Dec01-2019.jpg","Панорама марсохода «Кьюриосити»","NASA/JPL-Caltech/MSSS, 2019"],["Gusev Spirit 01.jpg","Камни кратера Гусев — первые дни марсохода «Спирит»","NASA/JPL, 2004"],["MarsSunset.jpg","Закат на Марсе: возле Солнца небо голубое","NASA/JPL, Spirit, 2005"],["PIA17936-f2-MarsCuriosityRover-EarthMoon-20140131.jpg","Самая яркая «звезда» марсианского неба — Земля","NASA/JPL-Caltech, Curiosity, 2014"]],
+[["Jupiter and its shrunken Great Red Spot.jpg","Юпитер и уменьшившееся Большое красное пятно","NASA/ESA, Hubble, 2014"],["PIA22946-Jupiter-RedSpot-JunoSpacecraft-20190212.jpg","Большое красное пятно и бурлящее южное полушарие","NASA/JPL-Caltech/SwRI/MSSS, К. Гилл, 2019"],["Great Red Spot From Voyager 1.jpg","Большое красное пятно глазами «Вояджера-1»","NASA/JPL, 1979"],["Jupiter's Great Red Spot and Ganymede's shadow.jpg","Тень Ганимеда легла на Большое красное пятно","NASA/ESA, Hubble, 2014"],["Jupiter - Perijove 17 (31891177817).jpg","Облака Юпитера вблизи, зонд «Юнона»","NASA/JPL-Caltech/SwRI/MSSS, К. Гилл, 2019"],["PIA21376 - Crescent Jupiter with the Great Red Spot.jpg","Серп Юпитера — вид, который не увидеть с Земли","NASA/JPL-Caltech, Juno"]],
+[["Saturn during Equinox.jpg","Сатурн в равноденствие: кольца почти без тени","NASA/JPL/SSI, Cassini, 2008"],["Saturn from Cassini Orbiter (2004-10-06).jpg","Сатурн и кольца, мозаика «Кассини»","NASA/JPL/SSI, 2004"],["Top view of the rings of Saturn by Cassini - October 10, 2013.jpg","Вид сверху: кольца и шестиугольник на полюсе","NASA/JPL-Caltech/SSI, 2013"],["Saturn's North Polar Hexagon.jpg","Шестиугольный вихрь на северном полюсе","NASA/JPL-Caltech/SSI, 2012"],["Saturn eclipse.jpg","Сатурн заслонил Солнце — кольца светятся на просвет","NASA/JPL/SSI, Cassini, 2006"],["Cassini Saturn rings Staggering Structure PIA21627.jpg","Спиральные волны в кольцах крупным планом","NASA/JPL-Caltech/SSI"]],
+[["Uranus Voyager2 color calibrated.png","Уран в естественных цветах","NASA/JPL, Voyager 2, 1986"],["Uranus - NASA-ESA JWST Space Telescope (54879990600).jpg","Уран глазами телескопа «Джеймс Уэбб»","NASA/ESA/CSA/STScI"],["Uranus rings.png","Кольца Урана в условных цветах","NASA/JPL, Voyager 2"],["FDS 26852.19 Rings of Uranus.png","Кольца на просвет: видны пылевые дорожки","NASA/JPL, Voyager 2"],["Uranus Montage.jpg","Уран и пять его крупных спутников","NASA/JPL, Voyager 2"],["Montage of Uranus and Miranda.jpg","Уран и Миранда","NASA/JPL, Voyager 2"]],
+[["Neptune Voyager2 color calibrated.png","Нептун в естественных цветах","NASA/JPL, Voyager 2, 1989"],["Neptune - Voyager 2 (29347980845) flatten crop.jpg","В центре — Большое тёмное пятно","NASA/JPL, Voyager 2, 1989"],["Neptune's Great Dark Spot.jpg","Большое тёмное пятно — шторм размером с Землю","NASA/JPL, Voyager 2"],["Neptune storms.jpg","Три шторма, включая быстрое облако «Скутер»","NASA/JPL, Voyager 2"],["Neptune Close Up (NIRCam).jpg","Кольца Нептуна в инфракрасном свете, «Джеймс Уэбб»","NASA/ESA/CSA/STScI, 2022"],["PIA02202 Neptune's full rings.jpg","Тонкие кольца Нептуна","NASA/JPL, Voyager 2"]]];
+const GNOTE=["Смотреть на Солнце без специального фильтра нельзя — эти снимки сделаны телескопами и космическими обсерваториями.","На Меркурий ещё не садился ни один аппарат, поэтому все снимки — с орбиты и пролётов.","Снимки с поверхности передавали только советские «Венеры»: в жаре и давлении аппараты работали около двух часов.","","Марсоходы и посадочные станции работают на Марсе с 1976 года — поэтому у нас так много снимков с поверхности.","У Юпитера нет твёрдой поверхности, так что все снимки — из космоса.","У Сатурна нет твёрдой поверхности, так что все снимки — из космоса.","Вблизи Уран видел только один аппарат — «Вояджер-2» в 1986 году.","Вблизи Нептун видел только один аппарат — «Вояджер-2» в 1989 году."];
+const $=s=>document.querySelector(s),C=$('#c'),x=C.getContext('2d');
+const SP=[1/86400,12,48,192,768],fmt=n=>n.toLocaleString('ru-RU');
+let real=false,mo=0,moT=0,AUw=190,OBJ=[],place=null,ed=-1,st={},W,H,DPR,days=0,last=0,paused=false,spd=1,rl0=0,showG=true,follow=null,sel=-1,showO=true,showL=true,launch=false,ox=0,oy=0,selM=-1;
+const cam={x:0,y:0,z:.7,zt:.7},base=()=>real?Math.min(W,H)*.45/RR[8][1]:Math.min(1,Math.min(W,H)/1250);
+let won=new Set();try{won=new Set(JSON.parse(localStorage.ss||'[]'))}catch(e){}
+const start=Date.now(),d0=start/864e5+2440587.5-2451545,L0=[0,252.25,181.98,100.46,355.45,34.4,49.94,313.23,304.88],PS=[1,87.969,224.701,365.256,686.98,4332.59,10759.22,30688.5,60182],GM=D.map((d,i)=>i?.5*d[2]*d[2]:2030),ACC=['Солнце','Меркурий','Венеру','Землю','Марс','Юпитер','Сатурн','Уран','Нептун'],P=D.map((d,i)=>({a0:(L0[i]+360*d0/PS[i])*Math.PI/180,x:0,y:0})),comets=[],booms=[],PX=Array(9).fill(0),PY=Array(9).fill(0);
+const EL=[0,[.20563593,1.906e-5,252.2503235,149472.67411175,77.45779628,.16047689],[.00677672,-4.107e-5,181.9790995,58517.81538729,131.60246718,.00268329],[.01671123,-4.392e-5,100.46457166,35999.37244981,102.93768193,.32327364],[.0933941,7.882e-5,-4.55343205,19140.30268499,-23.94362959,.44441088],[.04838624,-1.3253e-4,34.39644051,3034.74612775,14.72847983,.21252668],[.05386179,-5.0991e-4,49.95424423,1222.49362201,92.59887831,-.41897216],[.04725744,-4.397e-5,313.23810451,428.48202785,170.9542763,.40805281],[.00859048,5.105e-5,-55.12002969,218.45945325,44.96476227,-.32241464]];
+const lon=(i,t)=>{const T=(d0+t)/36525,q=EL[i],e=q[0]+q[1]*T,w=q[4]+q[5]*T,M=((q[2]+q[3]*T-w)%360)*Math.PI/180;let E=M;for(let k=0;k<6;k++)E=M+e*Math.sin(E);return 2*Math.atan2(Math.sqrt(1+e)*Math.sin(E/2),Math.sqrt(1-e)*Math.cos(E/2))+w*Math.PI/180};
+const UNIT=38/696340,AU=149.6e6*UNIT,B=D.map(d=>[d[2],d[3]]),RR=D.map(d=>[d[5]/2*UNIT,d[6]*1e6*UNIT]),lg=(c,r)=>Math.exp(Math.log(c)*(1-mo)+Math.log(r)*mo);
+function planetsAt(t){if(NB){for(let i=0;i<9;i++){PX[i]=P[i].dead?1e9:P[i].x;PY[i]=P[i].dead?1e9:P[i].y}return}for(let i=1;i<9;i++){const a=lon(i,t);PX[i]=D[i][3]*Math.cos(a);PY[i]=-D[i][3]*Math.sin(a)}}
+function stepC(c,h){let ax=0,ay=0;for(let i=0;i<9;i++){if(i==0&&SO)continue;const dx=PX[i]-c.x,dy=PY[i]-c.y,d2=dx*dx+dy*dy,R=D[i][2]*(i?1:.95);if(d2<R*R)return i;const q=d2+R*R*.3,f=GM[i]/(q*Math.sqrt(q));ax+=dx*f;ay+=dy*f}for(let k=0;k<OBJ.length;k++){const o=OBJ[k],dx=o.x-c.x,dy=o.y-c.y,d2=dx*dx+dy*dy,R=Math.max(o.ru,2);if(d2<o.ru*o.ru&&o.k!=CLD)return 9+k;const q=d2+R*R*.3,f=2030*o.M/MS/(q*Math.sqrt(q));ax+=dx*f;ay+=dy*f}c.vx+=ax*h;c.vy+=ay*h;c.x+=c.vx*h;c.y+=c.vy*h;return -1}
+const aimV=()=>{const dx=aim.a[0]-aim.b[0],dy=aim.a[1]-aim.b[1],l=Math.hypot(dx,dy)||1,px=Math.min(l*cam.z,300),s=px/300*VM/9.1;return[dx/l*s,dy/l*s,px]};
+const stars=Array.from({length:260},()=>({x:Math.random(),y:Math.random(),s:Math.random()*1.4+.3,p:Math.random()*.5+.05,t:Math.random()*6}));
+const belt=Array.from({length:700},()=>({r:272+Math.random()*40+Math.random()*12,a:Math.random()*6.28,s:Math.random()*1.2+.4}));
+function rs(){DPR=devicePixelRatio||1;W=innerWidth;H=innerHeight;C.width=W*DPR;C.height=H*DPR;if(sel<0&&selM<0)cam.zt=cam.z=base()}
+addEventListener('resize',rs);rs();
+const clamp=v=>Math.max(OBJ.length?1e-6:lg(.12,.0012),Math.min(lg(16,500),v));
+const w2s=(a,b)=>[(a-cam.x)*cam.z+W/2+ox,(b-cam.y)*cam.z+H/2+oy],s2w=(a,b)=>[(a-W/2-ox)/cam.z+cam.x,(b-H/2-oy)/cam.z+cam.y];
+function snack(t,ms=2800){const s=$('#snack');s.textContent=t;s.classList.add('on');clearTimeout(snack.t);snack.t=setTimeout(()=>s.classList.remove('on'),ms)}
+// UI
+$('#nav').innerHTML=D.map((d,i)=>`<button class="chip rp" style="--c:${d[1]};color:${d[1]}" data-i="${i}"><i style="background:${d[1]}"></i><span style="color:var(--on)">${d[0]}</span></button>`).join('');
+$('#spd').innerHTML=SP.map((s,i)=>`<button class="rp ${i==1?'on':''}" data-s="${i}">${['Real life','1×','4×','16×','64×'][i]}</button>`).join('');
+$('#nav').onclick=e=>{const b=e.target.closest('.chip');if(b)pick(+b.dataset.i)};
+const setSpd=i=>{spd=i;if(!i){rl0=days;snack('Real life: 1 секунда на экране = 1 секунда в космосе. Планеты стоят там, где они сегодня на самом деле',4200)}[...$('#spd').children].forEach((c,k)=>c.classList.toggle('on',k==i))};$('#spd').onclick=e=>{const b=e.target.closest('button');if(b)setSpd(+b.dataset.s)};
+const setT=(id,f)=>$(id).onclick=e=>f(e.currentTarget.classList.toggle('on'));
+setT('#tOrb',v=>showO=v);setT('#tLbl',v=>showL=v);setT('#tGrav',v=>showG=v);
+setT('#tCom',v=>{if(v&&(real||mo>.02)){$('#tCom').classList.remove('on');snack('В реальном масштабе кометы не запускаем: физика рассчитана на учебный масштаб');return}launch=v;if(v){if(!spd)setSpd(1);snack('Потяни и отпусти — пунктир покажет путь с учётом гравитации Солнца и планет',3600)}});
+$('#fab').onclick=()=>{paused=!paused;$('#fab').textContent=paused?'▶':'⏸'};
+document.addEventListener('pointerdown',e=>{const b=e.target.closest('.rp,.btn,.opt,.x');if(!b)return;const r=b.getBoundingClientRect(),s=Math.max(r.width,r.height)*2,p=document.createElement('span');p.className='rip';p.style.cssText=`width:${s}px;height:${s}px;left:${e.clientX-r.left-s/2}px;top:${e.clientY-r.top-s/2}px`;b.appendChild(p);setTimeout(()=>p.remove(),650)});
+addEventListener('keydown',e=>{if(e.code=='Space'){e.preventDefault();$('#fab').click()}if(e.key=='Escape')home()});
+function score(){$('#score').textContent=`★ ${won.size}/8`;try{localStorage.ss=JSON.stringify([...won])}catch(e){}}
+const navOn=i=>document.querySelectorAll('#nav .chip').forEach((b,k)=>b.classList.toggle('on',k==i));
+const nf=(v,d=1)=>v.toLocaleString('ru-RU',{maximumFractionDigits:d});
+const fP=p=>{p=Math.abs(p);return p<2?Math.floor(p*24)+' ч '+Math.round(p*1440%60)+' мин':nf(p)+' сут.'};
+function sheetOpen(c){document.documentElement.style.setProperty('--acc',c);document.body.classList.add('open');$('#sheet').scrollTop=0}
+function pick(i){
+ sel=i;selM=-1;follow=P[i];const d=D[i],c=d[1];sheetOpen(c);navOn(i);
+ cam.zt=clamp(i?58/d[2]:1.1);
+ const ratio=d[5]/12742,ms=MO.filter(m=>m.p==i);
+ $('#sheet').innerHTML=`<button class="x rp" onclick="home()" aria-label="Закрыть">✕</button>
+ <div class="hero"><div class="orb" style="background:radial-gradient(circle at 32% 30%,#fff9,${c} 38%,#000 130%)"></div><div><div class="kind">${i?d[12]:'Звезда'}</div><h2>${d[0]}</h2></div></div>
+ <p class="fact">${d[10]}</p>
+ <div class="grid"><div class="t"><small>Диаметр</small><b>${fmt(d[5])} км</b></div><div class="t"><small>До Солнца</small><b>${i?fmt(d[6])+' млн км':'—'}</b></div><div class="t"><small>Длина года</small><b>${i?fmt(d[4])+' сут.':'230 млн лет'}</b></div><div class="t"><small>Сутки</small><b>${d[7]}</b></div><div class="t"><small>Температура</small><b>${d[8]}</b></div><div class="t"><small>Спутники</small><b>${d[9]}</b></div></div>
+ ${ms.length?`<div class="mh">${ms.length>1?'Крупные спутники':'Спутник'} — нажми, чтобы узнать больше</div><div class="mch">${ms.map(m=>`<button class="rp" data-m="${m.k}"><i style="background:${MN[m.k][6]}"></i>${MN[m.k][0]}</button>`).join('')}</div>`:''}
+ <div class="cmp"><span>${i==3?'Наш дом — точка отсчёта':'Размер: '+(ratio>=1?'в '+nf(ratio)+' раза шире Земли':'в '+nf(1/ratio)+' раза уже Земли')}</span><div class="bar"><i style="width:0" data-w="${Math.max(3,Math.min(100,d[5]/139820*100))}"></i></div></div>
+ <div class="acts">${i?`<button class="btn rp" id="qb">${won.has(i)?'★ Пройти тест ещё раз':'★ Проверь себя'}</button>`:'<button class="btn rp" onclick="pick(3)">К Земле</button>'}<button class="btn gb rp" id="gbt">🖼 Галерея</button></div><div id="quiz"></div>`;
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{const b=$('.bar i');if(b)b.style.width=b.dataset.w+'%'}));
+ $('.mch')&&($('.mch').onclick=e=>{const b=e.target.closest('button');if(b)pickMoon(+b.dataset.m)});
+ $('#gbt').onclick=()=>openG(i);
+ const qb=$('#qb');if(qb)qb.onclick=()=>{const [t,o,r]=d[11];qb.style.display='none';$('#quiz').innerHTML=`<p>${t}</p>`+o.map((s,k)=>`<button class="opt rp" data-k="${k}">${s}</button>`).join('');
+  $('#quiz').onclick=e=>{const b=e.target.closest('.opt');if(!b||b.classList.contains('good'))return;
+   if(+b.dataset.k==r){b.classList.add('good');won.add(i);score();$('#score').classList.add('pop');setTimeout(()=>$('#score').classList.remove('pop'),400);
+    snack(won.size==8?'🏆 Все восемь звёзд! Ты настоящий астроном':'★ Верно! Звезда твоя');}
+   else{b.classList.add('bad');snack('Не совсем — попробуй ещё раз');setTimeout(()=>b.classList.remove('bad'),400)}}}}
+function pickMoon(k){
+ const m=MN[k],o=MO[k],p=m[1],c=m[6];sel=-1;selM=k;follow=o;sheetOpen(c);navOn(p);
+ moonsAt();cam.zt=clamp(Math.min(.3*Math.min(W,H)/Math.max(o.R,1e-9),40/Math.max(o.r,1e-9)));
+ const rl=m[2]/3474;
+ $('#sheet').innerHTML=`<button class="x rp" onclick="home()" aria-label="Закрыть">✕</button>
+ <div class="hero"><div class="orb" style="width:60px;height:60px;background:radial-gradient(circle at 32% 30%,#fff9,${c} 38%,#000 130%)"></div><div><div class="kind">Спутник ${GEN[p]}</div><h2>${m[0]}</h2></div></div>
+ <p class="fact">${m[7]}</p>
+ <div class="grid"><div class="t"><small>Диаметр</small><b>${nf(m[2])} км</b></div><div class="t"><small>До ${GEN[p]}</small><b>${fmt(m[3])} км</b></div><div class="t"><small>Оборот вокруг планеты</small><b>${fP(m[4])}${m[4]<0?' (обратно)':''}</b></div><div class="t"><small>Открыт</small><b>${m[5]}</b></div></div>
+ <div class="cmp"><span>${k==0?'Наша Луна — точка отсчёта':'Размер: '+(rl>.87&&rl<1.15?'почти как у Луны':rl>=1?'в '+nf(rl)+' раза больше Луны':'в '+nf(1/rl,rl<.05?0:1)+' раза меньше Луны')}</span><div class="bar"><i style="width:0" data-w="${Math.max(2,m[2]/5268*100)}"></i></div></div>
+ <div class="acts"><button class="btn rp" id="mbk">← ${D[p][0]}</button></div>`;
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{const b=$('.bar i');if(b)b.style.width=b.dataset.w+'%'}));
+ $('#mbk').onclick=()=>pick(p)}
+function home(){sel=-1;selM=-1;follow=null;document.body.classList.remove('open');navOn(-1);cam.zt=base();cam.x=cam.y=0}
+// input
+const ptr=new Map();let moved=0,aim=null,pd=0;const pdist=()=>{const [a,b]=[...ptr.values()];return Math.hypot(a.x-b.x,a.y-b.y)};
+C.onpointerdown=e=>{C.setPointerCapture(e.pointerId);ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=0;if(ptr.size==2){pd=pdist();aim=null}else if(launch){const w=s2w(e.clientX,e.clientY);aim={a:w,b:w}}};
+C.onpointermove=e=>{const p=ptr.get(e.pointerId);if(!p)return;const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;
+ if(ptr.size==2){const d=pdist();cam.zt=clamp(cam.zt*d/pd);cam.z=cam.zt;pd=d;moved=99;return}
+ moved+=Math.abs(dx)+Math.abs(dy);
+ if(aim)aim.b=s2w(e.clientX,e.clientY);else if(moved>6){cam.x-=dx/cam.z;cam.y-=dy/cam.z;follow=null}};
+C.onpointerup=e=>{if(!ptr.has(e.pointerId))return;const single=ptr.size==1;ptr.delete(e.pointerId);if(!single)return;
+ if(aim){const v=aimV();if(v[2]>10){comets.push({x:aim.a[0],y:aim.a[1],vx:v[0],vy:v[1],tr:[],n:0});if(comets.length>14)comets.shift()}aim=null;return}
+ if(moved<7){let best=-1,bd=1e9;P.forEach((p,i)=>{if(p.dead)return;const [sx,sy]=w2s(p.x,p.y),d=Math.hypot(sx-e.clientX,sy-e.clientY),lim=Math.max(D[i][2]*cam.z+10,24);if(d<lim&&d<bd){bd=d;best=i}});if(place){const w=s2w(e.clientX,e.clientY),o=OBJ[place.k];o.x=w[0];o.y=w[1];o.rep=0;o.mv=1;place=null;C.style.cursor='';if(o.ru*cam.z>.4*Math.min(W,H)){cam.x=o.x;cam.y=o.y;follow=null;cam.zt=clamp(.3*Math.min(W,H)/o.ru)}snack(o.bh?'🕳 Чёрная дыра на месте. Запусти комету рядом и посмотри, что будет':'Объект поставлен. Нажми на него, чтобы изменить или удалить',4200);return}
+ let ob=-1,od=1e9;OBJ.forEach((o,k)=>{const [sx,sy]=w2s(o.x,o.y),d=Math.hypot(sx-e.clientX,sy-e.clientY);if(d<Math.max(o.ru*cam.z+10,24)&&d<od){od=d;ob=k}});let bm=-1,bmd=1e9;MO.forEach(m=>{if(m.hid)return;const [sx,sy]=w2s(m.x,m.y),[qx,qy]=w2s(P[m.p].x,P[m.p].y);if(m.R*cam.z<18||Math.hypot(sx-qx,sy-qy)<D[m.p][2]*cam.z+3)return;const d=Math.hypot(sx-e.clientX,sy-e.clientY);if(d<Math.max(m.r*cam.z+8,14)&&d<bmd){bmd=d;bm=m.k}});
+ if(ob>=0)openO(ob);else if(bm>=0&&(best<0||bmd<bd))pickMoon(bm);else if(best>=0)pick(best)}};
+C.onpointercancel=e=>ptr.delete(e.pointerId);
+C.onwheel=e=>{e.preventDefault();cam.zt=clamp(cam.zt*Math.exp(-e.deltaY*(.0012+.003*mo)))};
+// render
+function ball(sx,sy,r,col,ux,uy,bands,fn){
+ x.save();x.shadowColor=col;x.shadowBlur=r*.9;x.fillStyle=col;x.beginPath();x.arc(sx,sy,r,0,7);x.fill();x.restore();
+ x.save();x.beginPath();x.arc(sx,sy,r,0,7);x.clip();
+ if(bands){x.fillStyle='rgba(110,60,30,.28)';for(let k=-2;k<3;k++)x.fillRect(sx-r,sy+k*r*.36-r*.07,2*r,r*.15)}if(fn)fn();
+ const g=x.createRadialGradient(sx+ux*r*.55,sy+uy*r*.55,r*.05,sx,sy,r*1.1);g.addColorStop(0,'rgba(255,255,255,.4)');g.addColorStop(.45,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,12,.82)');x.fillStyle=g;x.fillRect(sx-r,sy-r,2*r,2*r);x.restore()}
+function moonsAt(){for(const o of MO){const m=MN[o.k],p=P[o.p],sat=o.p==6;o.lx=o.x;o.ly=o.y;o.hid=!!p.dead;
+ o.R=lg(B[o.p][0]*((sat?2.7:1.75)+(sat?.42:.5)*o.n),m[3]*UNIT);o.r=lg(Math.max(1.4,2.6*Math.sqrt(m[2]/3474)),m[2]/2*UNIT);
+ o.a=o.ph+Math.sign(m[4])*6.2832*days/(18*Math.sqrt(Math.abs(m[4])));o.x=p.x+o.R*Math.cos(o.a);o.y=p.y-o.R*Math.sin(o.a)}}
+function drawMoons(i,sx,sy,ux,uy,t){const z=cam.z;for(const o of MO){if(o.p!=i||o.hid)continue;const m=MN[o.k],Rz=o.R*z,r=Math.max(o.r*z,1.1*(1-mo)),on=selM==o.k,foc=on||sel==i||(selM>=0&&MO[selM].p==i);
+ if(showO&&(foc||Rz>40)){x.strokeStyle=on?m[6]+'88':`rgba(255,255,255,${foc?.13:.06})`;x.lineWidth=1;x.beginPath();x.arc(sx,sy,Rz,0,7);x.stroke()}
+ const mx=sx+Rz*Math.cos(o.a),my=sy-Rz*Math.sin(o.a);
+ if(r>.25&&(mo<.5||Rz>6))ball(mx,my,r,m[6],ux,uy,0,o.k==10?()=>{x.fillStyle='rgba(28,20,14,.85)';x.beginPath();x.arc(mx,my,r,o.a+1.2,o.a+1.2+Math.PI);x.fill()}:null);
+ if(on){x.strokeStyle=m[6];x.lineWidth=2;x.setLineDash([4,6]);x.lineDashOffset=-t/50;x.beginPath();x.arc(mx,my,Math.max(r,3)+7,0,7);x.stroke();x.setLineDash([])}
+ if(showL&&(foc||Rz>70)&&(r>1||on)){x.font='500 11px "Roboto Flex",sans-serif';x.textAlign='center';x.fillStyle=on?'rgba(232,224,238,.95)':'rgba(232,224,238,.62)';x.fillText(m[0],mx,my+Math.max(r,3)+15)}}}
+function frame(t){requestAnimationFrame(frame);
+ const dt=Math.min(.05,(t-last)/1e3||0);last=t;if(!paused)days+=dt*SP[spd];
+ if(mo!=moT){mo+=(moT-mo)*Math.min(1,dt*3);if(Math.abs(moT-mo)<.002)mo=moT}for(let i=0;i<9;i++){D[i][2]=lg(B[i][0],RR[i][0]);D[i][3]=i?lg(B[i][1],RR[i][1]):0}AUw=lg(190,AU);SO=OBJ.some(o=>o.rep)||(NB&&!!P[0].dead);for(const o of OBJ)o.ru=lg(vr(o.Re),o.Re*UNIT/1e3);
+ if(NB)nbUpdate(paused?0:dt*SP[spd]);P.forEach((p,i)=>{if(!i||NB)return;const a=lon(i,days),R=D[i][3];p.lx=p.x;p.ly=p.y;p.ang=a;p.x=R*Math.cos(a);p.y=-R*Math.sin(a)});moonsAt();
+ const m=innerWidth<=840,ty=(sel>=0||selM>=0)&&m?-H*.2:0,tx=(sel>=0||selM>=0)&&!m?-190:0;ox+=(tx-ox)*Math.min(1,dt*6);oy+=(ty-oy)*Math.min(1,dt*6);
+ if(follow!=null){const q=follow,k=Math.min(1,dt*4);cam.x=q.x+(cam.x-(q.lx??q.x))*(1-k);cam.y=q.y+(cam.y-(q.ly??q.y))*(1-k)}
+ cam.z*=Math.pow(cam.zt/cam.z,Math.min(1,dt*5));
+ x.setTransform(DPR,0,0,DPR,0,0);x.fillStyle='#0b0912';x.fillRect(0,0,W,H);
+ let g=x.createRadialGradient(W*.2,H*.3,0,W*.2,H*.3,W*.7);g.addColorStop(0,'rgba(110,60,180,.22)');g.addColorStop(1,'transparent');x.fillStyle=g;x.fillRect(0,0,W,H);
+ g=x.createRadialGradient(W*.85,H*.8,0,W*.85,H*.8,W*.6);g.addColorStop(0,'rgba(20,150,170,.16)');g.addColorStop(1,'transparent');x.fillStyle=g;x.fillRect(0,0,W,H);
+ stars.forEach(s=>{const sx=((s.x*W-cam.x*cam.z*s.p*(1-mo))%W+W)%W,sy=((s.y*H-cam.y*cam.z*s.p*(1-mo))%H+H)%H;x.fillStyle=`rgba(255,255,255,${.35+.35*Math.sin(t/700+s.t)})`;x.fillRect(sx,sy,s.s,s.s)});
+ const [cx,cy]=w2s(P[0].x,P[0].y),z=cam.z;
+ if(showG){const S=Math.max(44,W/32),o1=((W/2+ox-cam.x*z)%S+S)%S,o2=((H/2+oy-cam.y*z)%S+S)%S,cap=.3*Math.min(W,H),kk=AUw/190,mA=M=>Math.min(.97,Math.max(.5,.3+.05*Math.log10(M/1e20)));
+  const Ms=P.map((p,i)=>{const [mx,my]=w2s(p.x,p.y);return{x:mx,y:my,s:Math.min(cap,Math.max((i?lg(6+1.4*B[i][0],4*RR[i][0]):lg(40,152))*z,i?9:34)),A:(SO&&!i)||p.dead?0:mA(MP[i])}});
+  for(const o of OBJ){const [mx,my]=w2s(o.x,o.y);Ms.push({x:mx,y:my,s:Math.min(cap,Math.max(Math.max(1.2*o.ru,lg(40,152)*(o.M/MS)**.25)*z,30)),A:mA(o.M)})}
+  Ms.sort((a,b)=>b.s-a.s);
+  const seg=(u,v,f)=>{for(const m of Ms){const dx=m.x-u,dy=m.y-v,d2=dx*dx+dy*dy,l=3.6*m.s;if(d2>l*l)continue;const k=m.A*Math.exp(-d2/(2*m.s*m.s));u+=dx*k;v+=dy*k}f?x.moveTo(u,v):x.lineTo(u,v)};
+  x.strokeStyle='rgba(150,130,255,.17)';x.lineWidth=1;x.beginPath();
+  for(let y=o2-S;y<H+S;y+=S)for(let u=-8;u<=W+8;u+=8)seg(u,y,u<0);
+  for(let c=o1-S;c<W+S;c+=S)for(let v=-8;v<=H+8;v+=8)seg(c,v,v<0);
+  
+  
+  
+  
+  
+  
+  x.stroke()}
+ if(showO){x.lineWidth=1;for(let i=1;i<9;i++){x.strokeStyle=i==sel?D[i][1]+'aa':'rgba(255,255,255,.1)';if(D[i][3]*z<2e4){x.beginPath();x.arc(cx,cy,D[i][3]*z,0,7);x.stroke()}}}
+ x.fillStyle='rgba(200,185,170,.55)';belt.forEach(b=>{const br=lg(b.r,(2.1+1.2*(b.r-272)/52)*AU),a=b.a+days*.0009*(300/b.r),r=br*z;x.fillRect(cx+r*Math.cos(a),cy-r*Math.sin(a),b.s*Math.max(.8,z),b.s*Math.max(.8,z))});
+ x.globalAlpha=SO?0:1; // sun
+ const sr=Math.max(D[0][2]*z,3*(1-mo)),pu=1+.04*Math.sin(t/500);x.globalCompositeOperation='lighter';
+ g=x.createRadialGradient(cx,cy,sr*.5,cx,cy,sr*5*pu);g.addColorStop(0,'rgba(255,190,70,.6)');g.addColorStop(.3,'rgba(255,120,40,.15)');g.addColorStop(1,'rgba(255,90,20,0)');x.fillStyle=g;x.fillRect(cx-sr*5.5,cy-sr*5.5,sr*11,sr*11);
+ for(let k=0;k<14;k++){const a=k*.449+t/16000,l=sr*(1.55+.22*Math.sin(t/1700+k*1.7)+.1*Math.sin(t/950+k*.6));x.strokeStyle='rgba(255,170,60,.25)';x.lineWidth=sr*.12;x.beginPath();x.moveTo(cx+Math.cos(a)*sr,cy+Math.sin(a)*sr);x.lineTo(cx+Math.cos(a)*l*1.3,cy+Math.sin(a)*l*1.3);x.stroke()}
+ x.globalCompositeOperation='source-over';
+ for(let k=0;k<4;k++){const p=(t/5000+k/4)%1,a=k*1.7+Math.floor(t/5000+k/4)*2.3;x.strokeStyle=`rgba(255,160,60,${.55*(1-p)})`;x.lineWidth=Math.max(1*(1-mo),sr*.05);x.beginPath();x.arc(cx+Math.cos(a)*sr,cy+Math.sin(a)*sr,sr*(.1+.3*p),a-1.57,a+1.57);x.stroke()}
+ g=x.createRadialGradient(cx-sr*.25,cy-sr*.25,sr*.1,cx,cy,sr);g.addColorStop(0,'#fff6c8');g.addColorStop(.6,'#ffc247');g.addColorStop(1,'#ff8a1f');x.fillStyle=g;x.beginPath();x.arc(cx,cy,sr,0,7);x.fill();
+ if(sel==0){x.strokeStyle='#ffc247';x.setLineDash([6,6]);x.lineDashOffset=-t/60;x.beginPath();x.arc(cx,cy,sr+10,0,7);x.stroke();x.setLineDash([])}
+ x.globalAlpha=1;if(mo>.02&&!SO&&D[0][2]*z<4){x.strokeStyle='#ffc247';x.globalAlpha=.55*mo*(1-D[0][2]*z/4);x.lineWidth=1.2;x.beginPath();x.arc(cx,cy,9,0,7);x.stroke();x.globalAlpha=1;if(showL){x.font='500 12px "Roboto Flex",sans-serif';x.textAlign='center';x.fillStyle='rgba(232,224,238,.85)';x.fillText('Солнце',cx,cy+27)}} // planets
+ for(let i=1;i<9;i++){const p=P[i],d=D[i],[sx,sy]=w2s(p.x,p.y),r=Math.max(d[2]*z,2.5*(1-mo)),R=d[3];if(p.dead||OBJ.some(o=>o.k!=CLD&&Math.hypot(p.x-o.x,p.y-o.y)<o.ru))continue;
+  const st=Math.min(.05,2.5/(R*z));for(let k=0;k<(R*z<2e4&&mo<.5&&!NB?28:0);k++){const a0=p.ang-k*st,a1=a0-st*1.1;x.strokeStyle=d[1]+Math.floor(70*(1-k/28)).toString(16).padStart(2,'0');x.lineWidth=Math.max(1.5,r*.35)*(1-k/40);x.beginPath();x.arc(cx,cy,R*z,-a0,-a1);x.stroke()}
+  if(NB&&p.tr&&p.tr.length>1&&mo<.5){x.lineWidth=Math.max(1.5,r*.35);for(let k=1;k<p.tr.length;k++){const A=toDisp(...p.tr[k-1]),B=toDisp(...p.tr[k]),[a1,b1]=w2s(A[0]+P[0].x,A[1]+P[0].y),[a2,b2]=w2s(B[0]+P[0].x,B[1]+P[0].y);x.strokeStyle=d[1]+Math.round(110*k/p.tr.length).toString(16).padStart(2,'0');x.beginPath();x.moveTo(a1,b1);x.lineTo(a2,b2);x.stroke()}}
+  const qx=p.x-P[0].x,qy=p.y-P[0].y,L=Math.hypot(qx,qy)||1,ux=-qx/L,uy=-qy/L;
+  if(i==6){x.save();x.translate(sx,sy);x.rotate(-.45);x.strokeStyle='rgba(232,212,158,.55)';x.lineWidth=r*.38;x.beginPath();x.ellipse(0,0,r*1.9,r*.6,0,0,7);x.stroke();x.lineWidth=r*.14;x.strokeStyle='rgba(180,150,100,.5)';x.beginPath();x.ellipse(0,0,r*2.35,r*.75,0,0,7);x.stroke();x.restore()}
+  ball(sx,sy,r,d[1],ux,uy,i==5||i==6,()=>spin(sx,sy,r,t,i));if(mo>.02&&d[2]*z<4){x.strokeStyle=d[1];x.globalAlpha=.55*mo*(1-d[2]*z/4);x.lineWidth=1.2;x.beginPath();x.arc(sx,sy,9,0,7);x.stroke();x.globalAlpha=1}
+  if(i==6){x.save();x.translate(sx,sy);x.rotate(-.45);x.strokeStyle='rgba(232,212,158,.7)';x.lineWidth=r*.38;x.beginPath();x.ellipse(0,0,r*1.9,r*.6,0,0,Math.PI);x.stroke();x.restore()}
+  drawMoons(i,sx,sy,ux,uy,t);
+  if(i==sel){x.strokeStyle=d[1];x.lineWidth=2;x.setLineDash([5,7]);x.lineDashOffset=-t/50;x.beginPath();x.arc(sx,sy,r*(i==6?2.8:1.6)+8,0,7);x.stroke();x.setLineDash([])}
+  if(showL){x.font='500 12px "Roboto Flex",sans-serif';x.textAlign='center';x.fillStyle='rgba(232,224,238,.85)';x.fillText(d[0],sx,sy+r*(i==6?2:1)+18)}}
+ // objects
+ for(const o of OBJ){const [sx,sy]=w2s(o.x,o.y),r=Math.max(o.ru*z,(o.bh?5:3)*(1-mo));
+  if(mo>.02&&o.ru*z<4){x.strokeStyle=o.c;x.globalAlpha=.55*mo*(1-o.ru*z/4);x.lineWidth=1.2;x.beginPath();x.arc(sx,sy,9,0,7);x.stroke();x.globalAlpha=1}
+  if(o.bh)bh(sx,sy,r,t);else{const cl=o.k==CLD,pl=r*(1.9+.12*Math.sin(t/650+o.x));if(o.k=='Нейтронная звезда'){const a=t/130;x.save();x.globalCompositeOperation='lighter';x.strokeStyle='rgba(150,190,255,.5)';x.lineWidth=Math.max(2*(1-mo),r*.35);x.lineCap='round';x.beginPath();x.moveTo(sx-Math.cos(a)*r*8,sy-Math.sin(a)*r*8);x.lineTo(sx+Math.cos(a)*r*8,sy+Math.sin(a)*r*8);x.stroke();x.restore()}x.save();x.globalCompositeOperation='lighter';x.globalAlpha=cl?0:1;const g=x.createRadialGradient(sx,sy,r*.4,sx,sy,pl);g.addColorStop(0,o.c+'aa');g.addColorStop(1,o.c+'00');x.fillStyle=g;x.beginPath();x.arc(sx,sy,pl,0,7);x.fill();x.restore();if(cl)cloud(sx,sy,r,t,o);else ball(sx,sy,r,o.c,-.7,-.7)}
+  if(showL){x.font='500 12px "Roboto Flex",sans-serif';x.textAlign='center';x.fillStyle='rgba(232,224,238,.9)';x.fillText(o.n,sx,sy+r*(o.bh?1.9:1.3)+18)}}
+ // comets
+ if(!paused&&comets.length){const dd=dt*SP[spd],vm=Math.max(...comets.map(c=>Math.hypot(c.vx,c.vy))),n=Math.min(600,Math.max(Math.ceil(dd/.2),Math.ceil(dd*vm/6))),h=dd/n;for(let s=1;s<=n;s++){planetsAt(days-dd+h*s);for(const c of comets){if(c.dead)continue;const e=stepC(c,h);if(e>=0){c.dead=1;booms.push({x:c.x,y:c.y,t});snack(e>=9?'🕳 Комета поглощена: '+OBJ[e-9].n:e?'💥 Комета врезалась в '+ACC[e]:'🔥 Комета упала на Солнце')}else if(++c.n%8==0){c.tr.push([c.x,c.y]);if(c.tr.length>130)c.tr.shift()}}}}
+ for(let k=comets.length-1;k>=0;k--){const c=comets[k];
+  if(c.dead){comets.splice(k,1);continue}
+  
+  if(Math.hypot(c.x,c.y)>3500){comets.splice(k,1);continue}
+  const T=[...c.tr,[c.x,c.y]];x.lineCap='round';for(let j=1;j<T.length;j++){const [a,b]=w2s(...T[j-1]),[e,f]=w2s(...T[j]),q=j/T.length;x.strokeStyle=`rgba(170,225,255,${q*.8})`;x.lineWidth=1+q*3*Math.min(z,1.5);x.beginPath();x.moveTo(a,b);x.lineTo(e,f);x.stroke()}
+  const [hx,hy]=w2s(c.x,c.y);x.fillStyle='#fff';x.shadowColor='#9fe0ff';x.shadowBlur=14;x.beginPath();x.arc(hx,hy,3.2,0,7);x.fill();x.shadowBlur=0}
+ for(let k=booms.length-1;k>=0;k--){const b=booms[k],q=(t-b.t)/700;if(q>1){booms.splice(k,1);continue}const [u,w]=w2s(b.x,b.y);x.strokeStyle=`rgba(255,200,120,${1-q})`;x.lineWidth=3;x.beginPath();x.arc(u,w,(8+q*50)*Math.min(z,2),0,7);x.stroke()}
+ if(aim){const v=aimV(),[a,b]=w2s(...aim.a),[e,f]=w2s(...aim.b);
+  x.strokeStyle='rgba(255,255,255,.28)';x.lineWidth=2;x.lineCap='round';x.beginPath();x.moveTo(a,b);x.lineTo(e,f);x.stroke();
+  const q={x:aim.a[0],y:aim.a[1],vx:v[0],vy:v[1]};let end=-1,lx=a,ly=b;x.strokeStyle='#ff8a5c';x.lineWidth=2.6;x.setLineDash([1,9]);x.beginPath();x.moveTo(a,b);
+  let tt=0,lt=-9;for(let j=0;j<2400&&end<0&&Math.hypot(q.x,q.y)<9000;j++){const h=Math.min(.2,6/Math.max(Math.hypot(q.vx,q.vy),1e-3));if(tt-lt>.8){planetsAt(days+tt);lt=tt}end=stepC(q,h);tt+=h;if(j%3==0||end>=0){[lx,ly]=w2s(q.x,q.y);x.lineTo(lx,ly)}}
+  x.stroke();x.setLineDash([]);
+  if(end>=0){x.fillStyle='#ff8a5c';x.font='700 18px "Roboto Flex",sans-serif';x.textAlign='center';x.fillText('✕',lx,ly+6)}
+  x.fillStyle='#ff8a5c';x.beginPath();x.arc(a,b,6,0,7);x.fill();
+  x.fillStyle='#ffd2bf';x.font='700 13px "Roboto Flex",sans-serif';x.textAlign='left';x.fillText('≈ '+fmt(Math.round(Math.hypot(v[0],v[1])*9.1))+' км/с',a+14,b-14)}
+ const dn=new Date(start+days*864e5);$('#date').textContent=spd?dn.toLocaleDateString('ru-RU',{year:'numeric',month:'long',day:'numeric'}):dn.toLocaleString('ru-RU',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+ const sc=$('#sc');sc.style.display=mo>.98?'block':'none';
+ if(mo>.98){const k0=100/(z*UNIT),pw=10**Math.floor(Math.log10(k0)),nn=k0/pw,km=(nn>=5?5:nn>=2?2:1)*pw,ls=km/299792,lt=ls<1?ls.toFixed(2).replace('.',',')+' с':ls<60?Math.round(ls)+' с':ls<3600?(ls/60).toFixed(1).replace('.',',')+' мин':(ls/3600).toFixed(1).replace('.',',')+' ч';
+  $('#sbar i').style.width=km*UNIT*z+'px';$('#sbar span').textContent=(km>=1e6?(km/1e6).toLocaleString('ru-RU')+' млн км':fmt(km)+' км')+' · свет '+lt}
+ $('#vc').style.display=launch?'block':'none';const rl=$('#rl');if(spd)rl.style.display='none';else{const i=sel>0?sel:3,v=6.2832*D[i][6]*1e6/(D[i][4]*86400);rl.style.display='block';rl.textContent=`${D[i][0]} · ${v.toLocaleString('ru-RU',{maximumFractionDigits:1})} км/с · пройдено ${fmt(Math.round(v*(days-rl0)*86400))} км`}
+}
+const dlg=$('#dlg'),dt=$('#dt'),iso=m=>new Date(m).toISOString().slice(0,10),openD=()=>{dt.value=iso(start+days*864e5);dlg.classList.add('on')},closeD=()=>dlg.classList.remove('on');
+const PRE=[['🏠 Сегодня','now'],['🛰 Спутник-1 · 4 окт 1957','1957-10-04'],['🚀 Гагарин · 12 апр 1961','1961-04-12'],['🌕 Аполлон-11 · 20 июл 1969','1969-07-20'],['🛸 Вояджер-2 · 20 авг 1977','1977-08-20']];
+$('#pre').innerHTML=PRE.map(p=>`<button class="chip rp" data-d="${p[1]}" style="--c:#d0bcff">${p[0]}</button>`).join('');
+function goDate(s){if(s=='now')days=0;else{const [y,m,d]=s.split('-').map(Number),ms=Date.UTC(y,m-1,d,12);if(isNaN(ms))return;days=(ms-start)/864e5}rl0=days;comets.length=0;if(NB)nbInit();closeD();snack('Планеты на '+new Date(start+days*864e5).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}),3600)}
+$('#tDate').onclick=openD;$('#date').onclick=openD;$('#dNo').onclick=closeD;$('#dOk').onclick=()=>dt.value&&goDate(dt.value);
+$('#pre').onclick=e=>{const b=e.target.closest('.chip');if(b)goDate(b.dataset.d)};dlg.onclick=e=>{if(e.target==dlg)closeD()};addEventListener('keydown',e=>{if(e.key=='Escape')closeD()});
+$('#tReal').onclick=e=>{real=!real;moT=real?1:0;e.currentTarget.classList.toggle('on',real);if(real){launch=false;$('#tCom').classList.remove('on');comets.length=0}home();snack(real?'Реальный масштаб: тела рисуются в настоящих пропорциях и почти невидимы — тонкие кольца показывают, где они. Приближай колесом мыши':'Учебный масштаб: планеты увеличены, орбиты сжаты',4800)};
+const G=6.674e-11,CL=2.998e8,MS=1.989e30,ME=5.972e24,MJ=1.898e27,RSUN=6.957e8,AUm=1.496e11,MP=[MS,3.3e23,4.87e24,5.97e24,6.42e23,1.898e27,5.68e26,8.68e25,1.02e26];
+const sci=v=>{if(v>=.01&&v<1e6)return(+v.toPrecision(3)).toLocaleString('ru-RU');const e=Math.floor(Math.log10(v));return(v/10**e).toFixed(2).replace('.',',')+'×10<sup>'+e+'</sup>'};
+const fM=k=>k>=2e29?sci(k/MS)+' M☉':k>=6e22?sci(k/ME)+' M⊕':sci(k)+' кг',fR=m=>m>=1.5e10?sci(m/AUm)+' а.е.':m>=1e3?sci(m/1e3)+' км':m>=1?sci(m)+' м':sci(m*1e3)+' мм';
+function cls(M,R){const rs=2*G*M/CL**2,rho=M/(4/3*Math.PI*R**3),ve=Math.sqrt(2*G*M/R),ms=M/MS,me=M/ME,o=(n,c,t,bh)=>({n,c,t,bh,rs,rho,ve}),bad=t=>o('Неустойчивый объект','#ff8a80',t),tiny='Масса слишком мала, чтобы удержать такое вещество: оно разлетится.';
+ if(R<=rs)return o('Чёрная дыра','#b39dff',ms<2.5?'Теоретическая: природа не умеет так сжимать малые массы, звёзды легче ~3 M☉ в дыры не коллапсируют.':ms<100?'Звёздная чёрная дыра — остаток массивной звезды.':ms<1e5?'Промежуточная чёрная дыра.':'Сверхмассивная чёрная дыра: такие живут в центрах галактик.',1);
+ if(rho>=1e16)return ms<.1?bad(tiny):ms<=2.2?o('Нейтронная звезда','#8ab4ff','Плотность атомного ядра: чайная ложка весит миллиарды тонн.'):bad('Выше предела ~2,2 M☉ нейтронное вещество не держится — объект коллапсирует в чёрную дыру.');
+ if(rho>=1e8)return ms<.1?bad(tiny):ms<=1.4?o('Белый карлик','#dfe8ff','Остаток звезды вроде Солнца: масса звезды в объёме планеты.'):bad('Выше предела Чандрасекара (1,4 M☉) белый карлик не удержится: сверхновая или нейтронная звезда.');
+ if(ms>=.08)return R>100*RSUN?o('Красный сверхгигант','#ff7043','Раздутая звезда: плотность в тысячи раз меньше воздуха.'):ms>=8?o('Массивная звезда','#9ec5ff','Проживёт недолго и закончит сверхновой.'):ms>=1.3?o('Горячая звезда','#cfe0ff','Ярче и горячее Солнца, живёт быстрее.'):ms>=.6?o('Звезда типа Солнца','#ffd54f','Термоядерный синтез в ядре держит её в равновесии.'):o('Красный карлик','#ff8a50','Самые частые звёзды Галактики: тусклые, но живут триллионы лет.');
+ if(rho<1e-3)return o('Газопылевое облако','#b0bec5','Слишком рыхлое: гравитация не соберёт его в тело.');
+ return M>=13*MJ?o('Коричневый карлик','#c97b5a','«Несостоявшаяся звезда»: для синтеза водорода массы не хватает.'):me>=10&&rho<2500?o('Газовый гигант','#e8c27a','Основа — водород и гелий, твёрдой поверхности нет.'):me>=2?o('Суперземля','#4fc3a1','Каменная планета массивнее Земли.'):me>=.1?o('Планета земного типа','#4f9df7','Твёрдая каменная поверхность.'):me>=.001?o('Карликовая планета или спутник','#bcaaa4','Слишком мала, чтобы расчистить свою орбиту.'):o('Астероид','#9e9e9e','Малое каменное тело.')}
+const DP=Array.from({length:150},()=>({q:Math.random()**1.5,a:Math.random()*6.283,s:.6+Math.random()*1.1}));
+function bh(sx,sy,r,t){x.save();x.translate(sx,sy);x.rotate(-.35);const A=r*4.4,pu=1+.05*Math.sin(t/500),gl=()=>{const g=x.createRadialGradient(0,0,r*.9,0,0,A);g.addColorStop(0,'rgba(255,235,190,.95)');g.addColorStop(.18,'rgba(255,150,50,.55)');g.addColorStop(.6,'rgba(200,60,20,.14)');g.addColorStop(1,'rgba(120,30,10,0)');x.save();x.globalCompositeOperation='lighter';x.scale(1,.3);x.fillStyle=g;x.beginPath();x.arc(0,0,A,0,7);x.fill();x.restore()},
+ dots=f=>{x.save();x.globalCompositeOperation='lighter';x.scale(1,.3);for(const p of DP){const ro=1.15+p.q*3.1,th=p.a+t/1000*3.2/ro**1.5,sn=Math.sin(th);if((sn>0)!=f)continue;const b=Math.min(1,(.95-p.q*.6)*(1+.55*Math.cos(th+.6))),d=Math.max(1.2*(1-mo),r*.05*p.s);x.fillStyle=`hsla(${22+38*(1-p.q)},100%,${62+30*(1-p.q)}%,${b})`;x.fillRect(ro*r*Math.cos(th)-d/2,ro*r*sn-d/.6,d,d/.3)}x.restore()};
+ gl();dots(false);x.shadowColor='#ffb347';x.shadowBlur=r*.7*pu;x.strokeStyle='rgba(255,225,180,.95)';x.lineWidth=Math.max(1.5*(1-mo),r*.07);x.beginPath();x.arc(0,0,r*1.12,0,7);x.stroke();x.shadowBlur=0;x.fillStyle='#000';x.beginPath();x.arc(0,0,r,0,7);x.fill();x.save();x.beginPath();x.rect(-A,0,2*A,A);x.clip();gl();dots(true);x.restore();x.restore()}
+const SPN={3:[[.1,0,.55,'rgba(70,170,90,.9)'],[-.35,2.1,.42,'rgba(70,170,90,.9)'],[.55,4.1,.35,'rgba(225,225,200,.85)']],4:[[.2,0,.5,'rgba(120,55,35,.55)']],5:[[-.32,0,.42,'rgba(200,80,50,.85)']],8:[[.1,0,.4,'rgba(30,50,150,.6)']]};
+function spin(sx,sy,r,t,i){const L=SPN[i];if(!L||r<6)return;for(const [la,lo0,sz,c] of L){const lo=t/(i==5?2600:2000)+lo0,cl=Math.cos(lo);if(cl<.05)continue;x.fillStyle=c;x.beginPath();x.ellipse(sx+r*Math.sin(lo)*Math.cos(la),sy-r*Math.sin(la),r*sz*cl*.6,r*sz*.6,0,0,7);x.fill()}}
+const VA=[[2.44e6,5],[6.371e6,9.5],[6.99e7,22],[6.957e8,38],[5.79e10,95],[1.082e11,140],[1.496e11,190],[2.28e11,240],[7.78e11,330],[1.434e12,415],[2.871e12,490],[4.495e12,560]];
+const vr=R=>{let i=1;while(i<VA.length-1&&R>VA[i][0])i++;const a=VA[i-1],b=VA[i];return a[1]*Math.exp(Math.log(R/a[0])*Math.log(b[1]/a[1])/Math.log(b[0]/a[0]))};
+let SO=false,VM=82,NB=false,RF=null,tn=0;
+const CLD='Газопылевое облако',GK=2.9591e-4,NA=[0,...VA.slice(4).map(v=>v[0]/AUm)],MR=[1,1.66e-7,2.447e-6,3.003e-6,3.227e-7,9.548e-4,2.859e-4,4.366e-5,5.151e-5];
+function cloud(sx,sy,r,t,o){const sd=o.sd||(o.sd=Math.random()*100),h=k=>{const s=Math.sin(k*127.1+sd)*43758.5;return s-Math.floor(s)};for(let k=0;k<18;k++){const a=h(k)*6.283+t/14000*(k%3-1),d=r*.6*h(k+40)**.7,pr=r*(.35+.45*h(k+80))*(1+.04*Math.sin(t/900+k)),px=sx+Math.cos(a)*d,py=sy+Math.sin(a)*d,g=x.createRadialGradient(px,py,0,px,py,pr);g.addColorStop(0,'rgba(176,190,205,.2)');g.addColorStop(.6,'rgba(150,160,190,.08)');g.addColorStop(1,'rgba(150,160,190,0)');x.fillStyle=g;x.beginPath();x.arc(px,py,pr,0,7);x.fill()}}
+const toDisp=(ax,ay)=>{const r=Math.hypot(ax,ay);if(r<1e-9)return[0,0];const m=r*AUm,R=lg(vr(m),m*UNIT/1e3),th=Math.atan2(ay,ax);return[R*Math.cos(th),-R*Math.sin(th)]};
+const fromDisp=(dx,dy)=>{const Rd=Math.hypot(dx,dy);if(Rd<1e-6)return[0,0];let lo=-8,hi=4.5;for(let k=0;k<40;k++){const mid=(lo+hi)/2,m=10**mid*AUm;lg(vr(m),m*UNIT/1e3)<Rd?lo=mid:hi=mid}const r=10**((lo+hi)/2),th=Math.atan2(-dy,dx);return[r*Math.cos(th),r*Math.sin(th)]};
+let AX=0,AY=0,HB=null,CB=null;
+const nbC=()=>P[0].dead?(RF||P[0]):P[0],nbList=()=>[...P.filter(b=>!b.dead),...OBJ.filter(b=>!b.dead)],nm=b=>b===P[0]?'Солнце':P.includes(b)?D[P.indexOf(b)][0]:b.n;
+const nbH=()=>{let h=null;for(const b of nbList())if(!h||b.m>h.m)h=b;return h||P[0]},dR=b=>P.includes(b)?D[P.indexOf(b)][2]:b.ru||0;
+// display: the heaviest body H sits at anchor A; the sun's family is drawn around the centre C (the sun, or whatever replaced or swallowed it)
+function nbDisp(){const H=HB,Cc=nbC(),s=Cc===H?[0,0]:toDisp(Cc.px-H.px,Cc.py-H.py),SX=AX+s[0],SY=AY+s[1];
+ for(const p of P){if(p.dead)continue;if(p===H){p.x=AX;p.y=AY;continue}const q=toDisp(p.px-Cc.px,p.py-Cc.py);p.x=SX+q[0];p.y=SY+q[1]}
+ if(P[0].dead){P[0].x=SX;P[0].y=SY}
+ for(const o of OBJ){if(o.dead)continue;if(o===H){o.x=AX;o.y=AY;continue}if(o===Cc){o.x=SX;o.y=SY;continue}const q=toDisp(o.px-H.px,o.py-H.py);o.x=AX+q[0];o.y=AY+q[1]}}
+function nbSwap(){const h=nbH();if(h!==HB){if(h.x!==undefined){AX=h.x;AY=h.y}HB=h}const c=nbC();if(c!==CB){CB=c;P.forEach(p=>p.tr=[])}}
+function nbInit(){tn=0;RF=null;AX=AY=0;const rp=OBJ.find(o=>o.rep),M0=rp?rp.M/MS:1;
+ P.forEach((p,i)=>{p.dead=0;p.tr=[];p.lt=-1e9;p.R=D[i][5]/2/1.496e8;p.m=MR[i];p.e=0;if(!i){p.px=p.py=p.vx=p.vy=0;p.x=p.y=0;p.dead=rp?1:0;return}const a=lon(i,days),r=NA[i],v=Math.sqrt(GK*M0/r);p.px=r*Math.cos(a);p.py=r*Math.sin(a);p.vx=-v*Math.sin(a);p.vy=v*Math.cos(a)});
+ for(const o of OBJ){o.px=undefined;o.mv=0}if(rp){rp.px=rp.py=rp.vx=rp.vy=0;rp.x=rp.y=0;rp.m=rp.M/MS;rp.R=rp.Re/AUm;rp.e=rp.k==CLD?.3*rp.Re/AUm:0;rp.dead=0;RF=rp}HB=rp||P[0];CB=nbC()}
+function nbAcc(L){for(const b of L){b.ax=0;b.ay=0}for(let i=0;i<L.length;i++)for(let j=i+1;j<L.length;j++){const a=L[i],b=L[j],dx=b.px-a.px,dy=b.py-a.py,d2=dx*dx+dy*dy+a.e*a.e+b.e*b.e+1e-14,f=GK/(d2*Math.sqrt(d2));a.ax+=dx*f*b.m;a.ay+=dy*f*b.m;b.ax-=dx*f*a.m;b.ay-=dy*f*a.m}}
+// time step shrinks during close passes, so a near miss is no longer flung out by a too-coarse step
+function nbDt(L){let h=.5;for(let i=0;i<L.length;i++)for(let j=i+1;j<L.length;j++){const a=L[i],b=L[j],dx=b.px-a.px,dy=b.py-a.py,d2=dx*dx+dy*dy+a.e*a.e+b.e*b.e+1e-14,d=Math.sqrt(d2),v=Math.hypot(b.vx-a.vx,b.vy-a.vy)+1e-12;h=Math.min(h,.025*Math.sqrt(d2*d/(GK*(a.m+b.m))),.025*d/v)}return Math.max(h,1e-7)}
+function nbMerge(a,b){const [g,s]=a.m>=b.m?[a,b]:[b,a],T=g.m+s.m;g.vx=(g.vx*g.m+s.vx*s.m)/T;g.vy=(g.vy*g.m+s.vy*s.m)/T;g.m=T;s.dead=1;if(s===RF||s===P[0])RF=g;snack('💥 Столкновение: '+nm(s)+' → '+nm(g),3800)}
+function nbStep(h){const L=nbList();nbAcc(L);for(const b of L){b.vx+=b.ax*h/2;b.vy+=b.ay*h/2;b.px+=b.vx*h;b.py+=b.vy*h}nbAcc(L);for(const b of L){b.vx+=b.ax*h/2;b.vy+=b.ay*h/2}
+ nbDisp();let hit=0;
+ for(let i=0;i<L.length;i++)for(let j=i+1;j<L.length;j++){const a=L[i],b=L[j];if(a.dead||b.dead||a.k==CLD||b.k==CLD)continue;
+  // collide when they really touch, or when they touch on screen (planets are drawn much bigger than they are)
+  if(Math.hypot(a.px-b.px,a.py-b.py)<a.R+b.R||Math.hypot(a.x-b.x,a.y-b.y)<.9*(dR(a)+dR(b))){nbMerge(a,b);hit=1}}
+ if(hit){nbSwap();nbDisp()}
+ tn+=h;const r0=nbC();for(let i=1;i<9;i++){const p=P[i];if(!p.dead&&tn-p.lt>=PS[i]/160){p.lt=tn;p.tr.push([p.px-r0.px,p.py-r0.py]);if(p.tr.length>45)p.tr.shift()}}}
+function nbUpdate(dd){if(RF&&!RF.dead&&!OBJ.includes(RF)&&!P.includes(RF)){RF=null;P[0].dead=0}
+ for(const p of P){p.lx=p.x;p.ly=p.y}
+ if(!HB||HB.dead||!(P.includes(HB)||OBJ.includes(HB))){HB=nbH();if(HB.x!==undefined){AX=HB.x;AY=HB.y}}const H0=HB;
+ for(const o of OBJ){o.m=o.M/MS;o.R=o.Re/AUm;o.e=o.k==CLD?.3*o.Re/AUm:0;
+  if(o.mv&&o===H0&&o.px!==undefined){const q=fromDisp(o.x-AX,o.y-AY);o.px+=q[0];o.py+=q[1];AX=o.x;AY=o.y}
+  else if(o.px===undefined||o.mv){const q=fromDisp(o.x-AX,o.y-AY);o.px=H0.px+q[0];o.py=H0.py+q[1];o.vx=H0.vx;o.vy=H0.vy;o.dead=0}o.mv=0}
+ nbSwap();
+ if(dd>0){let left=dd,it=0;while(left>1e-9&&it<2500){const L=nbList(),h=Math.min(left,nbDt(L));nbStep(h);left-=h;it++}}
+ nbDisp();
+ if(OBJ.some(o=>o.dead)){for(let k=OBJ.length-1;k>=0;k--)if(OBJ[k].dead)OBJ.splice(k,1);if(ed>=0)closeO()}}
+$('#tNB').onclick=e=>{NB=!NB;e.currentTarget.classList.toggle('on',NB);if(NB)nbInit();else{P.forEach(p=>{p.dead=0;p.tr=[]});RF=null;P[0].x=P[0].y=0}snack(NB?'Физика орбит включена: планеты летят по законам гравитации. Поставь рядом звезду или чёрную дыру и посмотри, что будет':'Планеты снова едут по орбитам-рельсам',5200)};
+let rsT=0;$('#score').style.cursor='pointer';$('#score').onclick=()=>{if(Date.now()-rsT<3500){won.clear();score();rsT=0;snack('Звёзды сброшены')}else{rsT=Date.now();snack('Нажми на ★ ещё раз, чтобы сбросить звёзды',3200)}};
+const vs=$('#vs'),vt=$('#vt'),vsr=()=>{VM=10**vs.value;vt.textContent='до '+fmt(Math.round(VM))+' км/с'+(VM>2999?' · '+(VM/2997.92).toFixed(1).replace('.',',')+' % c':'')};vs.oninput=vsr;vs.value=1.914;vsr();
+const odlg=$('#odlg'),sM=$('#sm'),sR=$('#sr'),nM=$('#nm'),nR=$('#nr'),uM=$('#um'),uR=$('#ur');
+const UMs=[['M☉',MS],['M⊕',ME],['M♃',MJ],['кг',1]],URs=[['R☉',RSUN],['R⊕',6.371e6],['R♃',6.9911e7],['км',1e3],['а.е.',AUm],['м',1]];
+uM.innerHTML=UMs.map((u,i)=>`<option value="${i}">${u[0]}</option>`).join('');uR.innerHTML=URs.map((u,i)=>`<option value="${i}">${u[0]}</option>`).join('');
+const PO=[['Стрелец A*','Стрелец A*',4.3e6*MS,0],['TON 618','TON 618',6.6e10*MS,0],['M87*','M87*',6.5e9*MS,0],['Лебедь X-1','Лебедь X-1',21*MS,0],['Земля → ЧД','Земля-дыра',ME,0],['Солнце → ЧД','Солнце-дыра',MS,0],['Нейтронная звезда','Нейтронная звезда',1.4*MS,12e3],['Бетельгейзе','Бетельгейзе',18*MS,764*RSUN]];
+$('#opre').innerHTML=PO.map((p,i)=>`<button class="chip rp" data-i="${i}" style="--c:#b39dff">${p[0]}</button>`).join('');
+const autoU=()=>{uM.value=st.M>=2e29?0:st.M>=6e22?1:3;uR.value=st.R>=1.5e10?4:st.R>=3e8?0:st.R>=3e6?1:st.R>=1e3?3:5};
+function updO(src){const {M,R}=st,r=cls(M,R);
+ if(src!='n'){nM.value=+(M/UMs[uM.value][1]).toPrecision(4);nR.value=+(R/URs[uR.value][1]).toPrecision(4)}
+ sM.value=Math.log10(M);sR.value=Math.log10(R);
+ const o=$('#ores');o.style.setProperty('--oc',r.c);o.innerHTML=`<h4>${r.n}</h4><div class="gg"><span>Масса<b>${sci(M/MS)} M☉ · ${sci(M/ME)} M⊕</b></span><span>Радиус<b>${sci(R/RSUN)} R☉ · ${sci(R/6.371e6)} R⊕</b></span><span>Радиус Шварцшильда<b>${fR(r.rs)}</b></span><span>R / rs<b>${sci(R/r.rs)}</b></span><span>Плотность<b>${sci(r.rho)} кг/м³</b></span><span>2-я космическая<b>${r.ve>=CL?'больше c':fmt(Math.round(r.ve/1e3))+' км/с'}</b></span></div><p>${r.t}</p>`;
+ if(ed>=0&&OBJ[ed])Object.assign(OBJ[ed],{M,R,n:st.n||r.n,c:r.c,bh:!!r.bh,k:r.n,Re:r.bh?r.rs:R})}
+const syncB=()=>{$('#oSun').textContent=OBJ[ed].rep?'☀ Вернуть Солнце':'☀ На место Солнца'};
+function openO(k){if(k<0){OBJ.push({x:cam.x+180/cam.z,y:cam.y,M:MS,R:RSUN,Re:RSUN,ru:1});k=OBJ.length-1;snack('Меняй массу и радиус: объект перестраивается на карте сразу',4200)}ed=k;const o=OBJ[k];st={M:o.M,R:o.R,n:o.n};autoU();updO();syncB();odlg.classList.add('on')}
+const num=(f,u)=>()=>{const v=parseFloat(f.value);if(v>0){st[f==nM?'M':'R']=v*u()[f==nM?uM.value:uR.value][1];st.n=null;updO('n')}};
+nM.oninput=num(nM,()=>UMs);nR.oninput=num(nR,()=>URs);uM.onchange=()=>updO();uR.onchange=()=>updO();
+sM.oninput=()=>{st.M=10**sM.value;st.n=null;updO()};sR.oninput=()=>{st.R=10**sR.value;st.n=null;updO()};
+$('#opre').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;const p=PO[+b.dataset.i];st={M:p[2],R:p[3]||2*G*p[2]/CL**2*.999,n:p[1]};autoU();updO()};
+const closeO=()=>{odlg.classList.remove('on');ed=-1};
+$('#oMove').onclick=()=>{place={k:ed};launch=false;$('#tCom').classList.remove('on');C.style.cursor='crosshair';snack('Нажми на карту, куда переместить объект',3200)};
+$('#oSun').onclick=()=>{const o=OBJ[ed];if(o.rep){o.rep=0;o.x+=200/cam.z}else{OBJ.forEach(q=>q.rep=0);o.rep=1;o.x=0;o.y=0;cam.x=cam.y=0;follow=null;cam.zt=clamp(Math.min(cam.zt,.3*Math.min(W,H)/Math.max(o.ru,1)));snack('Солнце заменено: «'+o.n+'». Планеты внутри объекта поглощены',4600)}if(NB)nbInit();syncB()};
+$('#oDel').onclick=()=>{OBJ.splice(ed,1);closeO()};$('#oOk').onclick=closeO;$('#tObj').onclick=()=>openO(-1);
+addEventListener('keydown',e=>{if(e.key=='Escape'){closeO();place=null;C.style.cursor=''}});
+// gallery
+const cf=(f,w)=>'https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(f.replace(/ /g,'_'))+'?width='+w,cpg=f=>'https://commons.wikimedia.org/wiki/File:'+encodeURIComponent(f.replace(/ /g,'_'));
+let gB=0,gI=0,gx0=null;const gal=$('#gal'),gim=$('#gim');
+function openG(b){gB=b;$('#gtt').textContent='Галерея · '+D[b][0];$('#gno').textContent=GNOTE[b];$('#gno').hidden=!GNOTE[b];
+ $('#gth').innerHTML=GAL[b].map((g,k)=>`<button class="rp" data-k="${k}" aria-label="${g[1]}"><img loading="lazy" src="${cf(g[0],330)}" alt="" onerror="this.style.visibility='hidden'"></button>`).join('');
+ gal.classList.add('on');gShow(0)}
+function gShow(k){const L=GAL[gB];gI=(k+L.length)%L.length;const g=L[gI];
+ $('#gn').textContent=(gI+1)+' / '+L.length;gim.classList.remove('ok');$('#ger').hidden=true;$('#gld').hidden=false;gim.alt=g[1];gim.src=cf(g[0],1280);
+ $('#gcp').innerHTML=`<b>${g[1]}</b>${g[2]} · <a href="${cpg(g[0])}" target="_blank" rel="noopener">источник ↗</a>`;
+ [...$('#gth').children].forEach((b,i)=>b.classList.toggle('on',i==gI));const tb=$('#gth').children[gI];$('#gth').scrollTo({left:tb.offsetLeft-$('#gth').clientWidth/2+tb.clientWidth/2,behavior:'smooth'});
+ new Image().src=cf(L[(gI+1)%L.length][0],1280)}
+gim.onload=()=>{gim.classList.add('ok');$('#gld').hidden=true};gim.onerror=()=>{$('#gld').hidden=true;$('#ger').hidden=false};
+const closeG=()=>gal.classList.remove('on');
+$('#gx').onclick=closeG;gal.onclick=e=>{if(e.target==gal)closeG()};$('#gp').onclick=()=>gShow(gI-1);$('#gnx').onclick=()=>gShow(gI+1);
+$('#gth').onclick=e=>{const b=e.target.closest('button');if(b)gShow(+b.dataset.k)};
+$('#gv').onpointerdown=e=>{if(!e.target.closest('.ga'))gx0=e.clientX};$('#gv').onpointerup=e=>{if(gx0==null)return;const d=e.clientX-gx0;gx0=null;if(Math.abs(d)>45)gShow(gI+(d<0?1:-1))};
+addEventListener('keydown',e=>{if(!gal.classList.contains('on'))return;if(e.key=='Escape')closeG();else if(e.key=='ArrowLeft')gShow(gI-1);else if(e.key=='ArrowRight')gShow(gI+1);else if(e.code!='Space')return;e.preventDefault();e.stopImmediatePropagation()},true);
+score();requestAnimationFrame(frame);
+setTimeout(()=>snack('Нажми на планету, чтобы узнать о ней больше',3600),800);
+</script>
+</body>
+</html>

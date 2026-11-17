@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Оптическая лаборатория — физика света</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#0b0912;--s1:#1d1a24;--s2:#272330;--s3:#322d3d;--on:#e8e0ee;--on2:#cbc3d4;--ol:#4b4556;--pr:#d0bcff;--onpr:#381e72;--acc:#d0bcff;--ok:#9be3a8;--er:#ffb4ab;box-sizing:border-box}
+*{box-sizing:border-box;margin:0}html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--on);font:400 14px/1.45 "Roboto Flex",Roboto,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:block}button,input,select{font:inherit;color:inherit}button{border:0;background:none;cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--pr);outline-offset:2px}
+.glass{background:rgba(29,26,36,.94);border:1px solid rgba(255,255,255,.09);box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#top{position:fixed;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:10px;padding:9px 12px 9px 18px;border-radius:28px;z-index:5}
+#top h1{font:900 19px/1 "Roboto Flex";letter-spacing:-.4px;flex:1;white-space:nowrap;background:linear-gradient(90deg,#ffe29a,#ffb0c8,var(--pr));-webkit-background-clip:text;background-clip:text;color:transparent}
+.pill{padding:8px 13px;border-radius:16px;background:var(--s2);font-weight:500;white-space:nowrap}.pill small{color:var(--on2);font-weight:400}
+#nav{position:fixed;left:12px;right:12px;top:70px;display:flex;gap:8px;overflow-x:auto;padding:2px;z-index:4;scrollbar-width:none}#nav::-webkit-scrollbar{display:none}
+.chip{display:flex;align-items:center;gap:8px;height:34px;padding:0 14px 0 10px;border-radius:10px;border:1px solid var(--ol);background:rgba(29,26,36,.7);white-space:nowrap;font-weight:500}.chip i{width:14px;height:14px;border-radius:50%;box-shadow:0 0 8px currentColor}.chip.on{background:var(--acc);color:#14101c;border-color:transparent}
+#dock{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:30px;z-index:5;max-width:calc(100% - 16px);flex-wrap:wrap;justify-content:center}
+.tg{height:40px;padding:0 13px;border-radius:12px;border:1px solid var(--ol);font-weight:500}.tg.on{background:#4a4458;color:#eaddff;border-color:transparent}.tg.primary{background:var(--pr);color:#27154d;border-color:transparent;font-weight:700}
+#panel{position:fixed;z-index:6;background:var(--s1);border-radius:28px;overflow:auto;right:12px;top:116px;bottom:12px;width:360px;transform:translateX(120%);padding:20px;transition:transform .45s cubic-bezier(.2,0,0,1);box-shadow:0 20px 60px #000a}
+body.panel-open #panel{transform:none}#panel:before{content:"";position:absolute;inset:0 0 auto;height:180px;background:radial-gradient(circle at 20% 0,var(--acc),transparent 70%);opacity:.2;pointer-events:none}
+.x{position:absolute;right:12px;top:12px;width:38px;height:38px;border-radius:50%;background:var(--s2);z-index:2}
+.hero{display:flex;gap:14px;align-items:center;position:relative;padding-right:35px}.orb{width:66px;height:66px;flex:none;border-radius:50%;box-shadow:0 0 34px var(--acc),inset -14px -10px 22px #000a;background:radial-gradient(circle at 32% 30%,#fff9,var(--acc) 38%,#000 130%)}
+.kind{color:var(--acc);font-weight:700}h2{font:900 30px/1.05 "Roboto Flex";letter-spacing:-.8px}
+.fact{margin:17px 0;padding:13px 15px;border-radius:20px 20px 20px 6px;background:var(--s2);color:var(--on2)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.tile{padding:11px 13px;border-radius:15px;background:var(--s2)}.tile small{display:block;color:var(--on2);font-size:12px}.tile b{font-weight:500;font-size:14px}
+.section{margin-top:18px;position:relative}.section h3{font-size:15px;margin-bottom:9px}.field{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:11px 0;color:var(--on2)}.field b{color:var(--on);font-weight:500}.field input[type=range]{width:52%;accent-color:var(--pr)}.rangebox{margin:12px 0}.rangebox .field{margin:0 0 6px}.numeric{width:88px;min-width:72px;padding:6px 8px;border-radius:9px;border:1px solid var(--ol);background:var(--s2);text-align:right}.rangebox>input[type=range]{width:100%}.field select{background:var(--s2);border:1px solid var(--ol);padding:8px 10px;border-radius:10px;max-width:58%}
+.btn{width:100%;height:46px;border-radius:24px;background:var(--acc);color:#171020;font-weight:700;margin-top:10px}.btn.secondary{background:var(--s3);color:var(--on)}
+.note{font-size:12px;color:var(--on2);line-height:1.55}
+#hint{position:fixed;left:14px;top:116px;z-index:3;padding:12px 15px;border-radius:18px;max-width:280px;color:var(--on2);font-size:12px;pointer-events:none}#hint b{display:block;color:var(--on);font-size:14px;margin-bottom:4px}
+#status{position:fixed;left:14px;bottom:calc(var(--dockH,64px) + 22px + env(safe-area-inset-bottom,0px));z-index:3;padding:10px 14px;border-radius:14px;color:var(--on2);font-size:12px;max-width:min(380px,calc(100% - 28px));pointer-events:none}
+
+/* Левая колонка: инструкция сверху, миниатюры экранов строго под ней */
+#hud-container{position:fixed;z-index:4;left:12px;top:112px;bottom:calc(var(--dockH,64px) + 88px + env(safe-area-inset-bottom,0px));width:280px;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;align-items:stretch;gap:10px;padding:2px 5px 10px 2px;scrollbar-width:thin;scrollbar-color:var(--ol) transparent;pointer-events:auto}
+.hint-panel{position:relative;left:auto;top:auto;z-index:auto;width:100%;max-width:none;flex:0 0 auto;padding:12px 15px;border-radius:18px;color:var(--on2);font-size:12px;pointer-events:none}
+.hint-panel b{display:block;color:var(--on);font-size:14px;margin-bottom:4px}
+.screen-hud{position:relative;inset:auto;display:flex;flex-direction:column;width:100%;max-width:100%;min-width:0;flex:0 0 auto;padding:10px 12px;border-radius:16px;user-select:none;touch-action:auto}
+.hud-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,.08);font-size:12px;color:var(--on);font-weight:500}
+.hud-close{position:relative;z-index:2;display:inline-flex;align-items:center;justify-content:center;min-width:30px;min-height:30px;background:rgba(255,255,255,.06);border:0;color:var(--on2);cursor:pointer;font-size:16px;padding:0 7px;border-radius:8px;pointer-events:auto;touch-action:manipulation}
+.hud-close:hover{color:#ffb4ab;background:rgba(255,255,255,.06)}
+/* ВАЖНО: глобальное правило canvas задаёт position:fixed для главной сцены.
+   Миниатюры должны явно отменять его, иначе каждый мини-canvas становится
+   полноэкранным фиксированным слоем и визуально перекрывает соседние карточки. */
+#hud-container canvas{
+  position:relative !important;
+  inset:auto !important;
+  display:block;
+  width:100% !important;
+  max-width:100%;
+  height:auto !important;
+  aspect-ratio:93 / 55;
+  flex:none;
+  touch-action:auto;
+}
+@media(max-width:600px){#hud-container{width:min(250px,calc(100vw - 12px));left:6px;top:108px;bottom:calc(var(--dockH,64px) + 88px + env(safe-area-inset-bottom,0px))}.screen-hud{padding:8px}.hint-panel{padding:10px 12px}}
+
+/* Каталог добавления: поиск + тематические категории */
+.element-menu{position:fixed;z-index:12;left:50%;bottom:86px;transform:translateX(-50%);width:min(640px,calc(100vw - 24px));max-height:min(68vh,620px);overflow:auto;padding:16px;border-radius:22px}
+.element-menu-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;font-weight:700;font-size:15px}
+.element-menu-search{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--ol);background:var(--s2);margin-bottom:10px;outline:none}
+.element-menu-cats{display:flex;gap:6px;overflow-x:auto;padding:1px 1px 9px;scrollbar-width:thin}
+.element-menu-cats .tg{height:32px;padding:0 10px;white-space:nowrap;font-size:12px}
+.element-menu-cats .tg.active{background:var(--pr);color:#27154d;border-color:transparent}
+.element-menu-items{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.element-menu-items .tg{height:auto;min-height:42px;padding:9px 10px;text-align:left;white-space:normal;line-height:1.25;background:rgba(255,255,255,.035)}
+.element-menu-items .tg:hover{background:var(--s3)}
+.element-menu-empty{grid-column:1/-1;color:var(--on2);padding:14px 4px;font-size:12px}
+@media(max-width:640px){.element-menu-items{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:840px){.element-menu{bottom:76px;max-height:60vh;width:min(620px,calc(100vw - 16px))}}
+
+#toast{position:fixed;left:50%;bottom:105px;transform:translate(-50%,35px);opacity:0;background:#e8e0ee;color:#322f35;padding:12px 18px;border-radius:14px;z-index:10;transition:.3s;pointer-events:none;text-align:center;max-width:90%;font-weight:500}#toast.on{opacity:1;transform:translate(-50%,0)}
+.analysis-card{gap:8px;border:1px solid rgba(208,188,255,.18)}
+.analysis-main{font-weight:700;font-size:13px;color:var(--on)}
+.analysis-sub{font-size:11px;color:var(--on2);line-height:1.5}
+.analysis-values{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px}
+.analysis-values span{display:block;padding:6px 8px;background:rgba(255,255,255,.045);border-radius:9px;font-size:11px;color:var(--on2)}
+.analysis-values b{display:block;color:var(--on);font-size:12px;font-variant-numeric:tabular-nums}
+@media(max-width:840px){#panel{left:8px;right:8px;width:auto;top:auto;bottom:8px;max-height:57vh;transform:translateY(120%)}body.panel-open #panel{transform:none}body.panel-open #dock{transform:translate(-50%,160%)}#top h1{font-size:16px}#hint{top:112px;max-width:220px}#dock{gap:6px;padding:8px}.tg{height:36px;padding:0 10px;font-size:12px}}
+body{background:radial-gradient(900px 620px at 12% 18%,rgba(120,70,200,.24),transparent 62%),radial-gradient(800px 600px at 92% 88%,rgba(40,150,210,.15),transparent 60%),var(--bg)}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 28%,rgba(255,90,90,.055) 38%,rgba(255,200,70,.055) 44%,rgba(90,255,150,.05) 50%,rgba(80,170,255,.055) 56%,rgba(170,100,255,.055) 62%,transparent 72%)}
+.grow{display:flex;align-items:center;gap:8px;font-size:12px;margin:6px 0;color:var(--on2)}.gl{width:74px;flex:none}.sw{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}.bar2{flex:1;height:7px;border-radius:4px;background:var(--s3);overflow:hidden}.bar2 i{display:block;height:100%;background:var(--acc)}.grow b{width:42px;text-align:right;color:var(--on);font-weight:500}
+.verdict{padding:10px 12px;border-radius:14px;font-size:12px;line-height:1.5;background:var(--s2)}.verdict.ok{background:#1f4d2c;color:#d8ffe0}.verdict.warn{background:#5a4a1a;color:#ffefc2}.verdict.no{background:#5a1f1a;color:#ffd9d4}
+</style></head>
+<body>
+<canvas id="scene" aria-label="Интерактивная оптическая скамья"></canvas>
+<header id="top" class="glass"><h1>Оптическая лаборатория</h1><span class="pill">⚛ <span class="lb">Физика света</span></span><span class="pill" id="readout">λ 650 нм</span></header>
+<nav id="nav"></nav>
+<div id="status" class="glass">Геометрическая оптика · координаты и расстояния в условных мм модели</div>
+<div id="hud-container"></div>
+<aside id="panel"></aside>
+<div id="dock" class="glass"><button class="tg on" id="rays">Лучи: вкл.</button><button class="tg on" id="labels">Подписи</button><button class="tg" id="grid">Сетка</button><button class="tg on" id="extensions">Продолжения</button><button class="tg" id="level">Режим: кратко</button><button class="tg primary" id="add">＋ Добавить элемент</button><button class="tg" id="reset">↺ Сброс</button></div>
+<div id="toast"></div>
+<script>
+(()=>{
+const $=s=>document.querySelector(s),canvas=$('#scene'),ctx=canvas.getContext('2d');
+let W,H,DPR,showRays=true,showLabels=true,showGrid=false,showExtensions=true,educationLevel=7,selected=null,drag=null,scale=1,offset={x:0,y:0};
+
+const WAVE = [650, 610, 580, 550, 510, 470, 430, 400];
+const modeName=()=>educationLevel===7?'кратко':'подробно';
+
+const LENS_TYPES={
+  lens:{name:'Двояковыпуклая',converging:true,shape:'double-convex'},
+  divLens:{name:'Двояковогнутая',converging:false,shape:'double-concave'},
+  planoConvex:{name:'Плосковыпуклая',converging:true,shape:'plano-convex'},
+  meniscusConvex:{name:'Вогнуто-выпуклая',converging:true,shape:'positive-meniscus'},
+  planoConcave:{name:'Плосковогнутая',converging:false,shape:'plano-concave'},
+  meniscusConcave:{name:'Выпукло-вогнутая',converging:false,shape:'negative-meniscus'}
+};
+const isLensType=t=>!!LENS_TYPES[t];
+const lensConverging=o=>LENS_TYPES[o.type]?.converging??o.type==='lens';
+const defaults=()=>[
+{id:1,type:'laser',x:115,y:310,angle:0,color:'#ff525e',wave:650,beams:5,spacing:8,power:1},
+{id:2,type:'lens',x:420,y:310,f:150,diam:150,material:'glass'},
+{id:3,type:'screen',x:700,y:310,w:8,h:230,angle:0,showHud:true,hudX:24,hudY:140}
+];
+let objects=defaults(),nextId=4;
+
+const defs={
+laser:{name:'Лазер',kind:'Источник света',color:'#ff626d',desc:'Монохроматический источник: фотоны имеют одну длину волны и идут в узком пучке.',fact:'Лазер излучает когерентный пучок одной длины волны.'},
+bulb:{name:'Лампочка',kind:'Источник света',color:'#ffd27a',desc:'Тепловой источник излучает белый свет, содержащий весь спектр частот.',fact:'Белый свет распадается в призме благодаря дисперсии: показатель преломления n зависит от длины волны.'},
+lens:{name:'Собирающая линза',kind:'Оптический элемент',color:'#8edcff',desc:'Выпуклая линза собирает параллельные лучи в фокусе.',fact:'Тонкая линза преломляет лучи пропорционально их удалению от оптической оси.'},
+divLens:{name:'Рассеивающая линза',kind:'Оптический элемент',color:'#a6b5ff',desc:'Вогнутая линза делает параллельный пучок расходящимся.',fact:'Фокусное расстояние рассеивающей линзы отрицательно (f < 0).'},
+prism:{name:'Призма',kind:'Преломляющая среда',color:'#d6b6ff',desc:'Стеклянная призма преломляет свет и разделяет белый свет на 7-8 цветов радуги.',fact:'Используется закон Снеллиуса и формула Коши для оптического стекла BK7.'},
+mirror:{name:'Плоское зеркало',kind:'Отражатель',color:'#d5d9e8',desc:'Зеркало отражает луч: угол отражения равен углу падения.',fact:'Угол падения равен углу отражения относительно нормали.'},
+screen:{name:'Экран',kind:'Детектор',color:'#9be3a8',desc:'Регистрирует точки пересечения лучей. Можно включить миниатюру и повернуть экран.',fact:'Реальное изображение можно получить на экране, если экран стоит в плоскости изображения.'},
+object:{name:'Предмет AB',kind:'Объект наблюдения',color:'#ffd27a',desc:'Стрелка изображает предмет, от каждой точки которого расходятся световые лучи. Линза или зеркало создаёт его изображение.',fact:'Высота предмета и расстояние до линзы определяют положение, размер и ориентацию изображения.'},
+ruler:{name:'Линейка',kind:'Измерительный инструмент',color:'#f4d58d',desc:'Линейка помогает измерять расстояния и положение элементов в условных миллиметрах модели.',fact:'Одна координатная единица сцены принята за 1 мм модели. Это масштаб симуляции, а не калибровка реального экрана.'},
+protractor:{name:'Транспортир',kind:'Измерительный инструмент',color:'#c8b6ff',desc:'Транспортир помогает оценивать угол падения и угол отражения относительно нормали.',fact:'Углы падения и отражения измеряются от нормали к поверхности, а не от самой поверхности.'}
+};
+defs.glass={name:'Цветное стекло',kind:'Светофильтр',color:'#9be3a8',desc:'Цветное стекло пропускает лучи одного цвета и поглощает остальные. Поэтому белый свет за зелёным стеклом становится зелёным и тусклее.',fact:'Поглощающий светофильтр: пропускание T зависит от длины волны. Поглощённая энергия превращается в тепло.'};
+Object.entries(LENS_TYPES).forEach(([type,l])=>{if(!defs[type])defs[type]={name:l.name+' линза',kind:'Оптический элемент',color:l.converging?'#8edcff':'#a6b5ff',desc:l.converging?'Собирающая линза: параллельные лучи после преломления сходятся к действительному фокусу.':'Рассеивающая линза: параллельные лучи после преломления расходятся, а их продолжения пересекаются в мнимом фокусе.',fact:'Форма линзы показана в поперечном сечении. Трассировка использует приближение тонкой линзы.'};});
+
+function resize(){DPR=devicePixelRatio||1;W=innerWidth;H=innerHeight;canvas.width=W*DPR;canvas.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);if(!offset.x)offset.x=W/2-410;if(!offset.y)offset.y=H/2-310}addEventListener('resize',resize);resize();
+const wx=x=>(x-offset.x)/scale,wy=y=>(y-offset.y)/scale;
+const byId=id=>objects.find(o=>o.id===id);
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2600)}
+
+function add(type){
+  const anchor=selected?byId(selected):null;
+  let x=anchor?anchor.x+130:330+Math.random()*150,y=anchor?anchor.y:310;
+  if(type==='object'){
+    const optics=objects.filter(q=>isLensType(q.type)||q.type==='mirror');
+    const target=anchor&&(isLensType(anchor.type)||anchor.type==='mirror')?anchor:optics[0];
+    if(target){x=target.x-180;y=target.y;}
+  }
+  const o={id:nextId++,type,x,y};
+  if(isLensType(type))Object.assign(o,{f:lensConverging(o)?150:-150,diam:150,material:'glass'});
+  if(type==='prism')Object.assign(o,{size:120,apex:0,material:'BK7'});
+  if(type==='mirror')Object.assign(o,{length:160,angle:0});
+  if(type==='screen')Object.assign(o,{w:8,h:230,angle:0,showHud:false,hudX:24,hudY:140});
+  if(type==='laser')Object.assign(o,{angle:0,color:'#ff525e',wave:650,beams:5,spacing:8});
+  if(type==='bulb')Object.assign(o,{spread:35,beams:3});
+  if(type==='object')Object.assign(o,{height:80});
+  if(type==='ruler')Object.assign(o,{length:220,angle:0});
+  if(type==='protractor')Object.assign(o,{radius:90,angle:0});
+  if(type==='glass')Object.assign(o,{wl:550,bw:80,h:200});
+  objects.push(o);select(o.id);
+}
+
+function select(id){
+  selected=id;const o=byId(id);
+  if(!o){document.body.classList.remove('panel-open');return}
+  document.documentElement.style.setProperty('--acc',o.type==='glass'?glassColor(o.wl):defs[o.type].color);
+  if(o.type==='laser')$('#readout').textContent='λ '+(o.wave||650)+' нм';
+  document.body.classList.add('panel-open');renderPanel();
+}
+
+function renderPanel(){
+  const o=byId(selected);if(!o)return;const d=defs[o.type];let controls='';
+  if(o.type==='laser')controls=`${range('Направление луча','angle',-35,35,1,'°')}${range('Длина волны','wave',400,700,5,'нм')}${range('Количество пучков','beams',1,11,1,'шт.')}${range('Расстояние между пучками','spacing',3,18,1,'мм')}`;
+  if(o.type==='bulb')controls=`${range('Количество лучей','beams',1,9,1,'шт.')}${range('Угол раскрытия','spread',10,80,1,'°')}<div class="note" style="margin-top:6px">Лампа излучает белый свет (весь спектр). Призма разлагает его в радугу.</div>`;
+  if(isLensType(o.type))controls=`<div class="note">Форма: ${LENS_TYPES[o.type].name}. ${lensConverging(o)?'Собирающая':'Рассеивающая'} линза.</div>${range('Фокусное расстояние','f',60,400,10,'мм')}${range('Диаметр линзы','diam',60,220,10,'мм')}`;
+  if(o.type==='prism')controls=`${range('Размер призмы','size',70,180,5,'мм')}${range('Поворот грани','apex',-25,25,1,'°')}<div class="note" style="margin-top:6px">Стекло BK7 · n(λ) дисперсия.</div>`;
+  if(o.type==='mirror')controls=`${range('Угол зеркала','angle',-75,75,1,'°')}${range('Длина','length',70,240,5,'мм')}`;
+  if(o.type==='screen')controls=`${range('Высота экрана','h',100,300,10,'мм')}${range('Угол экрана','angle',-90,90,1,'°')}<div style="margin:12px 0"><label style="display:flex;align-items:center;gap:10px;cursor:pointer;color:var(--on)"><input type="checkbox" id="chk-hud" ${o.showHud?'checked':''} style="accent-color:var(--pr);width:18px;height:18px"><b>Показывать миниатюру экрана</b></label></div><div class="note" style="margin-top:6px">Миниатюра находится в левой панели приборов.</div>`;
+  if(o.type==='object')controls=`${range('Высота предмета (минус — стрелка вниз)','height',-400,400,5,'мм')}<div class="note">Перемещай стрелку по сцене. Для построения изображения размести её слева от линзы или перед зеркалом.</div>`;
+  if(o.type==='glass')controls=`${range('Пропускаемая длина волны (центр)','wl',400,700,5,'нм')}${range('Ширина полосы пропускания','bw',5,300,5,'нм')}${range('Высота стекла','h',60,300,10,'мм')}`;
+  if(o.type==='ruler')controls=`${range('Длина линейки','length',80,2000,10,'мм')}${range('Поворот','angle',-180,180,1,'°')}`;
+  if(o.type==='protractor')controls=`${range('Радиус транспортира','radius',50,150,5,'мм')}${range('Поворот','angle',-180,180,1,'°')}`;
+
+  const panelTitle=isLensType(o.type)?(LENS_TYPES[o.type].name+' линза'):d.name;
+  const imageInfo=getImageAnalysis(o);
+  const analysisMarkup=o.type==='glass'?'<div class="section" id="glass-info"></div>':imageInfo?`<div class="section" id="panel-analysis">${panelAnalysisInner(imageInfo)}</div>`:'';
+  $('#panel').innerHTML=`<button class="x" id="close">✕</button><div class="hero"><div class="orb"></div><div><div class="kind">${d.kind}</div><h2>${panelTitle}</h2></div></div><p class="fact">${d.desc}</p><div class="grid"><div class="tile"><small>Координата X</small><b>${o.x.toFixed(0)} мм</b></div><div class="tile"><small>Координата Y</small><b>${o.y.toFixed(0)} мм</b></div></div><div class="section"><h3>Параметры элемента</h3>${controls}<button class="btn secondary" id="delete">Удалить элемент</button></div>${analysisMarkup}<div class="section"><h3>Физика эксперимента · ${modeName()}</h3><p class="note">${educationLevel===7?d.desc+' Наблюдай, куда направлены лучи и где появляется изображение.':d.fact+(isLensType(o.type)||o.type==='object'?' Для тонкой линзы: 1/f = 1/a + 1/b; Γ = h′/h = −b/a. Знак b показывает, действительное изображение или мнимое.':'')}</p><p class="note" style="margin-top:8px">Модель линзы использует приближение тонкой линзы и параксиальные лучи; аберрации и толщину реальной линзы она не моделирует.</p></div>`;
+  $('#close').onclick=()=>select(null);
+  {const gi=$('#glass-info');if(gi)gi.innerHTML=glassInfoHTML(o)}
+  $('#delete').onclick=()=>{objects=objects.filter(q=>q.id!==o.id);select(null);toast('Элемент удалён')};
+  
+  let chkHud=$('#chk-hud');
+  if(chkHud)chkHud.onchange=e=>{
+    o.showHud=e.target.checked;
+    if(o.showHud){
+      o.hudX = 12;
+      o.hudY = 112;
+    }
+  };
+
+  function range(label,key,min,max,step){let val=o[key]??({wave:650,beams:3,spacing:8}[key]??0);if(key==='f')val=Math.abs(val);return `<div class="rangebox"><div class="field"><span>${label}</span><input class="numeric" type="number" min="${min}" max="${max}" step="${step}" value="${val}" data-key="${key}"></div><input style="width:100%;accent-color:var(--pr)" type="range" min="${min}" max="${max}" step="${step}" value="${val}" data-key="${key}"></div>`}
+  function setParam(k,v){
+    if(!Number.isFinite(v))return;
+    let limits={angle:[-180,180],wave:[380,700],beams:[1,11],spacing:[3,18],spread:[10,80],f:[60,400],diam:[60,220],size:[70,180],apex:[-25,25],length:[70,320],h:[100,300],height:[-400,400],radius:[50,150]};
+    let active=$('#panel').querySelector(`[data-key="${k}"]`);let [mn,mx]=active?[+active.min,+active.max]:(limits[k]||[-10000,10000]);
+    v=Math.max(mn,Math.min(mx,v));
+    if(k==='f'&&!lensConverging(o))v=-Math.abs(v);else if(k==='f')v=Math.abs(v);
+    o[k]=v;if(k==='wl')document.documentElement.style.setProperty('--acc',glassColor(v));if(k==='wave')$('#readout').textContent='λ '+v+' нм';
+    $('#panel').querySelectorAll(`[data-key="${k}"]`).forEach(el=>{if(document.activeElement!==el)el.value=k==='f'?Math.abs(v):v});
+  }
+  $('#panel').querySelectorAll('[data-key]').forEach(inp=>{let fn=()=>setParam(inp.dataset.key,+inp.value);inp.addEventListener('input',fn);inp.addEventListener('change',fn)});
+}
+
+function refract(I,N,n1,n2){
+  let cosi=Math.max(-1,Math.min(1,I.x*N.x+I.y*N.y));let n={x:N.x,y:N.y};
+  if(cosi>0){n={x:-n.x,y:-n.y};cosi=-cosi}
+  let eta=n1/n2,k=1-eta*eta*(1-cosi*cosi);
+  if(k<0)return null;
+  let l=Math.hypot(eta*I.x-(eta*cosi+Math.sqrt(k))*n.x, eta*I.y-(eta*cosi+Math.sqrt(k))*n.y)||1;
+  return{x:(eta*I.x-(eta*cosi+Math.sqrt(k))*n.x)/l, y:(eta*I.y-(eta*cosi+Math.sqrt(k))*n.y)/l};
+}
+function norm(v){let l=Math.hypot(v.x,v.y)||1;return{x:v.x/l,y:v.y/l}}
+function raySegment(p,d,a,b){let v={x:b.x-a.x,y:b.y-a.y},den=d.x*v.y-d.y*v.x;if(Math.abs(den)<1e-8)return null;let q={x:a.x-p.x,y:a.y-p.y},t=(q.x*v.y-q.y*v.x)/den,u=(q.x*d.y-q.y*d.x)/den;return t>1e-4&&u>=0&&u<=1?{t,u,x:p.x+d.x*t,y:p.y+d.y*t}:null}
+function prismVerts(o){let s=o.size/2,ang=(o.apex||0)*Math.PI/180;let pts=[{x:-s,y:s*.72},{x:s,y:s*.72},{x:0,y:-s}];return pts.map(p=>({x:o.x+p.x*Math.cos(ang)-p.y*Math.sin(ang),y:o.y+p.x*Math.sin(ang)+p.y*Math.cos(ang)}))}
+function hitPrism(p,d,o){let v=prismVerts(o),hits=[];for(let i=0;i<3;i++){let a=v[i],b=v[(i+1)%3],h=raySegment(p,d,a,b);if(h){let edge=norm({x:b.x-a.x,y:b.y-a.y}),N={x:edge.y,y:-edge.x};hits.push({...h,N,edge,i})}}hits.sort((a,b)=>a.t-b.t);return hits[0]||null}
+
+function indexGlass(l){let um=l/1000;return 1.5046+0.00420/(um*um)}
+
+function wavelengthColor(w){
+  let r=0,g=0,b=0;
+  if(w>=380&&w<440){r=-(w-440)/60;b=1}
+  else if(w<490){g=(w-440)/50;b=1}
+  else if(w<510){g=1;b=-(w-510)/20}
+  else if(w<580){r=(w-510)/70;g=1}
+  else if(w<645){r=1;g=-(w-645)/65}
+  else if(w<=700){r=1}
+  let f=w<420?.3+.7*(w-380)/40:w>645?.3+.7*(700-w)/55:1;
+  return `rgb(${Math.round(255*r*f)},${Math.round(255*g*f)},${Math.round(255*b*f)})`;
+}
+
+function fmt(v){return Number.isFinite(v)?(Math.abs(v)>=100? v.toFixed(0):v.toFixed(1)).replace('.',','):'∞'}
+function opticalElementFor(obj){
+  if(!obj)return null;
+  return objects.filter(q=>(isLensType(q.type)||q.type==='mirror') && Math.abs(q.x-obj.x)>1e-4)
+    .sort((a,b)=>Math.abs(a.x-obj.x)-Math.abs(b.x-obj.x))[0]||null;
+}
+function objectFor(element){
+  if(!element)return null;
+  return objects.filter(q=>q.type==='object' && Math.abs(q.x-element.x)>1e-4)
+    .sort((a,b)=>Math.abs(element.x-a.x)-Math.abs(element.x-b.x))[0]||null;
+}
+function reflectPointAcrossLine(p,o){
+  const a=o.angle*Math.PI/180, tangent={x:-Math.sin(a),y:Math.cos(a)};
+  const v={x:p.x-o.x,y:p.y-o.y},proj=v.x*tangent.x+v.y*tangent.y;
+  const foot={x:o.x+proj*tangent.x,y:o.y+proj*tangent.y};
+  return{x:2*foot.x-p.x,y:2*foot.y-p.y};
+}
+// Цветное стекло = поглощающий светофильтр. T(λ)=T0·exp[−(λ−λ0)²/(2σ²)], σ=Δλ/2,355 (Δλ — ширина полосы на полувысоте)
+const GLASS_T0=.92; // ~4% отражается от каждой из двух поверхностей
+const glassT=(o,l)=>GLASS_T0*Math.exp(-Math.pow(l-o.wl,2)/(2*Math.pow((o.bw||80)/2.355,2)));
+const glassColor=w=>wavelengthColor(Math.max(420,Math.min(650,w)));
+const glassName=w=>w<455?'фиолетовое':w<495?'синее':w<570?'зелёное':w<590?'жёлтое':w<620?'оранжевое':'красное';
+function glassExist(o){const b=o.bw;
+  if(b>=300)return{c:'warn',t:'⚠ Почти нейтральное стекло: пропускает почти весь видимый свет и цвета практически не даёт.'};
+  if(b>=40)return{c:'ok',t:'✔ Такое стекло может существовать: обычное цветное стекло (с красителем или оксидами металлов) имеет полосу пропускания 40–150 нм.'};
+  if(b>=10)return{c:'warn',t:'⚠ Цветным стеклом так узко не получится. Такая полоса бывает у интерференционных светофильтров (тонкие слои покрытия).'};
+  return{c:'no',t:'✕ Для стекла нереально: полоса уже 10 нм — это лазер или специальный интерференционный фильтр.'};}
+function glassInfoHTML(o){
+  const lasers=objects.filter(q=>q.type==='laser'),useW=objects.some(q=>q.type==='bulb')||!lasers.length;
+  const ls=[...new Set([...lasers.map(q=>q.wave||650),...(useW?WAVE:[])])].sort((a,b)=>b-a),ex=glassExist(o);
+  const rows=ls.map(l=>{const T=glassT(o,l);return `<div class="grow"><span class="gl"><i class="sw" style="background:${wavelengthColor(l)}"></i>${l} нм</span><span class="bar2"><i style="width:${(T*100).toFixed(1)}%"></i></span><b>${fmt(T*100)}%</b></div>`}).join('');
+  const sl=lasers.length?(lasers[0].wave||650):650,sg=(o.bw||80)/2.355,dd=sl-o.wl,Ts=glassT(o,sl);
+  const txt=educationLevel===7
+    ?`Стекло красителем поглощает лучи «чужих» цветов и пропускает близкие к своему (${glassName(o.wl)}, около ${o.wl} нм). Поглощённая энергия нагревает стекло — поэтому за ним свет тусклее. Лазер другого цвета стекло почти не пропустит.`
+    :`T(λ) = 0,92·exp[−(λ−λ₀)² / (2σ²)], σ = Δλ/2,355 = ${fmt(sg)} нм. Например, λ = ${sl} нм: λ−λ₀ = ${dd} нм, T = 0,92·exp(−${(dd*dd/(2*sg*sg)).toFixed(2)}) = ${fmt(Ts*100)}%. Яркость за стеклом I = T·I₀; доля 1−T = ${fmt((1-Ts)*100)}% поглощается и переходит в тепло. 0,92 — потери на отражение (≈4% на каждой поверхности). Несколько стёкол подряд: T перемножаются.`;
+  return `<h3>Что пропускает стекло</h3><div class="verdict ${ex.c}">${ex.t}</div><div style="margin:10px 0">${rows}</div><p class="note">${txt}</p>`;
+}
+function panelAnalysisInner(i){return `<h3>Изображение предмета</h3><p class="note"><b>${i.headline}</b><br>${i.explanation}</p><div class="analysis-values"><span>a · расстояние до предмета<b>${fmt(i.do)} мм</b></span><span>b · расстояние до изображения<b>${fmt(i.di)} мм</b></span><span>f · фокус<b>${i.f===null?'—':fmt(i.f)+' мм'}</b></span><span>Γ · увеличение<b>${i.m===null?'—':fmt(i.m)}</b></span><span>h · высота предмета<b>${fmt(i.h0)} мм</b></span><span>h′ · высота изображения<b>${i.h1==null?'—':fmt(i.h1)+' мм'}</b></span><span>B над осью<b>${fmt(i.y0)} мм</b></span><span>B′ над осью<b>${i.y1==null?'—':fmt(i.y1)+' мм'}</b></span></div>`}
+// Система тонких линз: изображение предыдущей линзы — предмет для следующей (1/f = 1/a + 1/b, Γ = Γ1·Γ2·…)
+function getImageAnalysis(subject){
+  const r=getImageAnalysisCore(subject);if(!r)return r;
+  const f0=r.first||r.element;r.first=f0;r.h0=r.obj.height??80;r.y0=f0.y-r.obj.y;
+  if(r.imageBaseY!=null&&r.imageTipY!=null&&Number.isFinite(r.imageTipY)){r.h1=r.imageBaseY-r.imageTipY;r.y1=(r.kind==='mirror'?r.first.y:r.element.y)-r.imageBaseY}else{r.h1=null;r.y1=null}
+  return r;
+}
+function getImageAnalysisCore(subject){
+  const isObject=subject?.type==='object';
+  const isOptical=!!subject&&(isLensType(subject.type)||subject.type==='mirror');
+  if(!isObject&&!isOptical)return null;
+  const obj=isObject?subject:objectFor(subject);
+  const first=obj?opticalElementFor(obj):null;
+  if(!obj||!first)return null;
+  if(first.type==='mirror'){
+    const element=first,tip={x:obj.x,y:obj.y-(obj.height??80)},base={x:obj.x,y:obj.y};
+    const it=reflectPointAcrossLine(tip,element),ib=reflectPointAcrossLine(base,element);
+    const dist=Math.hypot(it.x-tip.x,it.y-tip.y)/2;
+    return{obj,element,kind:'mirror',headline:'Мнимое · прямое · одинакового размера',explanation:'Плоское зеркало создаёт изображение за зеркалом. Оно не получается на экране; расстояние от изображения до зеркала равно расстоянию от предмета до зеркала.',do:dist,di:-dist,f:null,m:1,imageX:it.x,imageTipY:it.y,imageBaseX:ib.x,imageBaseY:ib.y,virtual:true,real:false};
+  }
+  const s=Math.sign(first.x-obj.x)||1,chain=[];
+  for(const el of objects.filter(q=>(isLensType(q.type)||q.type==='mirror')&&s*(q.x-obj.x)>1e-4).sort((p,q)=>s*(p.x-q.x))){if(el.type==='mirror')break;chain.push(el)}
+  let X=obj.x,tipY=obj.y-(obj.height??80),baseY=obj.y,m=1,inf=false;const stages=[];
+  for(const L of chain){
+    const a=s*(L.x-X),f=lensConverging(L)?Math.abs(L.f||150):-Math.abs(L.f||150);
+    const denom=Math.abs(a)<1e-6?NaN:1/f-1/a;
+    if(Math.abs(denom)<1e-5){inf=true;stages.push({element:L,a,b:Infinity,f,m:null});break}
+    const b=Number.isNaN(denom)?0:1/denom,mk=Number.isNaN(denom)?1:-b/a,ax=L.y;
+    tipY=ax+mk*(tipY-ax);baseY=ax+mk*(baseY-ax);X=L.x+s*b;m*=mk;
+    stages.push({element:L,a,b,f,m:mk,x:X,tipY,baseY});
+  }
+  const last=stages[stages.length-1],element=last.element,multi=stages.length>1;
+  if(inf)return{obj,element,first,stages,kind:'lens',headline:'Изображение на бесконечности',explanation:`Предмет для ${multi?'линзы '+stages.length:'линзы'} находится в фокальной плоскости. После неё лучи идут параллельно, поэтому конечного изображения на экране нет.`,do:stages[0].a,di:Infinity,f:multi?null:last.f,m:null,imageX:null,imageTipY:null,imageBaseY:null,virtual:false,real:false};
+  const di=last.b,imageX=X,imageTipY=tipY,imageBaseY=baseY,real=di>0,virtual=di<0;
+  const orientation=m<0?'перевёрнутое':'прямое';
+  const size=Math.abs(m)>1.02?'увеличенное':Math.abs(m)<.98?'уменьшенное':'одинакового размера';
+  const kind=real?'Действительное':'Мнимое';
+  const onScreen=screen=>{
+    const a=(screen.angle||0)*Math.PI/180,points=[{x:imageX,y:imageBaseY},{x:imageX,y:imageTipY}];
+    return points.every(p=>{const dx=p.x-screen.x,dy=p.y-screen.y,lx=dx*Math.cos(a)+dy*Math.sin(a),ly=-dx*Math.sin(a)+dy*Math.cos(a);return Math.abs(lx)<=Math.max((screen.w||8)/2+4,6)&&Math.abs(ly)<=screen.h/2});
+  };
+  const matchedScreen=real?objects.find(q=>q.type==='screen'&&onScreen(q))||null:null;
+  const screenNote=real?(matchedScreen?'Изображение попадает на экран.':`Чтобы получить изображение на экране, поставь его после ${multi?'последней линзы ':'линзы '}около x = ${fmt(imageX)} мм.`):'Мнимое изображение на экране получить нельзя.';
+  const chainText=multi?stages.map((st,i)=>`линза ${i+1}: a = ${fmt(st.a)}, b = ${fmt(st.b)} мм`).join('; ')+'. ':'';
+  const explanation=educationLevel===7
+    ?(multi?'Изображение первой линзы служит предметом для следующей. ':'')+(real?'После последней линзы лучи действительно пересекаются. Такое изображение можно поймать экраном. ':'После линз лучи расходятся, а пересекаются только их продолжения. Такое изображение на экран не поймать. ')+screenNote
+    :multi?`Система из ${stages.length} линз, для каждой 1/f = 1/a + 1/b; изображение предыдущей линзы — предмет для следующей (a < 0, если оно оказалось за линзой). ${chainText}Γ = Γ₁·Γ₂·… = ${fmt(m)}. ${real?'b > 0: итоговое изображение действительное.':'b < 0: итоговое изображение мнимое.'} ${screenNote}`
+    :`Тонкая линза: 1/f = 1/a + 1/b. Здесь a = ${fmt(stages[0].a)} мм, b = ${fmt(di)} мм; Γ = −b/a = ${fmt(m)}. ${real?'b > 0: изображение действительное.':'b < 0: изображение мнимое.'} ${screenNote}`;
+  return{obj,element,first,stages,kind:'lens',headline:`${kind} · ${orientation} · ${size}`,explanation,do:stages[0].a,di,f:multi?null:last.f,m,imageX,imageTipY,imageBaseX:imageX,imageBaseY,virtual,real,orientation,size,matchedScreen};
+}
+function trace(start,dir,lambda,color){
+  let p={...start},d=norm(dir),path=[{...p}],events=[],medium=null,steps=0,I=1,dim=false,segI=[];
+  for(;steps<12;steps++){
+    let best=null,ob=null,hitType='';
+    for(const o of objects){
+      if(isLensType(o.type)){
+        if(Math.abs(d.x)<1e-5)continue;
+        let t=(o.x-p.x)/d.x;
+        if(t>1e-3){let y=p.y+d.y*t;if(Math.abs(y-o.y)<o.diam/2&&(!best||t<best.t)){best={t,x:o.x,y};ob=o;hitType='lens'}}
+      }
+      else if(o.type==='glass'){
+        if(Math.abs(d.x)<1e-5)continue;
+        let t=(o.x-p.x)/d.x;
+        if(t>1e-3){let y=p.y+d.y*t;if(Math.abs(y-o.y)<o.h/2&&(!best||t<best.t)){best={t,x:o.x,y};ob=o;hitType='glass'}}
+      }
+      else if(o.type==='mirror'){
+        let L=o.length/2,ang=o.angle*Math.PI/180,a={x:o.x+Math.sin(ang)*L,y:o.y-Math.cos(ang)*L},b={x:o.x-Math.sin(ang)*L,y:o.y+Math.cos(ang)*L},h=raySegment(p,d,a,b);
+        if(h&&(!best||h.t<best.t)){best=h;ob=o;hitType='mirror'}
+      }
+      else if(o.type==='prism'){
+        let h=hitPrism(p,d,o);if(h&&(!best||h.t<best.t)){best=h;ob=o;hitType='prism'}
+      }
+      else if(o.type==='screen'){
+        let ang=(o.angle||0)*Math.PI/180, L=o.h/2;
+        let a={x:o.x-Math.sin(ang)*L, y:o.y+Math.cos(ang)*L}, b={x:o.x+Math.sin(ang)*L, y:o.y-Math.cos(ang)*L};
+        let h=raySegment(p,d,a,b);
+        if(h&&(!best||h.t<best.t)){best=h;ob=o;hitType='screen'}
+      }
+    }
+    if(!best){path.push({x:p.x+d.x*1500,y:p.y+d.y*1500});segI.push(I);break}
+    let q={x:best.x,y:best.y};path.push(q);segI.push(I);
+    if(hitType==='screen'){events.push({type:'screen',object:ob,point:q});return{path,hit:q,screen:ob,color,events,I,dim,segI}}
+    if(hitType==='glass'){
+      const T=glassT(ob,lambda);I*=T;dim=true;
+      events.push({type:'glass',object:ob,point:q,T});
+      if(I<.03)return{path,color,events,I:0,dim,segI,absorbed:true};
+      p={x:q.x+d.x*.05,y:q.y+d.y*.05};continue;
+    }
+    if(hitType==='lens'){
+      const incoming={...d};
+      const f=lensConverging(ob)?Math.abs(ob.f):-Math.abs(ob.f);
+      const h=q.y-ob.y;
+      // Paraxial thin-lens kick. Using the sign of propagation is essential:
+      // a ray entering from the right must still bend toward the axis for a converging lens.
+      const s=Math.sign(d.x)||1, slope=d.y/(d.x||s);
+      const slopeAfter=slope-s*(h/f);
+      d=norm({x:s,y:s*slopeAfter});
+      events.push({type:'lens',object:ob,point:q,incoming,outgoing:{...d}});
+      p={x:q.x+d.x*.05,y:q.y+d.y*.05};
+    }
+    else if(hitType==='mirror'){
+      const incoming={...d};
+      let edge=norm({x:-Math.sin(ob.angle*Math.PI/180),y:Math.cos(ob.angle*Math.PI/180)}),N={x:-edge.y,y:edge.x};
+      d=norm({x:d.x-2*(d.x*N.x+d.y*N.y)*N.x,y:d.y-2*(d.x*N.x+d.y*N.y)*N.y});
+      events.push({type:'mirror',object:ob,point:q,incoming,outgoing:{...d}});
+      p={x:q.x+d.x*.05,y:q.y+d.y*.05};
+    }
+    else if(hitType==='prism'){
+      let verts=prismVerts(ob),idx=best.i,a=verts[idx],b=verts[(idx+1)%3],edge=norm({x:b.x-a.x,y:b.y-a.y}),N={x:edge.y,y:-edge.x};
+      const entering=medium!==ob.id;
+      const n1=entering?1:indexGlass(lambda),n2=entering?indexGlass(lambda):1;
+      let nd=refract(d,N,n1,n2);
+      if(nd){d=nd;medium=entering?ob.id:null}
+      else{d=norm({x:d.x-2*(d.x*N.x+d.y*N.y)*N.x,y:d.y-2*(d.x*N.x+d.y*N.y)*N.y})}
+      events.push({type:'prism',object:ob,point:q});
+      p={x:q.x+d.x*.05,y:q.y+d.y*.05};
+    }
+  }
+  return{path,color,events,I,dim,segI};
+}
+
+function rays(){
+  let out=[];
+  for(const o of objects){
+    if(o.type==='laser'){
+      let a=(o.angle||0)*Math.PI/180,count=Math.max(1,Math.min(11,o.beams||5)),sp=o.spacing||8;
+      for(let i=0;i<count;i++){
+        let off=(i-(count-1)/2)*sp,lam=o.wave||650;
+        out.push(trace({x:o.x+14-Math.sin(a)*off,y:o.y+Math.cos(a)*off},{x:Math.cos(a),y:Math.sin(a)},lam,wavelengthColor(lam)));
+      }
+    }
+    if(o.type==='bulb'){
+      let count=o.beams||3,spread=(o.spread||35)*Math.PI/180;
+      for(let i=0;i<count;i++){
+        let a=count===1?0:-spread+2*spread*i/(count-1);
+        for(let lam of WAVE)out.push(trace({x:o.x+9,y:o.y},{x:Math.cos(a),y:Math.sin(a)},lam,wavelengthColor(lam)));
+      }
+    }
+  }
+  // Лучи из точки A (вершина стрелки) и точки B (основание): пересечение лучей каждой точки даёт её изображение A′ и B′.
+  for(const obj of objects.filter(q=>q.type==='object')){
+    const element=opticalElementFor(obj);if(!element)continue;
+    const pts=[{name:'A',p:{x:obj.x,y:obj.y-(obj.height??80)},color:'#ffc66d'},{name:'B',p:{x:obj.x,y:obj.y},color:'#6fd3ff'}];
+    for(const {name,p,color} of pts){
+      const targets=[];
+      if(isLensType(element.type)){
+        const ap=(element.diam||150)/2*.82,cl=y=>Math.max(element.y-ap,Math.min(element.y+ap,y));
+        const ys=name==='A'?[p.y,element.y,element.y+(p.y-element.y)*.48]:[element.y-ap*.6,element.y,element.y+ap*.6];
+        ys.forEach(y=>targets.push({x:element.x,y:cl(y)}));
+      }else{
+        const L=(element.length||160)/2,ang=element.angle*Math.PI/180,tg={x:-Math.sin(ang),y:Math.cos(ang)};
+        [-.62,0,.62].forEach(k=>targets.push({x:element.x+tg.x*L*k,y:element.y+tg.y*L*k}));
+      }
+      targets.forEach((t,index)=>{
+        const res=trace(p,{x:t.x-p.x,y:t.y-p.y},550,color);
+        Object.assign(res,{sourceObjectId:obj.id,targetElementId:element.id,constructionIndex:index,point:name});
+        out.push(res);
+      });
+    }
+  }
+  return out;
+}
+
+function drawLensShape(c,o){
+  const h=Math.max(24,o.diam/2),shape=LENS_TYPES[o.type]?.shape||'double-convex';
+  let Ltop,Lmid,Lbot,Rtop,Rmid,Rbot;
+  switch(shape){
+    case 'double-convex': Ltop=-3;Lmid=-22;Lbot=-3;Rtop=3;Rmid=22;Rbot=3;break;
+    case 'double-concave': Ltop=-18;Lmid=-5;Lbot=-18;Rtop=18;Rmid=5;Rbot=18;break;
+    case 'plano-convex': Ltop=-7;Lmid=-7;Lbot=-7;Rtop=7;Rmid=29;Rbot=7;break;
+    case 'plano-concave': Ltop=-12;Lmid=-12;Lbot=-12;Rtop=12;Rmid=-2;Rbot=12;break;
+    case 'positive-meniscus': Ltop=-9;Lmid=-23;Lbot=-9;Rtop=9;Rmid=17;Rbot=9;break;
+    case 'negative-meniscus': Ltop=-19;Lmid=-9;Lbot=-19;Rtop=19;Rmid=9;Rbot=19;break;
+    default: Ltop=-3;Lmid=-22;Lbot=-3;Rtop=3;Rmid=22;Rbot=3;
+  }
+  // Каждая поверхность задаётся квадратичной кривой с точным центральным прогибом.
+  const leftControl=2*Lmid-(Ltop+Lbot)/2;
+  const rightControl=2*Rmid-(Rtop+Rbot)/2;
+  c.moveTo(Ltop,-h);
+  c.quadraticCurveTo(leftControl,0,Lbot,h);
+  c.lineTo(Rbot,h);
+  c.quadraticCurveTo(rightControl,0,Rtop,-h);
+  c.closePath();
+}
+function drawArrow(c,x1,y1,x2,y2,color,dashed=false){
+  c.save();c.strokeStyle=color;c.fillStyle=color;c.lineWidth=2.2/scale;
+  if(dashed)c.setLineDash([6/scale,5/scale]);
+  c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();c.setLineDash([]);
+  const a=Math.atan2(y2-y1,x2-x1),head=9/scale;
+  c.beginPath();c.moveTo(x2,y2);c.lineTo(x2-head*Math.cos(a-.45),y2-head*Math.sin(a-.45));c.lineTo(x2-head*Math.cos(a+.45),y2-head*Math.sin(a+.45));c.closePath();c.fill();c.restore();
+}
+function drawImageAnalysis(c,analysis,allRays){
+  if(!analysis||analysis.imageX===null||!Number.isFinite(analysis.imageX))return;
+  const {imageX,imageTipY,imageBaseX,imageBaseY,virtual,element,obj,stages}=analysis;
+  c.save();
+  if(showExtensions&&virtual){
+    allRays.filter(r=>r.sourceObjectId===obj.id).forEach(r=>{
+      const ev=r.events?.find(e=>e.object?.id===element.id&&(e.type==='lens'||e.type==='mirror'));
+      if(!ev)return;
+      const B=r.point==='B';
+      c.strokeStyle=B?'rgba(111,211,255,.5)':'rgba(255,214,145,.55)';c.lineWidth=1.35/scale;c.setLineDash([7/scale,6/scale]);
+      c.beginPath();c.moveTo(ev.point.x,ev.point.y);c.lineTo(B?imageBaseX:imageX,B?imageBaseY:imageTipY);c.stroke();c.setLineDash([]);
+    });
+  }
+  (stages||[]).slice(0,-1).forEach((st,i)=>{
+    const sub='₁₂₃₄₅₆₇₈₉'[i]||'';
+    c.globalAlpha=.55;drawArrow(c,st.x,st.baseY,st.x,st.tipY,'#a6b5ff',true);c.globalAlpha=1;
+    c.fillStyle='#a6b5ff';c.font=`500 ${11/scale}px "Roboto Flex"`;c.textAlign='center';
+    c.fillText(`A${sub}′B${sub}′`,st.x,Math.min(st.tipY,st.baseY)-12/scale);
+  });
+  const color=virtual?'#f5c27a':'#9be3a8';
+  drawArrow(c,imageBaseX,imageBaseY,imageX,imageTipY,color,virtual);
+  c.fillStyle=color;c.font=`700 ${12/scale}px "Roboto Flex"`;c.textAlign='center';
+  c.fillText(virtual?'A′B′ · мнимое':'A′B′ · действительное',imageX,Math.min(imageTipY,imageBaseY)-14/scale);
+  c.textAlign='left';c.fillText('B′',imageBaseX+8/scale,imageBaseY+14/scale);
+  c.restore();
+}
+function drawRuler(c,o){
+  const L=o.length||220;c.save();c.rotate((o.angle||0)*Math.PI/180);
+  c.fillStyle='rgba(244,213,141,.12)';c.strokeStyle='#f4d58d';c.lineWidth=1.5/scale;
+  c.fillRect(-L/2,-12,L,24);c.strokeRect(-L/2,-12,L,24);
+  for(let mm=-L/2;mm<=L/2;mm+=10){const major=Math.round((mm+L/2)%50)===0;c.beginPath();c.moveTo(mm,-12);c.lineTo(mm,major?7:0);c.stroke();if(major){c.fillStyle='#f4d58d';c.font=`${10/scale}px "Roboto Flex"`;c.textAlign='center';c.fillText(String(Math.round(mm+L/2)),mm,20)}}
+  c.fillStyle='#f4d58d';c.font=`500 ${11/scale}px "Roboto Flex"`;c.textAlign='center';c.fillText('Линейка · мм',0,-18);
+  c.restore();
+}
+function drawProtractor(c,o){
+  const R=o.radius||90;c.save();c.rotate((o.angle||0)*Math.PI/180);
+  c.strokeStyle='#c8b6ff';c.fillStyle='rgba(200,182,255,.08)';c.lineWidth=1.4/scale;
+  c.beginPath();c.moveTo(-R,0);c.arc(0,0,R,Math.PI,Math.PI*2);c.closePath();c.fill();c.stroke();
+  for(let deg=-90;deg<=90;deg+=5){const a=(90-deg)*Math.PI/180,x=Math.cos(a),y=-Math.sin(a),major=deg%15===0;
+    c.beginPath();c.moveTo(x*R,y*R);c.lineTo(x*(R-(major?12:6)),y*(R-(major?12:6)));c.stroke();
+    if(deg%30===0){c.fillStyle='#d9ccff';c.font=`${10/scale}px "Roboto Flex"`;c.textAlign='center';c.fillText(String(deg)+'°',x*(R-24),y*(R-24)+4/scale)}
+  }
+  c.beginPath();c.moveTo(-R,0);c.lineTo(R,0);c.stroke();
+  c.fillStyle='#c8b6ff';c.font=`500 ${11/scale}px "Roboto Flex"`;c.textAlign='center';c.fillText('Транспортир',0,-R-10/scale);
+  c.restore();
+}
+let lastSig='';
+function draw(){
+  requestAnimationFrame(draw);
+  // Перерисовываем только если что-то изменилось: в покое компьютер почти не нагружается.
+  const sig=JSON.stringify([objects,offset,scale,selected,showRays,showLabels,showGrid,showExtensions,educationLevel,W,H,DPR]);
+  if(sig===lastSig)return;lastSig=sig;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.clearRect(0,0,W,H);
+    if(showGrid){
+    ctx.strokeStyle='rgba(208,188,255,.09)';ctx.lineWidth=1;
+    for(let x=offset.x%(50*scale);x<W;x+=50*scale){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+    for(let y=offset.y%(50*scale);y<H;y+=50*scale){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+  }
+
+  ctx.save();ctx.translate(offset.x,offset.y);ctx.scale(scale,scale);
+  ctx.strokeStyle='rgba(255,255,255,.14)';ctx.setLineDash([5/scale,8/scale]);
+  const axisYs=[...new Set(objects.filter(o=>isLensType(o.type)).map(o=>Math.round(o.y)))];
+  if(!axisYs.length)axisYs.push(310);
+  axisYs.forEach(axisY=>{ctx.beginPath();ctx.moveTo(-500,axisY);ctx.lineTo(1700,axisY);ctx.stroke()});
+  ctx.setLineDash([]);
+
+  let allRays=rays();
+
+  if(showRays){
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for(const r of allRays){
+      ctx.strokeStyle=r.color;ctx.lineWidth=2.2/scale;
+      if(!r.dim){ctx.globalAlpha=.75;ctx.beginPath();r.path.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke()}
+      else for(let i=1;i<r.path.length;i++){const a=r.segI[i-1];if(a<.02)continue;ctx.globalAlpha=.75*a;ctx.beginPath();ctx.moveTo(r.path[i-1].x,r.path[i-1].y);ctx.lineTo(r.path[i].x,r.path[i].y);ctx.stroke()}
+      ctx.globalAlpha=.75*(r.I??1);
+      if(r.hit){
+        ctx.fillStyle=r.color;ctx.beginPath();
+        ctx.arc(r.hit.x,r.hit.y,3.2/scale,0,7);
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  for(const o of objects){
+    let d=defs[o.type],is=selected===o.id;
+    ctx.save();ctx.translate(o.x,o.y);ctx.strokeStyle=d.color;ctx.fillStyle=d.color;ctx.lineWidth=2.2/scale;
+    ctx.shadowColor=d.color;ctx.shadowBlur=is?16/scale:6/scale;
+
+    if(o.type==='laser'){
+      ctx.fillStyle='#5b2731';ctx.strokeRect(-14,-13,27,26);ctx.fillRect(-14,-13,27,26);
+      ctx.fillStyle='#ff737c';ctx.fillRect(-1,-8,15,16);
+      ctx.fillStyle='#ffd1d4';ctx.beginPath();ctx.arc(14,0,3,0,7);ctx.fill();
+    }
+    if(o.type==='bulb'){
+      let gg=ctx.createRadialGradient(0,0,2,0,0,27);gg.addColorStop(0,'#fff7c5');gg.addColorStop(.35,'#ffd27a');gg.addColorStop(1,'rgba(255,170,70,0)');
+      ctx.fillStyle=gg;ctx.beginPath();ctx.arc(0,0,27,0,7);ctx.fill();
+      ctx.strokeStyle='#ffe3a3';ctx.beginPath();ctx.arc(0,0,10,0,7);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(-5,10);ctx.lineTo(-4,18);ctx.lineTo(4,18);ctx.lineTo(5,10);ctx.stroke();
+    }
+    if(isLensType(o.type)){
+      ctx.beginPath();
+      drawLensShape(ctx,o);
+      ctx.fillStyle='rgba(125,205,255,.18)';ctx.fill();ctx.stroke();
+      ctx.beginPath();ctx.moveTo(-13,0);ctx.lineTo(13,0);ctx.stroke();
+    }
+    if(isLensType(o.type) && (is||objects.some(q=>q.type==='laser'||q.type==='object'))){
+      let ff=Math.abs(o.f||150);
+      ctx.save();ctx.shadowBlur=0;ctx.strokeStyle='rgba(208,188,255,.65)';ctx.fillStyle='rgba(232,224,238,.85)';ctx.lineWidth=1/scale;
+      ctx.setLineDash([4/scale,4/scale]);
+      for(let sign of [-1,1]){
+        ctx.beginPath();ctx.moveTo(sign*ff,-13);ctx.lineTo(sign*ff,13);ctx.stroke();ctx.setLineDash([]);
+        ctx.font=`${11/scale}px "Roboto Flex"`;ctx.textAlign='center';
+        ctx.fillText(lensConverging(o)?(sign<0?'F':'F′'):(sign<0?'F′':'F'),sign*ff,-19/scale);
+        ctx.setLineDash([4/scale,4/scale]);
+      }
+      ctx.restore();
+    }
+    if(o.type==='prism'){
+      let v=prismVerts(o);ctx.beginPath();
+      v.forEach((p,i)=>i?ctx.lineTo(p.x-o.x,p.y-o.y):ctx.moveTo(p.x-o.x,p.y-o.y));
+      ctx.closePath();
+      let gg=ctx.createLinearGradient(-o.size/2,0,o.size/2,0);gg.addColorStop(0,'rgba(150,180,255,.16)');gg.addColorStop(1,'rgba(220,180,255,.25)');
+      ctx.fillStyle=gg;ctx.fill();ctx.stroke();
+      ctx.beginPath();ctx.moveTo(-o.size*.23,0);ctx.lineTo(o.size*.23,0);ctx.stroke();
+    }
+    if(o.type==='mirror'){
+      ctx.rotate(o.angle*Math.PI/180);ctx.beginPath();ctx.moveTo(0,-o.length/2);ctx.lineTo(0,o.length/2);
+      ctx.strokeStyle='#d9e5ff';ctx.lineWidth=7/scale;ctx.stroke();
+      ctx.lineWidth=1/scale;ctx.strokeStyle='#8b9fca';
+      for(let y=-o.length/2;y<o.length/2;y+=12){ctx.beginPath();ctx.moveTo(4,y);ctx.lineTo(12,y+7);ctx.stroke()}
+    }
+    if(o.type==='glass'){const gc=glassColor(o.wl);ctx.strokeStyle=gc;ctx.fillStyle=gc;ctx.shadowColor=gc;ctx.globalAlpha=.4;ctx.fillRect(-6,-o.h/2,12,o.h);ctx.globalAlpha=1;ctx.strokeRect(-6,-o.h/2,12,o.h)}
+    if(o.type==='screen'){
+      ctx.rotate((o.angle||0)*Math.PI/180);
+      ctx.fillStyle='rgba(155,227,168,.18)';ctx.fillRect(-o.w/2,-o.h/2,o.w,o.h);ctx.strokeRect(-o.w/2,-o.h/2,o.w,o.h);
+      ctx.fillStyle='#9be3a8';ctx.fillRect(-o.w/2-3,-o.h/2,3,o.h);
+    }
+    if(o.type==='object'){
+      const hh=o.height??80,sgn=hh>=0?1:-1;ctx.strokeStyle='#ffd27a';ctx.fillStyle='#ffd27a';ctx.lineWidth=3/scale;
+      ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,-hh);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(0,-hh);ctx.lineTo(-7/scale,-hh+13*sgn/scale);ctx.lineTo(7/scale,-hh+13*sgn/scale);ctx.closePath();ctx.fill();
+      ctx.beginPath();ctx.arc(0,0,3/scale,0,Math.PI*2);ctx.fill();
+      ctx.font=`700 ${12/scale}px "Roboto Flex"`;ctx.textAlign='left';ctx.fillText('A',8/scale,-hh-(sgn>0?3:-12)/scale);ctx.fillText('B',8/scale,(sgn>0?13:-5)/scale);
+    }
+    if(o.type==='ruler')drawRuler(ctx,o);
+    if(o.type==='protractor')drawProtractor(ctx,o);
+    ctx.shadowBlur=0;
+    if(is){
+      ctx.setLineDash([5/scale,5/scale]);ctx.strokeStyle='#eaddff';ctx.lineWidth=1/scale;
+      ctx.beginPath();ctx.arc(0,0,(o.type==='prism'?o.size:o.type==='screen'||o.type==='glass'?o.h:o.type==='mirror'?o.length:o.type==='ruler'?o.length:o.type==='protractor'?(o.radius||90)*1.5:o.diam||34)*.68,0,7);ctx.stroke();ctx.setLineDash([]);
+    }
+    ctx.restore();
+    if(showLabels){
+      const label=isLensType(o.type)?(LENS_TYPES[o.type].name+' линза'):d.name;
+      ctx.fillStyle=is?'#eaddff':'rgba(232,224,238,.86)';
+      ctx.font=`500 ${12/scale}px "Roboto Flex"`;ctx.textAlign='center';
+      const maxWidth=150/scale, words=label.split(' '), lines=[];let line='';
+      for(const word of words){const test=line?line+' '+word:word;if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=word}else line=test}
+      if(line)lines.push(line);
+      const baseY=o.y+((o.type==='screen'||o.type==='glass')?o.h/2:o.type==='object'?20:o.type==='ruler'?Math.abs(Math.sin((o.angle||0)*Math.PI/180))*(o.length||220)/2+Math.abs(Math.cos((o.angle||0)*Math.PI/180))*12+23:o.type==='protractor'?(o.radius||90)+20:Math.max(o.diam||o.size||o.length||30,38)/2)+18;
+      lines.slice(0,2).forEach((txt,i)=>ctx.fillText(txt,o.x,baseY+i*14/scale));
+    }
+  }
+  const analyses=objects.filter(q=>q.type==='object').map(q=>getImageAnalysis(q)),selObj=byId(selected);
+  const analysis=(selObj&&selObj.type==='object'?getImageAnalysis(selObj):analyses[0])||null;
+  analyses.forEach(a=>drawImageAnalysis(ctx,a,allRays));
+  {const gi=$('#glass-info');if(gi&&selObj&&selObj.type==='glass'){const h=glassInfoHTML(selObj);if(gi._h!==h){gi._h=h;gi.innerHTML=h}}}
+  {const pa=$('#panel-analysis');if(pa&&selObj){const ii=getImageAnalysis(selObj);if(ii){const h=panelAnalysisInner(ii);if(pa._h!==h){pa._h=h;pa.innerHTML=h}}}}
+  ctx.restore();
+
+  let hudContainer=$('#hud-container');
+  let activeScreens=objects.filter(o=>o.type==='screen'&&o.showHud);
+  hudContainer.style.display='flex';
+  let html=`<div class="hint-panel glass"><b>Собери оптическую схему</b>Перетаскивай элементы мышью или пальцем. Колёсико — масштаб, двумя пальцами — приближение. Линейка и транспортир добавляются через каталог. Клавиши: Ctrl+C / Ctrl+V — копировать и вставить, Ctrl+D — дублировать, Del — удалить, стрелки — сдвиг (Shift — крупнее).</div>`+(analysis?`<div class="screen-hud glass analysis-card" id="image-analysis"><div class="hud-header"><span>🔎 Анализ изображения</span><span>${analysis.kind==='mirror'?'Зеркало':'Линза'}</span></div><div class="analysis-main" id="analysis-head"></div><div class="analysis-sub" id="analysis-desc"></div><div class="analysis-values"><span>a · расстояние до предмета<b id="analysis-a"></b></span><span>b · расстояние до изображения<b id="analysis-b"></b></span><span>f · фокус<b id="analysis-f"></b></span><span>Γ · увеличение<b id="analysis-m"></b></span><span>h · высота предмета<b id="analysis-h0"></b></span><span>h′ · высота изображения<b id="analysis-h1"></b></span><span>B над осью<b id="analysis-y0"></b></span><span>B′ над осью<b id="analysis-y1"></b></span></div><div class="analysis-sub" id="analysis-level"></div></div>`:'')+activeScreens.map((scObj,idx)=>`<div class="screen-hud glass" id="hud-${scObj.id}">
+      <div class="hud-header"><span>📊 Экран #${idx+1}</span><button class="hud-close" data-close-id="${scObj.id}" title="Закрыть миниатюру" aria-label="Закрыть миниатюру">✕</button></div>
+      <canvas id="mini-screen-${scObj.id}" width="186" height="110" style="width:100%;height:auto;border-radius:10px;background:#090811;display:block"></canvas>
+      <div id="mini-count-${scObj.id}" style="font-size:11px;color:var(--on2);margin-top:6px">Попаданий: 0</div>
+    </div>`).join('');
+  if(hudContainer._h!==html){hudContainer._h=html;hudContainer.innerHTML=html}
+  if(analysis){
+    const put=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value};
+    put('analysis-head',analysis.headline);put('analysis-desc',analysis.explanation);
+    put('analysis-a',fmt(analysis.do)+' мм');put('analysis-b',analysis.di===Infinity?'∞':fmt(analysis.di)+' мм');
+    put('analysis-f',analysis.f===null?'—':fmt(analysis.f)+' мм');put('analysis-m',analysis.m===null?'—':fmt(analysis.m));put('analysis-h0',fmt(analysis.h0)+' мм');put('analysis-h1',analysis.h1==null?'—':fmt(analysis.h1)+' мм');put('analysis-y0',fmt(analysis.y0)+' мм');put('analysis-y1',analysis.y1==null?'—':fmt(analysis.y1)+' мм');
+    put('analysis-level',educationLevel===7?'Кратко · Смотри, где сходятся сами лучи. Расстояния a, b и Γ не зависят от высоты стрелки: при сдвиге вверх/вниз меняются h, h′ и положение над осью.':'Подробно · Знаки расстояний: b > 0 — действительное, b < 0 — мнимое. h′ = Γ·h; знак «−» у h′ — изображение перевёрнуто. Плюс — выше оптической оси, минус — ниже.');
+  }
+  activeScreens.forEach(scObj=>{
+    const mc=$('#mini-screen-'+scObj.id);if(!mc)return;
+    const mg=mc.getContext('2d');mg.fillStyle='#090811';mg.fillRect(0,0,mc.width,mc.height);
+    mg.strokeStyle='#9be3a8';mg.lineWidth=1.5;mg.beginPath();mg.moveTo(mc.width/2,8);mg.lineTo(mc.width/2,mc.height-8);mg.stroke();
+    const screenHits=allRays.filter(r=>r.screen&&r.screen.id===scObj.id&&r.hit);
+    const loc=h=>{const dx=h.x-scObj.x,dy=h.y-scObj.y,ang=-((scObj.angle||0)*Math.PI/180);return Math.max(6,Math.min(mc.height-6,(dx*Math.sin(ang)+dy*Math.cos(ang))/scObj.h*(mc.height-16)+mc.height/2))};
+    mg.save();mg.globalCompositeOperation='lighter';
+    screenHits.forEach(r=>{mg.globalAlpha=Math.max(.15,r.I??1);mg.fillStyle=r.color;mg.shadowColor=r.color;mg.shadowBlur=4;mg.beginPath();mg.arc(mc.width/2,loc(r.hit),3.5,0,Math.PI*2);mg.fill();mg.shadowBlur=0});
+    mg.restore();
+    const grp={};screenHits.filter(r=>r.point).forEach(r=>{(grp[r.sourceObjectId]=grp[r.sourceObjectId]||{A:[],B:[]})[r.point].push(loc(r.hit))});
+    Object.values(grp).forEach(g=>{
+      if(!g.A.length||!g.B.length)return;
+      const avg=v=>v.reduce((s,x)=>s+x,0)/v.length,yA=avg(g.A),yB=avg(g.B),x=mc.width/2+30,sg=yA<yB?-1:1;
+      mg.strokeStyle=mg.fillStyle='#9be3a8';mg.lineWidth=2.5;mg.beginPath();mg.moveTo(x,yB);mg.lineTo(x,yA-sg*8);mg.stroke();
+      mg.beginPath();mg.moveTo(x,yA);mg.lineTo(x-5,yA-sg*10);mg.lineTo(x+5,yA-sg*10);mg.closePath();mg.fill();
+      mg.font='700 11px "Roboto Flex",sans-serif';mg.fillText('A′',x+9,yA+4);mg.fillText('B′',x+9,yB+4);
+    });
+    const cnt=$('#mini-count-'+scObj.id);if(cnt)cnt.textContent=`Попаданий: ${screenHits.length}`;
+  });
+  // Надёжное закрытие миниатюр: pointerdown срабатывает и для мыши, и для touch.
+  // Обработчик делегированный, поэтому продолжает работать после обновления карточек.
+  if(!hudContainer.dataset.closeBound){
+    const closeMini=e=>{
+      const btn=e.target && e.target.closest ? e.target.closest('[data-close-id]') : null;
+      if(!btn || !hudContainer.contains(btn))return;
+      e.preventDefault();e.stopPropagation();
+      const sc=byId(Number(btn.dataset.closeId));
+      if(sc){sc.showHud=false;if(selected===sc.id)renderPanel();}
+    };
+    hudContainer.addEventListener('pointerdown',closeMini,true);
+    hudContainer.addEventListener('click',closeMini,true);
+    hudContainer.dataset.closeBound='1';
+  }
+
+  if(selected){let o=byId(selected);if(o){let d=defs[o.type];$('#status').textContent=d.name+' · X '+o.x.toFixed(0)+' мм · Y '+o.y.toFixed(0)+' мм · перетащи элемент для настройки схемы'}}
+  else if(analysis){$('#status').textContent=analysis.headline+' · a='+fmt(analysis.do)+' мм · b='+(analysis.di===Infinity?'∞':fmt(analysis.di)+' мм')}
+}
+
+
+function hit(o,x,y){
+  let dx=x-o.x,dy=y-o.y;
+  if(o.type==='screen'){
+    let ang=-((o.angle||0)*Math.PI/180);
+    let lx=dx*Math.cos(ang)-dy*Math.sin(ang);
+    let ly=dx*Math.sin(ang)+dy*Math.cos(ang);
+    return Math.abs(lx)<20&&Math.abs(ly)<o.h/2;
+  }
+  if(o.type==='glass')return Math.abs(dx)<22&&Math.abs(dy)<o.h/2;
+  if(o.type==='prism')return Math.hypot(dx,dy)<o.size*.8;
+  if(o.type==='mirror')return Math.hypot(dx,dy)<o.length/2+18;
+  if(o.type==='object')return Math.abs(dx)<24&&dy<Math.max(18,20-(o.height??80))&&dy>-Math.max(o.height??80,0)-20;
+  if(o.type==='ruler'){const a=-(o.angle||0)*Math.PI/180,lx=dx*Math.cos(a)-dy*Math.sin(a),ly=dx*Math.sin(a)+dy*Math.cos(a);return Math.abs(lx)<(o.length||220)/2+8&&Math.abs(ly)<22}
+  if(o.type==='protractor')return Math.hypot(dx,dy)<(o.radius||90)+16;
+  return Math.hypot(dx,dy)<Math.max(o.diam||30,38)/2+18;
+}
+
+let pointers=new Map(),pinch=0;
+canvas.onpointerdown=e=>{canvas.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===2){let a=[...pointers.values()];pinch=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);drag=null;return}let x=wx(e.clientX),y=wy(e.clientY);let o=[...objects].reverse().find(q=>hit(q,x,y));if(o){select(o.id);drag={id:o.id,dx:x-o.x,dy:y-o.y,startX:e.clientX,startY:e.clientY,moved:false}}else{select(null);drag={pan:true,x:e.clientX,y:e.clientY,ox:offset.x,oy:offset.y}}};
+canvas.onpointermove=e=>{if(!pointers.has(e.pointerId))return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===2){let a=[...pointers.values()],d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);if(pinch){let factor=d/pinch;scale=Math.max(.45,Math.min(2.2,scale*factor));pinch=d}return}if(!drag)return;if(drag.id&&Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>4)drag.moved=true;if(drag.pan){offset.x=drag.ox+e.clientX-drag.x;offset.y=drag.oy+e.clientY-drag.y}else{let o=byId(drag.id);if(o){o.x=wx(e.clientX)-drag.dx;o.y=wy(e.clientY)-drag.dy;if(selected===o.id){let a=$('#panel .grid');if(a)a.innerHTML=`<div class="tile"><small>Координата X</small><b>${o.x.toFixed(0)} мм</b></div><div class="tile"><small>Координата Y</small><b>${o.y.toFixed(0)} мм</b></div>`}}}};
+function end(e){pointers.delete(e.pointerId);if(!pointers.size){drag=null;pinch=0}}canvas.onpointerup=end;canvas.onpointercancel=end;
+canvas.onwheel=e=>{e.preventDefault();let before=scale;scale=Math.max(.45,Math.min(2.2,scale*Math.exp(-e.deltaY*.001)));let x=e.clientX,y=e.clientY;offset.x=x-(x-offset.x)*scale/before;offset.y=y-(y-offset.y)*scale/before};
+
+$('#rays').onclick=e=>{showRays=!showRays;e.currentTarget.classList.toggle('on',showRays);e.currentTarget.textContent='Лучи: '+(showRays?'вкл.':'выкл.')};
+$('#labels').onclick=e=>{showLabels=!showLabels;e.currentTarget.classList.toggle('on',showLabels)};
+$('#grid').onclick=e=>{showGrid=!showGrid;e.currentTarget.classList.toggle('on',showGrid)};
+$('#extensions').onclick=e=>{showExtensions=!showExtensions;e.currentTarget.classList.toggle('on',showExtensions);toast('Продолжения лучей '+(showExtensions?'включены':'выключены'))};
+$('#level').onclick=e=>{educationLevel=educationLevel===7?11:7;e.currentTarget.textContent='Режим: '+modeName();if(selected)renderPanel();toast('Режим пояснений: '+modeName())};
+$('#reset').onclick=()=>{objects=defaults();nextId=4;select(null);scale=1;offset={x:W/2-410,y:H/2-310};toast('Схема возвращена к исходному состоянию')};
+
+const ELEMENT_CATALOG=[
+  {type:'laser',label:'🔴 Лазер',category:'Источники',keywords:'лазер источник монохроматический'},
+  {type:'bulb',label:'💡 Лампочка',category:'Источники',keywords:'лампа источник белый свет'},
+  {type:'lens',label:'Двояковыпуклая линза',category:'Линзы',keywords:'собирающая выпуклая'},
+  {type:'planoConvex',label:'Плосковыпуклая линза',category:'Линзы',keywords:'собирающая выпуклая'},
+  {type:'meniscusConvex',label:'Вогнуто-выпуклая линза',category:'Линзы',keywords:'мениск собирающая'},
+  {type:'divLens',label:'Двояковогнутая линза',category:'Линзы',keywords:'рассеивающая вогнутая'},
+  {type:'planoConcave',label:'Плосковогнутая линза',category:'Линзы',keywords:'рассеивающая вогнутая'},
+  {type:'meniscusConcave',label:'Выпукло-вогнутая линза',category:'Линзы',keywords:'мениск рассеивающая'},
+  {type:'prism',label:'🔺 Призма',category:'Преломление',keywords:'стекло дисперсия спектр'},
+  {type:'mirror',label:'🪞 Плоское зеркало',category:'Отражение',keywords:'отражатель зеркало'},
+  {type:'glass',label:'🟩 Цветное стекло',category:'Светофильтры',keywords:'стекло светофильтр цветное цвет фильтр поглощение пропускание'},
+  {type:'screen',label:'▥ Экран',category:'Измерения',keywords:'детектор измерительный экран'},
+  {type:'object',label:'↟ Предмет (стрелка)',category:'Измерения',keywords:'предмет объект стрелка изображение оптика'},
+  {type:'ruler',label:'📏 Линейка',category:'Измерения',keywords:'линейка расстояние измерение длина'},
+  {type:'protractor',label:'角 Транспортир',category:'Измерения',keywords:'транспортир угол градус падение отражение'}
+];
+let elementMenu=null,elementCategory='Все';
+function renderElementMenu(){
+  if(!elementMenu)return;
+  const query=(elementMenu.querySelector('.element-menu-search').value||'').trim().toLocaleLowerCase('ru');
+  const categories=['Все','Источники','Линзы','Преломление','Отражение','Светофильтры','Измерения'];
+  elementMenu.querySelector('.element-menu-cats').innerHTML=categories.map(c=>`<button class="tg ${elementCategory===c?'active':''}" data-category="${c}">${c}</button>`).join('');
+  const items=ELEMENT_CATALOG.filter(item=>(elementCategory==='Все'||item.category===elementCategory)&&(!query||(item.label+' '+item.keywords).toLocaleLowerCase('ru').includes(query)));
+  elementMenu.querySelector('.element-menu-items').innerHTML=items.length?items.map(item=>`<button class="tg" data-type="${item.type}">${item.label}</button>`).join(''):'<div class="element-menu-empty">Ничего не найдено. Попробуй изменить запрос или категорию.</div>';
+}
+$('#add').onclick=()=>{
+  if(elementMenu){elementMenu.remove();elementMenu=null;return;}
+  elementMenu=document.createElement('section');elementMenu.className='glass element-menu';
+  elementMenu.innerHTML=`<div class="element-menu-head"><span>Добавить элемент</span><button class="hud-close" data-menu-close aria-label="Закрыть">✕</button></div><input class="element-menu-search" type="search" placeholder="Поиск: например, линза или экран" autocomplete="off"><div class="element-menu-cats"></div><div class="element-menu-items"></div>`;
+  document.body.append(elementMenu);elementCategory='Все';renderElementMenu();
+  elementMenu.querySelector('.element-menu-search').addEventListener('input',renderElementMenu);
+  elementMenu.addEventListener('click',e=>{
+    const close=e.target.closest('[data-menu-close]');if(close){elementMenu.remove();elementMenu=null;return;}
+    const cat=e.target.closest('[data-category]');if(cat){elementCategory=cat.dataset.category;renderElementMenu();return;}
+    const item=e.target.closest('[data-type]');if(item){const type=item.dataset.type;elementMenu.remove();elementMenu=null;add(type);}
+  });
+  const outside=e=>{if(elementMenu&&!elementMenu.contains(e.target)&&e.target!==$('#add')){elementMenu.remove();elementMenu=null;document.removeEventListener('pointerdown',outside)}};
+  setTimeout(()=>document.addEventListener('pointerdown',outside),0);
+  elementMenu.querySelector('.element-menu-search').focus();
+};
+
+$('#nav').innerHTML=`<button class="chip on" data-mode="focus"><i style="background:#ffbd78"></i>Фокусировка</button><button class="chip" data-mode="image"><i style="background:#ffd27a"></i>Изображение в линзе</button><button class="chip" data-mode="mirror"><i style="background:#d5d9e8"></i>Плоское зеркало</button><button class="chip" data-mode="spectrum"><i style="background:#d0bcff"></i>Спектр</button><button class="chip" data-mode="refraction"><i style="background:#8edcff"></i>Преломление</button><button class="chip" data-mode="glass"><i style="background:#9be3a8"></i>Цветное стекло</button>`;
+$('#nav').onclick=e=>{
+  let b=e.target.closest('[data-mode]');if(!b)return;
+  document.querySelectorAll('#nav .chip').forEach(q=>q.classList.toggle('on',q===b));
+  if(b.dataset.mode==='focus'){objects=defaults();nextId=4;toast('Опыт: собери параллельный пучок в фокусе')}
+  if(b.dataset.mode==='image'){objects=[{id:1,type:'object',x:210,y:310,height:75},{id:2,type:'lens',x:470,y:310,f:140,diam:180,material:'glass'},{id:3,type:'screen',x:773,y:310,w:8,h:250,angle:0,showHud:true,hudX:24,hudY:140},{id:4,type:'ruler',x:470,y:485,length:300,angle:0}];nextId=5;toast('Опыт: положение и свойства изображения в собирающей линзе')}
+  if(b.dataset.mode==='mirror'){objects=[{id:1,type:'object',x:220,y:310,height:80},{id:2,type:'mirror',x:510,y:310,length:210,angle:0},{id:3,type:'ruler',x:350,y:485,length:260,angle:0},{id:4,type:'protractor',x:620,y:465,radius:78,angle:90}];nextId=5;toast('Опыт: мнимое изображение в плоском зеркале')}
+  if(b.dataset.mode==='spectrum'){objects=[{id:1,type:'bulb',x:115,y:310,spread:22,beams:3},{id:2,type:'prism',x:390,y:310,size:130,apex:0,material:'BK7'},{id:3,type:'screen',x:720,y:310,w:8,h:260,angle:0,showHud:true,hudX:24,hudY:140}];nextId=4;toast('Опыт: белый свет распадается на спектр в призме')}
+  if(b.dataset.mode==='glass'){objects=[{id:1,type:'bulb',x:115,y:310,spread:10,beams:3},{id:2,type:'glass',x:380,y:310,wl:540,bw:70,h:230},{id:3,type:'screen',x:700,y:310,w:8,h:260,angle:0,showHud:true,hudX:24,hudY:140}];nextId=4;toast('Опыт: зелёное стекло из белого света оставляет зелёный')}
+  if(b.dataset.mode==='refraction'){objects=[{id:1,type:'laser',x:115,y:310,angle:12,color:'#ff525e',wave:550},{id:2,type:'prism',x:420,y:310,size:140,apex:0,material:'BK7'},{id:3,type:'screen',x:720,y:310,w:8,h:260,angle:0,showHud:true,hudX:24,hudY:140}];nextId=4;toast('Опыт: преломление монохроматического луча')}
+  select(null);
+};
+
+// Высота нижней панели → CSS-переменная (на узких экранах кнопки переносятся на несколько строк)
+{const dock=$('#dock'),setDock=()=>document.documentElement.style.setProperty('--dockH',dock.offsetHeight+'px');setDock();addEventListener('resize',setDock);if(window.ResizeObserver)new ResizeObserver(setDock).observe(dock)}
+// Горячие клавиши: e.code — физическая клавиша, поэтому Ctrl+C работает и в русской раскладке
+let clip=null,pasteN=0;
+const typingTarget=e=>{const t=e.target;if(!t||!t.tagName)return false;if(t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable)return true;return t.tagName==='INPUT'&&!['range','checkbox','button'].includes(t.type)};
+const copySel=()=>{const o=byId(selected);if(!o)return false;clip=JSON.parse(JSON.stringify(o));pasteN=0;return true};
+const pasteClip=()=>{if(!clip)return;const c=JSON.parse(JSON.stringify(clip));c.id=nextId++;pasteN++;c.x+=30*pasteN;c.y+=30*pasteN;objects.push(c);select(c.id);toast('Вставлено')};
+document.addEventListener('keydown',e=>{
+  if(typingTarget(e))return;
+  const mod=e.ctrlKey||e.metaKey,code=e.code||'';
+  if(code==='Escape'){select(null);return}
+  if(mod&&code==='KeyC'){if(String(getSelection()).length)return;if(copySel()){e.preventDefault();toast('Скопировано')}return}
+  if(mod&&code==='KeyV'){if(clip){e.preventDefault();pasteClip()}return}
+  if(mod&&code==='KeyD'){if(copySel()){e.preventDefault();pasteClip()}return}
+  if(code==='Delete'||code==='Backspace'){const o=byId(selected);if(o){e.preventDefault();objects=objects.filter(q=>q.id!==o.id);select(null);toast('Элемент удалён')}return}
+  if(code.startsWith('Arrow')&&!(e.target&&e.target.type==='range')){
+    const o=byId(selected);if(!o)return;e.preventDefault();const st=e.shiftKey?10:1;
+    o.x+=code==='ArrowRight'?st:code==='ArrowLeft'?-st:0;o.y+=code==='ArrowDown'?st:code==='ArrowUp'?-st:0;
+    const g=$('#panel .grid');if(g)g.innerHTML=`<div class="tile"><small>Координата X</small><b>${o.x.toFixed(0)} мм</b></div><div class="tile"><small>Координата Y</small><b>${o.y.toFixed(0)} мм</b></div>`;
+  }
+});
+requestAnimationFrame(draw);
+})();
+</script></body></html>
