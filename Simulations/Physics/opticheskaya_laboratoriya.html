@@ -87,12 +87,13 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:li
 <div id="status" class="glass">Геометрическая оптика · координаты и расстояния в условных мм модели</div>
 <div id="hud-container"></div>
 <aside id="panel"></aside>
-<div id="dock" class="glass"><button class="tg on" id="rays">Лучи: вкл.</button><button class="tg on" id="labels">Подписи</button><button class="tg" id="grid">Сетка</button><button class="tg on" id="extensions">Продолжения</button><button class="tg" id="level">Режим: кратко</button><button class="tg primary" id="add">＋ Добавить элемент</button><button class="tg" id="reset">↺ Сброс</button></div>
+<div id="dock" class="glass"><button class="tg on" id="rays">Лучи: вкл.</button><button class="tg on" id="labels">Подписи</button><button class="tg" id="grid">Сетка</button><button class="tg" id="snap">Привязка: выкл.</button><button class="tg on" id="extensions">Продолжения</button><button class="tg" id="level">Режим: кратко</button><button class="tg primary" id="add">＋ Добавить элемент</button><button class="tg" id="reset">↺ Сброс</button></div>
 <div id="toast"></div>
 <script>
 (()=>{
 const $=s=>document.querySelector(s),canvas=$('#scene'),ctx=canvas.getContext('2d');
 let W,H,DPR,showRays=true,showLabels=true,showGrid=false,showExtensions=true,educationLevel=7,selected=null,drag=null,scale=1,offset={x:0,y:0};
+let snapStep=0,extraRays=[];
 
 const WAVE = [650, 610, 580, 550, 510, 470, 430, 400];
 const modeName=()=>educationLevel===7?'кратко':'подробно';
@@ -126,6 +127,13 @@ object:{name:'Предмет AB',kind:'Объект наблюдения',color:
 ruler:{name:'Линейка',kind:'Измерительный инструмент',color:'#f4d58d',desc:'Линейка помогает измерять расстояния и положение элементов в условных миллиметрах модели.',fact:'Одна координатная единица сцены принята за 1 мм модели. Это масштаб симуляции, а не калибровка реального экрана.'},
 protractor:{name:'Транспортир',kind:'Измерительный инструмент',color:'#c8b6ff',desc:'Транспортир помогает оценивать угол падения и угол отражения относительно нормали.',fact:'Углы падения и отражения измеряются от нормали к поверхности, а не от самой поверхности.'}
 };
+Object.assign(defs,{
+  slab:{name:'Стеклянная пластина',kind:'Плоскопараллельная пластина',color:'#d6b6ff',desc:'Луч, проходя через пластину под углом, выходит параллельно себе, но смещается в сторону.',fact:'На каждой грани n1·sinα = n2·sinβ. Выходящий луч параллелен падающему; смещение растёт с толщиной и углом падения.'},
+  rprism:{name:'Прямоугольная призма',kind:'Полное внутреннее отражение',color:'#d6b6ff',desc:'Свет заходит в катет, полностью отражается от гипотенузы и выходит под углом 90°.',fact:'Предельный угол для стекла ≈ 42°, а на гипотенузе угол падения 45° — луч не выходит, а отражается (полное внутреннее отражение). Так работают призменные бинокли и перископы.'},
+  concave:{name:'Вогнутое зеркало',kind:'Собирающее зеркало',color:'#d9e5ff',desc:'Сферическое зеркало собирает параллельные лучи в фокусе. F — фокус, C — центр кривизны (C = 2F).',fact:'Зеркальная формула 1/f = 1/a + 1/b, f = R/2. Если предмет дальше фокуса — изображение действительное и перевёрнутое, ближе — мнимое и прямое.'},
+  convex:{name:'Выпуклое зеркало',kind:'Рассеивающее зеркало',color:'#d9e5ff',desc:'Выпуклое зеркало рассеивает лучи. Изображение всегда мнимое, прямое и уменьшенное. Поэтому его ставят как зеркало заднего вида.',fact:'Фокус мнимый, f < 0 в формуле 1/f = 1/a + 1/b. Γ = −b/a, 0 < Γ < 1.'},
+  grating:{name:'Дифракционная решётка',kind:'Дифракция и интерференция',color:'#ffb86b',desc:'Решётка разлагает свет в спектр: красный отклоняется сильнее фиолетового. Центральный луч остаётся прямым.',fact:'Максимумы: d·sinθ = m·λ, где d = 1/N — период решётки, m — порядок.'}
+});
 defs.glass={name:'Цветное стекло',kind:'Светофильтр',color:'#9be3a8',desc:'Цветное стекло пропускает лучи одного цвета и поглощает остальные. Поэтому белый свет за зелёным стеклом становится зелёным и тусклее.',fact:'Поглощающий светофильтр: пропускание T зависит от длины волны. Поглощённая энергия превращается в тепло.'};
 Object.entries(LENS_TYPES).forEach(([type,l])=>{if(!defs[type])defs[type]={name:l.name+' линза',kind:'Оптический элемент',color:l.converging?'#8edcff':'#a6b5ff',desc:l.converging?'Собирающая линза: параллельные лучи после преломления сходятся к действительному фокусу.':'Рассеивающая линза: параллельные лучи после преломления расходятся, а их продолжения пересекаются в мнимом фокусе.',fact:'Форма линзы показана в поперечном сечении. Трассировка использует приближение тонкой линзы.'};});
 
@@ -138,13 +146,15 @@ function add(type){
   const anchor=selected?byId(selected):null;
   let x=anchor?anchor.x+130:330+Math.random()*150,y=anchor?anchor.y:310;
   if(type==='object'){
-    const optics=objects.filter(q=>isLensType(q.type)||q.type==='mirror');
-    const target=anchor&&(isLensType(anchor.type)||anchor.type==='mirror')?anchor:optics[0];
+    const optics=objects.filter(isOpt);
+    const target=anchor&&isOpt(anchor)?anchor:optics[0];
     if(target){x=target.x-180;y=target.y;}
   }
   const o={id:nextId++,type,x,y};
   if(isLensType(type))Object.assign(o,{f:lensConverging(o)?150:-150,diam:150,material:'glass'});
-  if(type==='prism')Object.assign(o,{size:120,apex:0,material:'BK7'});
+  if(isPrism(type))Object.assign(o,{size:type==='prism'?120:100,apex:0,material:'BK7'});
+  if(isCurved(type))Object.assign(o,{f:100,diam:160,angle:0});
+  if(type==='grating')Object.assign(o,{lines:300,h:200});
   if(type==='mirror')Object.assign(o,{length:160,angle:0});
   if(type==='screen')Object.assign(o,{w:8,h:230,angle:0,showHud:false,hudX:24,hudY:140});
   if(type==='laser')Object.assign(o,{angle:0,color:'#ff525e',wave:650,beams:5,spacing:8});
@@ -174,15 +184,19 @@ function renderPanel(){
   if(o.type==='screen')controls=`${range('Высота экрана','h',100,300,10,'мм')}${range('Угол экрана','angle',-90,90,1,'°')}<div style="margin:12px 0"><label style="display:flex;align-items:center;gap:10px;cursor:pointer;color:var(--on)"><input type="checkbox" id="chk-hud" ${o.showHud?'checked':''} style="accent-color:var(--pr);width:18px;height:18px"><b>Показывать миниатюру экрана</b></label></div><div class="note" style="margin-top:6px">Миниатюра находится в левой панели приборов.</div>`;
   if(o.type==='object')controls=`${range('Высота предмета (минус — стрелка вниз)','height',-400,400,5,'мм')}<div class="note">Перемещай стрелку по сцене. Для построения изображения размести её слева от линзы или перед зеркалом.</div>`;
   if(o.type==='glass')controls=`${range('Пропускаемая длина волны (центр)','wl',400,700,5,'нм')}${range('Ширина полосы пропускания','bw',5,300,5,'нм')}${range('Высота стекла','h',60,300,10,'мм')}`;
+  if(o.type==='slab'||o.type==='rprism')controls=`${range('Размер','size',70,180,5,'мм')}${range('Поворот','apex',-180,180,1,'°')}<div class="note" style="margin-top:6px">Стекло BK7: показатель преломления зависит от длины волны.</div>`;
+  if(isCurved(o.type))controls=`${range('Фокусное расстояние','f',50,300,5,'мм')}${range('Размер зеркала','diam',60,260,10,'мм')}${range('Сторона (0° — смотрит влево, 180° — вправо)','angle',0,180,180,'°')}`;
+  if(o.type==='grating')controls=`${range('Штрихов на 1 мм','lines',50,1000,10,'1/мм')}${range('Высота решётки','h',60,300,10,'мм')}`;
   if(o.type==='ruler')controls=`${range('Длина линейки','length',80,2000,10,'мм')}${range('Поворот','angle',-180,180,1,'°')}`;
   if(o.type==='protractor')controls=`${range('Радиус транспортира','radius',50,150,5,'мм')}${range('Поворот','angle',-180,180,1,'°')}`;
 
   const panelTitle=isLensType(o.type)?(LENS_TYPES[o.type].name+' линза'):d.name;
   const imageInfo=getImageAnalysis(o);
-  const analysisMarkup=o.type==='glass'?'<div class="section" id="glass-info"></div>':imageInfo?`<div class="section" id="panel-analysis">${panelAnalysisInner(imageInfo)}</div>`:'';
+  const analysisMarkup=o.type==='grating'?'<div class="section" id="grating-info"></div>':o.type==='glass'?'<div class="section" id="glass-info"></div>':imageInfo?`<div class="section" id="panel-analysis">${panelAnalysisInner(imageInfo)}</div>`:'';
   $('#panel').innerHTML=`<button class="x" id="close">✕</button><div class="hero"><div class="orb"></div><div><div class="kind">${d.kind}</div><h2>${panelTitle}</h2></div></div><p class="fact">${d.desc}</p><div class="grid"><div class="tile"><small>Координата X</small><b>${o.x.toFixed(0)} мм</b></div><div class="tile"><small>Координата Y</small><b>${o.y.toFixed(0)} мм</b></div></div><div class="section"><h3>Параметры элемента</h3>${controls}<button class="btn secondary" id="delete">Удалить элемент</button></div>${analysisMarkup}<div class="section"><h3>Физика эксперимента · ${modeName()}</h3><p class="note">${educationLevel===7?d.desc+' Наблюдай, куда направлены лучи и где появляется изображение.':d.fact+(isLensType(o.type)||o.type==='object'?' Для тонкой линзы: 1/f = 1/a + 1/b; Γ = h′/h = −b/a. Знак b показывает, действительное изображение или мнимое.':'')}</p><p class="note" style="margin-top:8px">Модель линзы использует приближение тонкой линзы и параксиальные лучи; аберрации и толщину реальной линзы она не моделирует.</p></div>`;
   $('#close').onclick=()=>select(null);
   {const gi=$('#glass-info');if(gi)gi.innerHTML=glassInfoHTML(o)}
+  {const gr=$('#grating-info');if(gr)gr.innerHTML=gratingInfoHTML(o)}
   $('#delete').onclick=()=>{objects=objects.filter(q=>q.id!==o.id);select(null);toast('Элемент удалён')};
   
   let chkHud=$('#chk-hud');
@@ -217,8 +231,14 @@ function refract(I,N,n1,n2){
 }
 function norm(v){let l=Math.hypot(v.x,v.y)||1;return{x:v.x/l,y:v.y/l}}
 function raySegment(p,d,a,b){let v={x:b.x-a.x,y:b.y-a.y},den=d.x*v.y-d.y*v.x;if(Math.abs(den)<1e-8)return null;let q={x:a.x-p.x,y:a.y-p.y},t=(q.x*v.y-q.y*v.x)/den,u=(q.x*d.y-q.y*d.x)/den;return t>1e-4&&u>=0&&u<=1?{t,u,x:p.x+d.x*t,y:p.y+d.y*t}:null}
-function prismVerts(o){let s=o.size/2,ang=(o.apex||0)*Math.PI/180;let pts=[{x:-s,y:s*.72},{x:s,y:s*.72},{x:0,y:-s}];return pts.map(p=>({x:o.x+p.x*Math.cos(ang)-p.y*Math.sin(ang),y:o.y+p.x*Math.sin(ang)+p.y*Math.cos(ang)}))}
-function hitPrism(p,d,o){let v=prismVerts(o),hits=[];for(let i=0;i<3;i++){let a=v[i],b=v[(i+1)%3],h=raySegment(p,d,a,b);if(h){let edge=norm({x:b.x-a.x,y:b.y-a.y}),N={x:edge.y,y:-edge.x};hits.push({...h,N,edge,i})}}hits.sort((a,b)=>a.t-b.t);return hits[0]||null}
+function prismVerts(o){
+  const s=o.size/2,ang=(o.apex||0)*Math.PI/180;
+  const pts=o.type==='slab'?[{x:-s*.7,y:-s},{x:s*.7,y:-s},{x:s*.7,y:s},{x:-s*.7,y:s}]
+    :o.type==='rprism'?[{x:-s,y:s},{x:s,y:s},{x:-s,y:-s}]
+    :[{x:-s,y:s*.72},{x:s,y:s*.72},{x:0,y:-s}];
+  return pts.map(p=>({x:o.x+p.x*Math.cos(ang)-p.y*Math.sin(ang),y:o.y+p.x*Math.sin(ang)+p.y*Math.cos(ang)}));
+}
+function hitPrism(p,d,o){const v=prismVerts(o),n=v.length,hits=[];for(let i=0;i<n;i++){const a=v[i],b=v[(i+1)%n],h=raySegment(p,d,a,b);if(h){const edge=norm({x:b.x-a.x,y:b.y-a.y}),N={x:edge.y,y:-edge.x};hits.push({...h,N,edge,i})}}hits.sort((a,b)=>a.t-b.t);return hits[0]||null}
 
 function indexGlass(l){let um=l/1000;return 1.5046+0.00420/(um*um)}
 
@@ -234,10 +254,14 @@ function wavelengthColor(w){
   return `rgb(${Math.round(255*r*f)},${Math.round(255*g*f)},${Math.round(255*b*f)})`;
 }
 
+function isCurved(t){return t==='concave'||t==='convex'}
+function isPrism(t){return t==='prism'||t==='slab'||t==='rprism'}
+function isOpt(q){return isLensType(q.type)||q.type==='mirror'||isCurved(q.type)}
+function mirrorL(o){return Math.min((o.diam||160)/2,1.2*Math.abs(o.f||100))}
 function fmt(v){return Number.isFinite(v)?(Math.abs(v)>=100? v.toFixed(0):v.toFixed(1)).replace('.',','):'∞'}
 function opticalElementFor(obj){
   if(!obj)return null;
-  return objects.filter(q=>(isLensType(q.type)||q.type==='mirror') && Math.abs(q.x-obj.x)>1e-4)
+  return objects.filter(q=>isOpt(q) && Math.abs(q.x-obj.x)>1e-4)
     .sort((a,b)=>Math.abs(a.x-obj.x)-Math.abs(b.x-obj.x))[0]||null;
 }
 function objectFor(element){
@@ -271,6 +295,16 @@ function glassInfoHTML(o){
     :`T(λ) = 0,92·exp[−(λ−λ₀)² / (2σ²)], σ = Δλ/2,355 = ${fmt(sg)} нм. Например, λ = ${sl} нм: λ−λ₀ = ${dd} нм, T = 0,92·exp(−${(dd*dd/(2*sg*sg)).toFixed(2)}) = ${fmt(Ts*100)}%. Яркость за стеклом I = T·I₀; доля 1−T = ${fmt((1-Ts)*100)}% поглощается и переходит в тепло. 0,92 — потери на отражение (≈4% на каждой поверхности). Несколько стёкол подряд: T перемножаются.`;
   return `<h3>Что пропускает стекло</h3><div class="verdict ${ex.c}">${ex.t}</div><div style="margin:10px 0">${rows}</div><p class="note">${txt}</p>`;
 }
+function gratingInfoHTML(o){
+  const lasers=objects.filter(q=>q.type==='laser'),useW=objects.some(q=>q.type==='bulb')||!lasers.length;
+  const ls=[...new Set([...lasers.map(q=>q.wave||650),...(useW?WAVE:[])])].sort((a,b)=>b-a),dnm=1e6/(o.lines||300);
+  const ang=(l,m)=>{const s=m*l/dnm;return Math.abs(s)<1?Math.asin(s)*180/Math.PI:null};
+  const rows=ls.map(l=>{const a1=ang(l,1),a2=ang(l,2);return `<div class="grow"><span class="gl"><i class="sw" style="background:${wavelengthColor(l)}"></i>${l} нм</span><span style="flex:1">1-й порядок: ${a1===null?'—':fmt(a1)+'°'} · 2-й: ${a2===null?'—':fmt(a2)+'°'}</span></div>`}).join('');
+  const txt=educationLevel===7
+    ?'Решётка раскладывает свет в спектр: чем длиннее волна (красный), тем сильнее луч отклоняется. Центральный луч (нулевой порядок) не разлагается. Боковые лучи слабее по яркости.'
+    :`Условие максимумов: d·sinθ = m·λ (при косом падении d·(sinθ − sinφ) = m·λ), где d = 1/N = ${fmt(dnm/1000)} мкм — период решётки, m — порядок. Порядок существует, пока |sinθ| ≤ 1. Для красного (650 нм) sinθ₁ = λ/d = ${fmt(650/dnm)}. Яркость порядков для щели a = d/2: I_m ∝ sinc²(mπ/2), поэтому чётные порядки пропадают.`;
+  return `<h3>Углы отклонения (при нормальном падении)</h3><div style="margin:10px 0">${rows}</div><p class="note">${txt}</p>`;
+}
 function panelAnalysisInner(i){return `<h3>Изображение предмета</h3><p class="note"><b>${i.headline}</b><br>${i.explanation}</p><div class="analysis-values"><span>a · расстояние до предмета<b>${fmt(i.do)} мм</b></span><span>b · расстояние до изображения<b>${fmt(i.di)} мм</b></span><span>f · фокус<b>${i.f===null?'—':fmt(i.f)+' мм'}</b></span><span>Γ · увеличение<b>${i.m===null?'—':fmt(i.m)}</b></span><span>h · высота предмета<b>${fmt(i.h0)} мм</b></span><span>h′ · высота изображения<b>${i.h1==null?'—':fmt(i.h1)+' мм'}</b></span><span>B над осью<b>${fmt(i.y0)} мм</b></span><span>B′ над осью<b>${i.y1==null?'—':fmt(i.y1)+' мм'}</b></span></div>`}
 // Система тонких линз: изображение предыдущей линзы — предмет для следующей (1/f = 1/a + 1/b, Γ = Γ1·Γ2·…)
 function getImageAnalysis(subject){
@@ -281,11 +315,23 @@ function getImageAnalysis(subject){
 }
 function getImageAnalysisCore(subject){
   const isObject=subject?.type==='object';
-  const isOptical=!!subject&&(isLensType(subject.type)||subject.type==='mirror');
+  const isOptical=!!subject&&isOpt(subject);
   if(!isObject&&!isOptical)return null;
   const obj=isObject?subject:objectFor(subject);
   const first=obj?opticalElementFor(obj):null;
   if(!obj||!first)return null;
+  if(isCurved(first.type)){
+    const fr=Math.cos((first.angle||0)*Math.PI/180)>=0?-1:1,a=(obj.x-first.x)*fr,f=first.type==='concave'?Math.abs(first.f):-Math.abs(first.f);
+    const base={obj,element:first,first,stages:[],kind:'mirror',m:null,imageX:null,imageTipY:null,imageBaseY:null,virtual:false,real:false,f};
+    if(a<=1e-4)return{...base,headline:'Предмет за зеркалом',explanation:'Отражающая сторона зеркала смотрит в другую сторону, поэтому изображения нет. Поверни зеркало на 180° или перенеси предмет.',do:Math.abs(a),di:Infinity};
+    const denom=1/f-1/a;
+    if(Math.abs(denom)<1e-5)return{...base,headline:'Изображение на бесконечности',explanation:'Предмет в фокусе зеркала: отражённые лучи идут параллельно, конечного изображения нет.',do:a,di:Infinity};
+    const b=1/denom,m=-b/a,ax=first.y,tipY=ax+m*(obj.y-(obj.height??80)-ax),baseY=ax+m*(obj.y-ax),imageX=first.x+fr*b,real=b>0,virtual=b<0;
+    const orientation=m<0?'перевёрнутое':'прямое',size=Math.abs(m)>1.02?'увеличенное':Math.abs(m)<.98?'уменьшенное':'одинакового размера';
+    const note=real?`Изображение получается перед зеркалом, около x = ${fmt(imageX)} мм. Экран ставь там (в модели до отражения экран свет пропускает).`:'Мнимое изображение за зеркалом на экране не получить.';
+    const explanation=educationLevel===7?(real?'После отражения лучи действительно пересекаются. ':'Пересекаются только продолжения лучей за зеркалом. ')+note:`Сферическое зеркало: 1/f = 1/a + 1/b, f = R/2 = ${fmt(f)} мм (${f>0?'вогнутое':'выпуклое'}). a = ${fmt(a)} мм, b = ${fmt(b)} мм, Γ = −b/a = ${fmt(m)}. ${real?'b > 0: изображение действительное.':'b < 0: изображение мнимое.'} ${note}`;
+    return{...base,headline:`${real?'Действительное':'Мнимое'} · ${orientation} · ${size}`,explanation,do:a,di:b,m,imageX,imageTipY:tipY,imageBaseX:imageX,imageBaseY:baseY,virtual,real,orientation,size,matchedScreen:null};
+  }
   if(first.type==='mirror'){
     const element=first,tip={x:obj.x,y:obj.y-(obj.height??80)},base={x:obj.x,y:obj.y};
     const it=reflectPointAcrossLine(tip,element),ib=reflectPointAcrossLine(base,element);
@@ -293,7 +339,7 @@ function getImageAnalysisCore(subject){
     return{obj,element,kind:'mirror',headline:'Мнимое · прямое · одинакового размера',explanation:'Плоское зеркало создаёт изображение за зеркалом. Оно не получается на экране; расстояние от изображения до зеркала равно расстоянию от предмета до зеркала.',do:dist,di:-dist,f:null,m:1,imageX:it.x,imageTipY:it.y,imageBaseX:ib.x,imageBaseY:ib.y,virtual:true,real:false};
   }
   const s=Math.sign(first.x-obj.x)||1,chain=[];
-  for(const el of objects.filter(q=>(isLensType(q.type)||q.type==='mirror')&&s*(q.x-obj.x)>1e-4).sort((p,q)=>s*(p.x-q.x))){if(el.type==='mirror')break;chain.push(el)}
+  for(const el of objects.filter(q=>isOpt(q)&&s*(q.x-obj.x)>1e-4).sort((p,q)=>s*(p.x-q.x))){if(el.type==='mirror'||isCurved(el.type))break;chain.push(el)}
   let X=obj.x,tipY=obj.y-(obj.height??80),baseY=obj.y,m=1,inf=false;const stages=[];
   for(const L of chain){
     const a=s*(L.x-X),f=lensConverging(L)?Math.abs(L.f||150):-Math.abs(L.f||150);
@@ -322,8 +368,8 @@ function getImageAnalysisCore(subject){
     :`Тонкая линза: 1/f = 1/a + 1/b. Здесь a = ${fmt(stages[0].a)} мм, b = ${fmt(di)} мм; Γ = −b/a = ${fmt(m)}. ${real?'b > 0: изображение действительное.':'b < 0: изображение мнимое.'} ${screenNote}`;
   return{obj,element,first,stages,kind:'lens',headline:`${kind} · ${orientation} · ${size}`,explanation,do:stages[0].a,di,f:multi?null:last.f,m,imageX,imageTipY,imageBaseX:imageX,imageBaseY,virtual,real,orientation,size,matchedScreen};
 }
-function trace(start,dir,lambda,color){
-  let p={...start},d=norm(dir),path=[{...p}],events=[],medium=null,steps=0,I=1,dim=false,segI=[];
+function trace(start,dir,lambda,color,opts={}){
+  let p={...start},d=norm(dir),path=[{...p}],events=[],medium=null,steps=0,I=opts.I??1,dim=(opts.I??1)<1,segI=[],depth=opts.depth||0,reflected=false,hasCM=objects.some(q=>isCurved(q.type));
   for(;steps<12;steps++){
     let best=null,ob=null,hitType='';
     for(const o of objects){
@@ -332,19 +378,24 @@ function trace(start,dir,lambda,color){
         let t=(o.x-p.x)/d.x;
         if(t>1e-3){let y=p.y+d.y*t;if(Math.abs(y-o.y)<o.diam/2&&(!best||t<best.t)){best={t,x:o.x,y};ob=o;hitType='lens'}}
       }
-      else if(o.type==='glass'){
+      else if(o.type==='glass'||o.type==='grating'){
         if(Math.abs(d.x)<1e-5)continue;
         let t=(o.x-p.x)/d.x;
-        if(t>1e-3){let y=p.y+d.y*t;if(Math.abs(y-o.y)<o.h/2&&(!best||t<best.t)){best={t,x:o.x,y};ob=o;hitType='glass'}}
+        if(t>1e-3){let y=p.y+d.y*t;if(Math.abs(y-o.y)<o.h/2&&(!best||t<best.t)){best={t,x:o.x,y};ob=o;hitType=o.type}}
       }
       else if(o.type==='mirror'){
         let L=o.length/2,ang=o.angle*Math.PI/180,a={x:o.x+Math.sin(ang)*L,y:o.y-Math.cos(ang)*L},b={x:o.x-Math.sin(ang)*L,y:o.y+Math.cos(ang)*L},h=raySegment(p,d,a,b);
         if(h&&(!best||h.t<best.t)){best=h;ob=o;hitType='mirror'}
       }
-      else if(o.type==='prism'){
+      else if(isCurved(o.type)){
+        const L=mirrorL(o),an=(o.angle||0)*Math.PI/180,a={x:o.x+Math.sin(an)*L,y:o.y-Math.cos(an)*L},b={x:o.x-Math.sin(an)*L,y:o.y+Math.cos(an)*L},h=raySegment(p,d,a,b);
+        if(h&&(!best||h.t<best.t)){best=h;ob=o;hitType='cmirror'}
+      }
+      else if(isPrism(o.type)){
         let h=hitPrism(p,d,o);if(h&&(!best||h.t<best.t)){best=h;ob=o;hitType='prism'}
       }
       else if(o.type==='screen'){
+        if(hasCM&&!reflected)continue; // упрощение: до отражения экран свет пропускает
         let ang=(o.angle||0)*Math.PI/180, L=o.h/2;
         let a={x:o.x-Math.sin(ang)*L, y:o.y+Math.cos(ang)*L}, b={x:o.x+Math.sin(ang)*L, y:o.y-Math.cos(ang)*L};
         let h=raySegment(p,d,a,b);
@@ -354,6 +405,27 @@ function trace(start,dir,lambda,color){
     if(!best){path.push({x:p.x+d.x*1500,y:p.y+d.y*1500});segI.push(I);break}
     let q={x:best.x,y:best.y};path.push(q);segI.push(I);
     if(hitType==='screen'){events.push({type:'screen',object:ob,point:q});return{path,hit:q,screen:ob,color,events,I,dim,segI}}
+    if(hitType==='cmirror'){
+      const an=ob.angle*Math.PI/180,n={x:Math.cos(an),y:Math.sin(an)},tt={x:-Math.sin(an),y:Math.cos(an)},u=d.x*n.x+d.y*n.y;
+      events.push({type:'mirror',object:ob,point:q});
+      if(u<=0)return{path,color,events,I:0,dim,segI,absorbed:true}; // тыльная сторона не отражает
+      const v=d.x*tt.x+d.y*tt.y,hh=(q.x-ob.x)*tt.x+(q.y-ob.y)*tt.y,f=ob.type==='concave'?Math.abs(ob.f):-Math.abs(ob.f);
+      const dl=norm({x:-1,y:v/u-hh/f}); // отражение: нормальная составляющая меняет знак, наклон — как у тонкой линзы
+      d={x:dl.x*n.x+dl.y*tt.x,y:dl.x*n.y+dl.y*tt.y};reflected=true;
+      p={x:q.x+d.x*.05,y:q.y+d.y*.05};continue;
+    }
+    if(hitType==='grating'){
+      // d·(sinθ − sinφ) = m·λ; интенсивность порядков ∝ sinc²(mπ/2) для щели a = d/2
+      const ks=lambda*(ob.lines||300)/1e6,sx=Math.sign(d.x)||1,ords=[];let sum=0;
+      for(let m=-5;m<=5;m++){const sn=d.y+m*ks;if(Math.abs(sn)>=.999)continue;const w=m===0?1:Math.pow(Math.sin(m*Math.PI/2)/(m*Math.PI/2),2);if(w<.01)continue;ords.push({m,sn,w});sum+=w}
+      events.push({type:'grating',object:ob,point:q});
+      const I0=I,z=ords.find(od=>od.m===0);
+      for(const od of ords){if(od.m===0||depth>=2||I0*od.w/sum<.02)continue;
+        extraRays.push(trace(q,{x:sx*Math.sqrt(1-od.sn*od.sn),y:od.sn},lambda,color,{I:I0*od.w/sum,depth:depth+1}))}
+      if(!z)return{path,color,events,I:0,dim:true,segI,absorbed:true};
+      I=I0*z.w/sum;dim=true;if(I<.03)return{path,color,events,I:0,dim,segI,absorbed:true};
+      p={x:q.x+d.x*.05,y:q.y+d.y*.05};continue;
+    }
     if(hitType==='glass'){
       const T=glassT(ob,lambda);I*=T;dim=true;
       events.push({type:'glass',object:ob,point:q,T});
@@ -380,7 +452,7 @@ function trace(start,dir,lambda,color){
       p={x:q.x+d.x*.05,y:q.y+d.y*.05};
     }
     else if(hitType==='prism'){
-      let verts=prismVerts(ob),idx=best.i,a=verts[idx],b=verts[(idx+1)%3],edge=norm({x:b.x-a.x,y:b.y-a.y}),N={x:edge.y,y:-edge.x};
+      let verts=prismVerts(ob),idx=best.i,a=verts[idx],b=verts[(idx+1)%verts.length],edge=norm({x:b.x-a.x,y:b.y-a.y}),N={x:edge.y,y:-edge.x};
       const entering=medium!==ob.id;
       const n1=entering?1:indexGlass(lambda),n2=entering?indexGlass(lambda):1;
       let nd=refract(d,N,n1,n2);
@@ -394,7 +466,7 @@ function trace(start,dir,lambda,color){
 }
 
 function rays(){
-  let out=[];
+  let out=[];extraRays=[];
   for(const o of objects){
     if(o.type==='laser'){
       let a=(o.angle||0)*Math.PI/180,count=Math.max(1,Math.min(11,o.beams||5)),sp=o.spacing||8;
@@ -417,8 +489,8 @@ function rays(){
     const pts=[{name:'A',p:{x:obj.x,y:obj.y-(obj.height??80)},color:'#ffc66d'},{name:'B',p:{x:obj.x,y:obj.y},color:'#6fd3ff'}];
     for(const {name,p,color} of pts){
       const targets=[];
-      if(isLensType(element.type)){
-        const ap=(element.diam||150)/2*.82,cl=y=>Math.max(element.y-ap,Math.min(element.y+ap,y));
+      if(isLensType(element.type)||isCurved(element.type)){
+        const ap=(isCurved(element.type)?mirrorL(element):(element.diam||150)/2)*.82,cl=y=>Math.max(element.y-ap,Math.min(element.y+ap,y));
         const ys=name==='A'?[p.y,element.y,element.y+(p.y-element.y)*.48]:[element.y-ap*.6,element.y,element.y+ap*.6];
         ys.forEach(y=>targets.push({x:element.x,y:cl(y)}));
       }else{
@@ -432,7 +504,7 @@ function rays(){
       });
     }
   }
-  return out;
+  return out.concat(extraRays);
 }
 
 function drawLensShape(c,o){
@@ -513,14 +585,16 @@ let lastSig='';
 function draw(){
   requestAnimationFrame(draw);
   // Перерисовываем только если что-то изменилось: в покое компьютер почти не нагружается.
-  const sig=JSON.stringify([objects,offset,scale,selected,showRays,showLabels,showGrid,showExtensions,educationLevel,W,H,DPR]);
+  const sig=JSON.stringify([objects,offset,scale,selected,showRays,showLabels,showGrid,showExtensions,educationLevel,snapStep,W,H,DPR]);
   if(sig===lastSig)return;lastSig=sig;
   ctx.setTransform(DPR,0,0,DPR,0,0);
   ctx.clearRect(0,0,W,H);
     if(showGrid){
     ctx.strokeStyle='rgba(208,188,255,.09)';ctx.lineWidth=1;
-    for(let x=offset.x%(50*scale);x<W;x+=50*scale){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
-    for(let y=offset.y%(50*scale);y<H;y+=50*scale){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+    const gx=(o0,s)=>((o0%s)+s)%s;
+    if(snapStep===10){ctx.strokeStyle='rgba(208,188,255,.045)';const s2=10*scale;ctx.beginPath();for(let x=gx(offset.x,s2);x<W;x+=s2){ctx.moveTo(x,0);ctx.lineTo(x,H)}for(let y=gx(offset.y+310*scale,s2);y<H;y+=s2){ctx.moveTo(0,y);ctx.lineTo(W,y)}ctx.stroke();ctx.strokeStyle='rgba(208,188,255,.09)'}
+    ctx.beginPath();for(let x=gx(offset.x,50*scale);x<W;x+=50*scale){ctx.moveTo(x,0);ctx.lineTo(x,H)}ctx.stroke()
+    ctx.beginPath();for(let y=gx(offset.y+310*scale,50*scale);y<H;y+=50*scale){ctx.moveTo(0,y);ctx.lineTo(W,y)}ctx.stroke()
   }
 
   ctx.save();ctx.translate(offset.x,offset.y);ctx.scale(scale,scale);
@@ -583,13 +657,13 @@ function draw(){
       }
       ctx.restore();
     }
-    if(o.type==='prism'){
+    if(isPrism(o.type)){
       let v=prismVerts(o);ctx.beginPath();
       v.forEach((p,i)=>i?ctx.lineTo(p.x-o.x,p.y-o.y):ctx.moveTo(p.x-o.x,p.y-o.y));
       ctx.closePath();
       let gg=ctx.createLinearGradient(-o.size/2,0,o.size/2,0);gg.addColorStop(0,'rgba(150,180,255,.16)');gg.addColorStop(1,'rgba(220,180,255,.25)');
       ctx.fillStyle=gg;ctx.fill();ctx.stroke();
-      ctx.beginPath();ctx.moveTo(-o.size*.23,0);ctx.lineTo(o.size*.23,0);ctx.stroke();
+      if(o.type==='prism'){ctx.beginPath();ctx.moveTo(-o.size*.23,0);ctx.lineTo(o.size*.23,0);ctx.stroke()}
     }
     if(o.type==='mirror'){
       ctx.rotate(o.angle*Math.PI/180);ctx.beginPath();ctx.moveTo(0,-o.length/2);ctx.lineTo(0,o.length/2);
@@ -597,6 +671,18 @@ function draw(){
       ctx.lineWidth=1/scale;ctx.strokeStyle='#8b9fca';
       for(let y=-o.length/2;y<o.length/2;y+=12){ctx.beginPath();ctx.moveTo(4,y);ctx.lineTo(12,y+7);ctx.stroke()}
     }
+    if(isCurved(o.type)){
+      const ang=(o.angle||0)*Math.PI/180,fa=Math.abs(o.f),R=2*fa,L=mirrorL(o),ph=Math.asin(Math.min(.95,L/R)),cv=o.type==='concave';
+      ctx.rotate(ang);ctx.strokeStyle='#d9e5ff';ctx.lineWidth=6/scale;ctx.beginPath();
+      if(cv)ctx.arc(-R,0,R,-ph,ph);else ctx.arc(R,0,R,Math.PI-ph,Math.PI+ph);
+      ctx.stroke();ctx.lineWidth=1/scale;ctx.strokeStyle='#8b9fca';
+      for(let k=-6;k<=6;k++){const f2=k/6*ph,px=cv?-R+R*Math.cos(f2):R-R*Math.cos(f2),py=R*Math.sin(f2),dx=Math.cos(f2)*9,dy=(cv?1:-1)*Math.sin(f2)*9+6;ctx.beginPath();ctx.moveTo(px+3,py);ctx.lineTo(px+3+dx,py+dy);ctx.stroke()}
+      ctx.setLineDash([4/scale,4/scale]);ctx.strokeStyle='rgba(255,255,255,.55)';ctx.fillStyle='#e8eeff';ctx.font=`500 ${11/scale}px "Roboto Flex"`;ctx.textAlign='center';
+      const fx=(cv?-1:1)*fa;
+      [[fx,'F'],[2*fx,'C']].forEach(([x,t])=>{ctx.beginPath();ctx.moveTo(x,-12);ctx.lineTo(x,12);ctx.stroke();ctx.save();ctx.translate(x,-18/scale);ctx.rotate(-ang);ctx.fillText(t,0,0);ctx.restore()});
+      ctx.setLineDash([]);
+    }
+    if(o.type==='grating'){ctx.strokeStyle='#ffb86b';ctx.fillStyle='#ffb86b';ctx.shadowColor='#ffb86b';ctx.globalAlpha=.22;ctx.fillRect(-5,-o.h/2,10,o.h);ctx.globalAlpha=1;ctx.lineWidth=1.2/scale;ctx.strokeRect(-5,-o.h/2,10,o.h);ctx.lineWidth=1/scale;for(let y=-o.h/2+5;y<o.h/2;y+=6){ctx.beginPath();ctx.moveTo(-3,y);ctx.lineTo(3,y);ctx.stroke()}}
     if(o.type==='glass'){const gc=glassColor(o.wl);ctx.strokeStyle=gc;ctx.fillStyle=gc;ctx.shadowColor=gc;ctx.globalAlpha=.4;ctx.fillRect(-6,-o.h/2,12,o.h);ctx.globalAlpha=1;ctx.strokeRect(-6,-o.h/2,12,o.h)}
     if(o.type==='screen'){
       ctx.rotate((o.angle||0)*Math.PI/180);
@@ -615,7 +701,7 @@ function draw(){
     ctx.shadowBlur=0;
     if(is){
       ctx.setLineDash([5/scale,5/scale]);ctx.strokeStyle='#eaddff';ctx.lineWidth=1/scale;
-      ctx.beginPath();ctx.arc(0,0,(o.type==='prism'?o.size:o.type==='screen'||o.type==='glass'?o.h:o.type==='mirror'?o.length:o.type==='ruler'?o.length:o.type==='protractor'?(o.radius||90)*1.5:o.diam||34)*.68,0,7);ctx.stroke();ctx.setLineDash([]);
+      ctx.beginPath();ctx.arc(0,0,(isPrism(o.type)?o.size:o.type==='screen'||o.type==='glass'||o.type==='grating'?o.h:o.type==='mirror'?o.length:o.type==='ruler'?o.length:o.type==='protractor'?(o.radius||90)*1.5:o.diam||34)*.68,0,7);ctx.stroke();ctx.setLineDash([]);
     }
     ctx.restore();
     if(showLabels){
@@ -625,13 +711,14 @@ function draw(){
       const maxWidth=150/scale, words=label.split(' '), lines=[];let line='';
       for(const word of words){const test=line?line+' '+word:word;if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=word}else line=test}
       if(line)lines.push(line);
-      const baseY=o.y+((o.type==='screen'||o.type==='glass')?o.h/2:o.type==='object'?20:o.type==='ruler'?Math.abs(Math.sin((o.angle||0)*Math.PI/180))*(o.length||220)/2+Math.abs(Math.cos((o.angle||0)*Math.PI/180))*12+23:o.type==='protractor'?(o.radius||90)+20:Math.max(o.diam||o.size||o.length||30,38)/2)+18;
+      const baseY=o.y+((o.type==='screen'||o.type==='glass'||o.type==='grating')?o.h/2:o.type==='object'?20:o.type==='ruler'?Math.abs(Math.sin((o.angle||0)*Math.PI/180))*(o.length||220)/2+Math.abs(Math.cos((o.angle||0)*Math.PI/180))*12+23:o.type==='protractor'?(o.radius||90)+20:Math.max(o.diam||o.size||o.length||30,38)/2)+18;
       lines.slice(0,2).forEach((txt,i)=>ctx.fillText(txt,o.x,baseY+i*14/scale));
     }
   }
   const analyses=objects.filter(q=>q.type==='object').map(q=>getImageAnalysis(q)),selObj=byId(selected);
   const analysis=(selObj&&selObj.type==='object'?getImageAnalysis(selObj):analyses[0])||null;
   analyses.forEach(a=>drawImageAnalysis(ctx,a,allRays));
+  {const gr=$('#grating-info');if(gr&&selObj&&selObj.type==='grating'){const h=gratingInfoHTML(selObj);if(gr._h!==h){gr._h=h;gr.innerHTML=h}}}
   {const gi=$('#glass-info');if(gi&&selObj&&selObj.type==='glass'){const h=glassInfoHTML(selObj);if(gi._h!==h){gi._h=h;gi.innerHTML=h}}}
   {const pa=$('#panel-analysis');if(pa&&selObj){const ii=getImageAnalysis(selObj);if(ii){const h=panelAnalysisInner(ii);if(pa._h!==h){pa._h=h;pa.innerHTML=h}}}}
   ctx.restore();
@@ -700,7 +787,9 @@ function hit(o,x,y){
     return Math.abs(lx)<20&&Math.abs(ly)<o.h/2;
   }
   if(o.type==='glass')return Math.abs(dx)<22&&Math.abs(dy)<o.h/2;
-  if(o.type==='prism')return Math.hypot(dx,dy)<o.size*.8;
+  if(isPrism(o.type))return Math.hypot(dx,dy)<o.size*.8;
+  if(isCurved(o.type))return Math.hypot(dx,dy)<mirrorL(o)+18;
+  if(o.type==='grating')return Math.abs(dx)<22&&Math.abs(dy)<o.h/2;
   if(o.type==='mirror')return Math.hypot(dx,dy)<o.length/2+18;
   if(o.type==='object')return Math.abs(dx)<24&&dy<Math.max(18,20-(o.height??80))&&dy>-Math.max(o.height??80,0)-20;
   if(o.type==='ruler'){const a=-(o.angle||0)*Math.PI/180,lx=dx*Math.cos(a)-dy*Math.sin(a),ly=dx*Math.sin(a)+dy*Math.cos(a);return Math.abs(lx)<(o.length||220)/2+8&&Math.abs(ly)<22}
@@ -710,13 +799,18 @@ function hit(o,x,y){
 
 let pointers=new Map(),pinch=0;
 canvas.onpointerdown=e=>{canvas.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===2){let a=[...pointers.values()];pinch=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);drag=null;return}let x=wx(e.clientX),y=wy(e.clientY);let o=[...objects].reverse().find(q=>hit(q,x,y));if(o){select(o.id);drag={id:o.id,dx:x-o.x,dy:y-o.y,startX:e.clientX,startY:e.clientY,moved:false}}else{select(null);drag={pan:true,x:e.clientX,y:e.clientY,ox:offset.x,oy:offset.y}}};
-canvas.onpointermove=e=>{if(!pointers.has(e.pointerId))return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===2){let a=[...pointers.values()],d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);if(pinch){let factor=d/pinch;scale=Math.max(.45,Math.min(2.2,scale*factor));pinch=d}return}if(!drag)return;if(drag.id&&Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>4)drag.moved=true;if(drag.pan){offset.x=drag.ox+e.clientX-drag.x;offset.y=drag.oy+e.clientY-drag.y}else{let o=byId(drag.id);if(o){o.x=wx(e.clientX)-drag.dx;o.y=wy(e.clientY)-drag.dy;if(selected===o.id){let a=$('#panel .grid');if(a)a.innerHTML=`<div class="tile"><small>Координата X</small><b>${o.x.toFixed(0)} мм</b></div><div class="tile"><small>Координата Y</small><b>${o.y.toFixed(0)} мм</b></div>`}}}};
+canvas.onpointermove=e=>{if(!pointers.has(e.pointerId))return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===2){let a=[...pointers.values()],d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);if(pinch){let factor=d/pinch;scale=Math.max(.45,Math.min(2.2,scale*factor));pinch=d}return}if(!drag)return;if(drag.id&&Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>4)drag.moved=true;if(drag.pan){offset.x=drag.ox+e.clientX-drag.x;offset.y=drag.oy+e.clientY-drag.y}else{let o=byId(drag.id);if(o){let nx=wx(e.clientX)-drag.dx,ny=wy(e.clientY)-drag.dy;
+if(snapStep){const sn=(v,c)=>c+Math.round((v-c)/snapStep)*snapStep; // ось (y = 310) и x = 0 — узлы сетки
+  if(o.type==='ruler'){const Lh=(o.length||220)/2,a=(o.angle||0)*Math.PI/180,zx=sn(nx-Lh*Math.cos(a),0),zy=sn(ny-Lh*Math.sin(a),310);nx=zx+Lh*Math.cos(a);ny=zy+Lh*Math.sin(a)} // у линейки цепляется нулевая отметка
+  else{nx=sn(nx,0);ny=sn(ny,310)}}
+o.x=nx;o.y=ny;if(selected===o.id){let a=$('#panel .grid');if(a)a.innerHTML=`<div class="tile"><small>Координата X</small><b>${o.x.toFixed(0)} мм</b></div><div class="tile"><small>Координата Y</small><b>${o.y.toFixed(0)} мм</b></div>`}}}};
 function end(e){pointers.delete(e.pointerId);if(!pointers.size){drag=null;pinch=0}}canvas.onpointerup=end;canvas.onpointercancel=end;
 canvas.onwheel=e=>{e.preventDefault();let before=scale;scale=Math.max(.45,Math.min(2.2,scale*Math.exp(-e.deltaY*.001)));let x=e.clientX,y=e.clientY;offset.x=x-(x-offset.x)*scale/before;offset.y=y-(y-offset.y)*scale/before};
 
 $('#rays').onclick=e=>{showRays=!showRays;e.currentTarget.classList.toggle('on',showRays);e.currentTarget.textContent='Лучи: '+(showRays?'вкл.':'выкл.')};
 $('#labels').onclick=e=>{showLabels=!showLabels;e.currentTarget.classList.toggle('on',showLabels)};
 $('#grid').onclick=e=>{showGrid=!showGrid;e.currentTarget.classList.toggle('on',showGrid)};
+$('#snap').onclick=e=>{snapStep=snapStep===0?50:snapStep===50?10:0;e.currentTarget.textContent='Привязка: '+(snapStep?snapStep+' мм':'выкл.');e.currentTarget.classList.toggle('on',!!snapStep);if(snapStep&&!showGrid){showGrid=true;$('#grid').classList.add('on')}};
 $('#extensions').onclick=e=>{showExtensions=!showExtensions;e.currentTarget.classList.toggle('on',showExtensions);toast('Продолжения лучей '+(showExtensions?'включены':'выключены'))};
 $('#level').onclick=e=>{educationLevel=educationLevel===7?11:7;e.currentTarget.textContent='Режим: '+modeName();if(selected)renderPanel();toast('Режим пояснений: '+modeName())};
 $('#reset').onclick=()=>{objects=defaults();nextId=4;select(null);scale=1;offset={x:W/2-410,y:H/2-310};toast('Схема возвращена к исходному состоянию')};
@@ -732,6 +826,11 @@ const ELEMENT_CATALOG=[
   {type:'meniscusConcave',label:'Выпукло-вогнутая линза',category:'Линзы',keywords:'мениск рассеивающая'},
   {type:'prism',label:'🔺 Призма',category:'Преломление',keywords:'стекло дисперсия спектр'},
   {type:'mirror',label:'🪞 Плоское зеркало',category:'Отражение',keywords:'отражатель зеркало'},
+  {type:'slab',label:'▭ Стеклянная пластина',category:'Преломление',keywords:'прямоугольная четырёхугольная призма плоскопараллельная пластина смещение луча'},
+  {type:'rprism',label:'◣ Прямоугольная призма',category:'Преломление',keywords:'призма полное внутреннее отражение 45 перископ'},
+  {type:'concave',label:'🪞 Вогнутое зеркало',category:'Отражение',keywords:'сферическое изогнутое зеркало собирающее фокус'},
+  {type:'convex',label:'🪞 Выпуклое зеркало',category:'Отражение',keywords:'сферическое изогнутое зеркало рассеивающее'},
+  {type:'grating',label:'▥ Дифракционная решётка',category:'Дифракция',keywords:'решётка спектр порядки дифракция интерференция'},
   {type:'glass',label:'🟩 Цветное стекло',category:'Светофильтры',keywords:'стекло светофильтр цветное цвет фильтр поглощение пропускание'},
   {type:'screen',label:'▥ Экран',category:'Измерения',keywords:'детектор измерительный экран'},
   {type:'object',label:'↟ Предмет (стрелка)',category:'Измерения',keywords:'предмет объект стрелка изображение оптика'},
@@ -742,7 +841,7 @@ let elementMenu=null,elementCategory='Все';
 function renderElementMenu(){
   if(!elementMenu)return;
   const query=(elementMenu.querySelector('.element-menu-search').value||'').trim().toLocaleLowerCase('ru');
-  const categories=['Все','Источники','Линзы','Преломление','Отражение','Светофильтры','Измерения'];
+  const categories=['Все','Источники','Линзы','Преломление','Отражение','Светофильтры','Дифракция','Измерения'];
   elementMenu.querySelector('.element-menu-cats').innerHTML=categories.map(c=>`<button class="tg ${elementCategory===c?'active':''}" data-category="${c}">${c}</button>`).join('');
   const items=ELEMENT_CATALOG.filter(item=>(elementCategory==='Все'||item.category===elementCategory)&&(!query||(item.label+' '+item.keywords).toLocaleLowerCase('ru').includes(query)));
   elementMenu.querySelector('.element-menu-items').innerHTML=items.length?items.map(item=>`<button class="tg" data-type="${item.type}">${item.label}</button>`).join(''):'<div class="element-menu-empty">Ничего не найдено. Попробуй изменить запрос или категорию.</div>';
@@ -763,7 +862,7 @@ $('#add').onclick=()=>{
   elementMenu.querySelector('.element-menu-search').focus();
 };
 
-$('#nav').innerHTML=`<button class="chip on" data-mode="focus"><i style="background:#ffbd78"></i>Фокусировка</button><button class="chip" data-mode="image"><i style="background:#ffd27a"></i>Изображение в линзе</button><button class="chip" data-mode="mirror"><i style="background:#d5d9e8"></i>Плоское зеркало</button><button class="chip" data-mode="spectrum"><i style="background:#d0bcff"></i>Спектр</button><button class="chip" data-mode="refraction"><i style="background:#8edcff"></i>Преломление</button><button class="chip" data-mode="glass"><i style="background:#9be3a8"></i>Цветное стекло</button>`;
+$('#nav').innerHTML=`<button class="chip on" data-mode="focus"><i style="background:#ffbd78"></i>Фокусировка</button><button class="chip" data-mode="image"><i style="background:#ffd27a"></i>Изображение в линзе</button><button class="chip" data-mode="mirror"><i style="background:#d5d9e8"></i>Плоское зеркало</button><button class="chip" data-mode="spectrum"><i style="background:#d0bcff"></i>Спектр</button><button class="chip" data-mode="refraction"><i style="background:#8edcff"></i>Преломление</button><button class="chip" data-mode="glass"><i style="background:#9be3a8"></i>Цветное стекло</button><button class="chip" data-mode="grating"><i style="background:#ffb86b"></i>Решётка</button>`;
 $('#nav').onclick=e=>{
   let b=e.target.closest('[data-mode]');if(!b)return;
   document.querySelectorAll('#nav .chip').forEach(q=>q.classList.toggle('on',q===b));
@@ -771,6 +870,7 @@ $('#nav').onclick=e=>{
   if(b.dataset.mode==='image'){objects=[{id:1,type:'object',x:210,y:310,height:75},{id:2,type:'lens',x:470,y:310,f:140,diam:180,material:'glass'},{id:3,type:'screen',x:773,y:310,w:8,h:250,angle:0,showHud:true,hudX:24,hudY:140},{id:4,type:'ruler',x:470,y:485,length:300,angle:0}];nextId=5;toast('Опыт: положение и свойства изображения в собирающей линзе')}
   if(b.dataset.mode==='mirror'){objects=[{id:1,type:'object',x:220,y:310,height:80},{id:2,type:'mirror',x:510,y:310,length:210,angle:0},{id:3,type:'ruler',x:350,y:485,length:260,angle:0},{id:4,type:'protractor',x:620,y:465,radius:78,angle:90}];nextId=5;toast('Опыт: мнимое изображение в плоском зеркале')}
   if(b.dataset.mode==='spectrum'){objects=[{id:1,type:'bulb',x:115,y:310,spread:22,beams:3},{id:2,type:'prism',x:390,y:310,size:130,apex:0,material:'BK7'},{id:3,type:'screen',x:720,y:310,w:8,h:260,angle:0,showHud:true,hudX:24,hudY:140}];nextId=4;toast('Опыт: белый свет распадается на спектр в призме')}
+  if(b.dataset.mode==='grating'){objects=[{id:1,type:'bulb',x:115,y:310,spread:10,beams:1},{id:2,type:'grating',x:380,y:310,lines:300,h:200},{id:3,type:'screen',x:720,y:310,w:8,h:300,angle:0,showHud:true,hudX:24,hudY:140}];nextId=4;toast('Опыт: решётка раскладывает белый свет в спектры')}
   if(b.dataset.mode==='glass'){objects=[{id:1,type:'bulb',x:115,y:310,spread:10,beams:3},{id:2,type:'glass',x:380,y:310,wl:540,bw:70,h:230},{id:3,type:'screen',x:700,y:310,w:8,h:260,angle:0,showHud:true,hudX:24,hudY:140}];nextId=4;toast('Опыт: зелёное стекло из белого света оставляет зелёный')}
   if(b.dataset.mode==='refraction'){objects=[{id:1,type:'laser',x:115,y:310,angle:12,color:'#ff525e',wave:550},{id:2,type:'prism',x:420,y:310,size:140,apex:0,material:'BK7'},{id:3,type:'screen',x:720,y:310,w:8,h:260,angle:0,showHud:true,hudX:24,hudY:140}];nextId=4;toast('Опыт: преломление монохроматического луча')}
   select(null);
