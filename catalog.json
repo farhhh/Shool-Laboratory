@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-18T05:49:46.450Z",
+  "generatedAt": "2026-11-18T06:07:07.177Z",
   "categories": [
     {
       "id": "astronomy",
@@ -11,7 +11,7 @@
           "title": "Солнечная система",
           "description": "Рассматривайте планеты, ставьте свои объекты и запускайте кометы",
           "url": "Simulations/Astronomia/solar_system.html",
-          "image": "Simulations/Astronomia/solar_system.png"
+          "image": "Simulations/Astronomia/solar_system.webp"
         }
       ]
     },
@@ -25,7 +25,7 @@
           "title": "Атомная лаборатория",
           "description": "Смотрите как работает атом и регулируйте его протоны, нейтроны, электроны, а также занимайтесь синтезом и делением",
           "url": "Simulations/Himia/atomnaya_laboratoriya.html",
-          "image": "Simulations/Himia/atomnaya_laboratoriya.png"
+          "image": "Simulations/Himia/atomnaya_laboratoriya.webp"
         }
       ]
     },
@@ -39,13 +39,13 @@
           "title": "Электрическая лаборатория",
           "description": "Стройте свои электронные схемы и смотрите что получилось",
           "url": "Simulations/Physics/elektricheskaya_laboratoriya.html",
-          "image": "Simulations/Physics/elektricheskaya_laboratoriya.png"
+          "image": "Simulations/Physics/elektricheskaya_laboratoriya.webp"
         },
         {
           "title": "Оптическая лаборатория",
           "description": "Изучайте свет, дисперсию, построения изображений и создавайте свои собственные эксперименты со светом",
           "url": "Simulations/Physics/opticheskaya_laboratoriya.html",
-          "image": "Simulations/Physics/opticheskaya_laboratoriya.png"
+          "image": "Simulations/Physics/opticheskaya_laboratoriya.webp"
         }
       ]
     },
@@ -66,7 +66,7 @@
           "title": "Живая клетка",
           "description": "Изучите строение растительной и животной клетки",
           "url": "Simulations/Biology/zhivaya_kletka.html",
-          "image": "Simulations/Biology/zhivaya_kletka.png"
+          "image": "Simulations/Biology/zhivaya_kletka.webp"
         }
       ]
     },

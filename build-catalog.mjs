@@ -139,13 +139,16 @@ async function main() {
       }
 
       const relativeHtml = path.relative(ROOT, path.join(folderPath, htmlName));
-      const relativePng = path.relative(ROOT, pngPath);
+      // Лёгкое превью .webp (если есть) грузится в разы быстрее исходного .png.
+      const webpPath = path.join(folderPath, `${baseName}.webp`);
+      const thumbPath = (await isFile(webpPath)) ? webpPath : pngPath;
+      const relativePng = path.relative(ROOT, thumbPath);
       const item = {
         title: metadata.title,
         description: metadata.description,
         url: safeUrl(relativeHtml)
       };
-      if (await isFile(pngPath)) item.image = safeUrl(relativePng);
+      if (await isFile(thumbPath)) item.image = safeUrl(relativePng);
       if (metadata.tags?.length) item.tags = metadata.tags;
       if (metadata.level) item.level = metadata.level;
       if (metadata.duration) item.duration = metadata.duration;

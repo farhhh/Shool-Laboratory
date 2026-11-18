@@ -257,6 +257,16 @@
       .empty-subject { padding:15px; }
     }
 
+    /* Телефоны и слабые устройства: убираем самые дорогие эффекты (размытие фона, большие тени).
+       Внешний вид почти не меняется: шапка и так почти непрозрачная. */
+    @media (max-width:760px), (hover:none) {
+      .topbar { -webkit-backdrop-filter:none; backdrop-filter:none; background:rgb(11,9,18); box-shadow:0 8px 20px rgba(0,0,0,.4); }
+      .thumb-tag { -webkit-backdrop-filter:none; backdrop-filter:none; background:rgba(15,12,22,.82); }
+      .card, .subject-panel, .intro { box-shadow:none; }
+      .partner-card { box-shadow:0 8px 20px rgba(0,0,0,.3); }
+      html { scroll-behavior:auto; }
+    }
+
     @media (hover:none) {
       .card:hover { transform:none; box-shadow:0 12px 30px rgba(0,0,0,.15); }
       .card:hover .thumb img { transform:none; }
@@ -349,7 +359,7 @@
     </footer>
   </div>
 
-  <!--CATALOG:START--><script type="application/json" id="catalog-data">{"generatedAt":"2026-11-18T05:49:46.450Z","categories":[{"id":"astronomy","name":"Астрономия","folder":"Astonomia","icon":"🪐","items":[{"title":"Солнечная система","description":"Рассматривайте планеты, ставьте свои объекты и запускайте кометы","url":"Simulations/Astronomia/solar_system.html","image":"Simulations/Astronomia/solar_system.png"}]},{"id":"chemistry","name":"Химия","folder":"Himia","icon":"⚗️","items":[{"title":"Атомная лаборатория","description":"Смотрите как работает атом и регулируйте его протоны, нейтроны, электроны, а также занимайтесь синтезом и делением","url":"Simulations/Himia/atomnaya_laboratoriya.html","image":"Simulations/Himia/atomnaya_laboratoriya.png"}]},{"id":"physics","name":"Физика","folder":"Physics","icon":"⚛️","items":[{"title":"Электрическая лаборатория","description":"Стройте свои электронные схемы и смотрите что получилось","url":"Simulations/Physics/elektricheskaya_laboratoriya.html","image":"Simulations/Physics/elektricheskaya_laboratoriya.png"},{"title":"Оптическая лаборатория","description":"Изучайте свет, дисперсию, построения изображений и создавайте свои собственные эксперименты со светом","url":"Simulations/Physics/opticheskaya_laboratoriya.html","image":"Simulations/Physics/opticheskaya_laboratoriya.png"}]},{"id":"informatics","name":"Информатика","folder":"Informatics","icon":"💻","items":[]},{"id":"biology","name":"Биология","folder":"Biology","icon":"🧬","items":[{"title":"Живая клетка","description":"Изучите строение растительной и животной клетки","url":"Simulations/Biology/zhivaya_kletka.html","image":"Simulations/Biology/zhivaya_kletka.png"}]},{"id":"geography","name":"География","folder":"Geography","icon":"🌍","items":[]}]}</script><!--CATALOG:END-->
+  <!--CATALOG:START--><script type="application/json" id="catalog-data">{"generatedAt":"2026-11-18T06:07:07.177Z","categories":[{"id":"astronomy","name":"Астрономия","folder":"Astonomia","icon":"🪐","items":[{"title":"Солнечная система","description":"Рассматривайте планеты, ставьте свои объекты и запускайте кометы","url":"Simulations/Astronomia/solar_system.html","image":"Simulations/Astronomia/solar_system.webp"}]},{"id":"chemistry","name":"Химия","folder":"Himia","icon":"⚗️","items":[{"title":"Атомная лаборатория","description":"Смотрите как работает атом и регулируйте его протоны, нейтроны, электроны, а также занимайтесь синтезом и делением","url":"Simulations/Himia/atomnaya_laboratoriya.html","image":"Simulations/Himia/atomnaya_laboratoriya.webp"}]},{"id":"physics","name":"Физика","folder":"Physics","icon":"⚛️","items":[{"title":"Электрическая лаборатория","description":"Стройте свои электронные схемы и смотрите что получилось","url":"Simulations/Physics/elektricheskaya_laboratoriya.html","image":"Simulations/Physics/elektricheskaya_laboratoriya.webp"},{"title":"Оптическая лаборатория","description":"Изучайте свет, дисперсию, построения изображений и создавайте свои собственные эксперименты со светом","url":"Simulations/Physics/opticheskaya_laboratoriya.html","image":"Simulations/Physics/opticheskaya_laboratoriya.webp"}]},{"id":"informatics","name":"Информатика","folder":"Informatics","icon":"💻","items":[]},{"id":"biology","name":"Биология","folder":"Biology","icon":"🧬","items":[{"title":"Живая клетка","description":"Изучите строение растительной и животной клетки","url":"Simulations/Biology/zhivaya_kletka.html","image":"Simulations/Biology/zhivaya_kletka.webp"}]},{"id":"geography","name":"География","folder":"Geography","icon":"🌍","items":[]}]}</script><!--CATALOG:END-->
   <script>
     (() => {
       'use strict';
