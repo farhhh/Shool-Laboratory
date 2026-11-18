@@ -8,3 +8,6 @@
 
 /Simulations/*
   Cache-Control: no-cache, must-revalidate
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
