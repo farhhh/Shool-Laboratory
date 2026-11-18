@@ -18,7 +18,7 @@ body{background:radial-gradient(900px 620px at 12% 18%,rgba(120,70,200,.24),tran
 .tg{height:40px;padding:0 13px;border-radius:12px;border:1px solid var(--ol);font-weight:500;white-space:nowrap}.tg.on{background:var(--pr);color:#27154d;font-weight:700;border-color:transparent}.tg.primary{background:var(--pr);color:#27154d;border-color:transparent;font-weight:700}.sep{width:1px;height:26px;background:var(--ol)}
 #hud{position:fixed;left:12px;top:116px;width:276px;max-height:calc(100% - 240px);overflow:auto;z-index:4;padding:14px;border-radius:20px;font-size:12px;color:var(--on2);scrollbar-width:thin}
 #hud b.t{display:block;color:var(--on);font-size:14px;margin-bottom:6px}.verdict{padding:10px 12px;border-radius:14px;line-height:1.5;background:var(--s2);margin-bottom:8px}
-.fm{display:block;padding:8px 10px;margin:5px 0 8px;border-radius:10px;background:rgba(140,245,166,.1);color:var(--ok);font-size:15px;font-weight:700;letter-spacing:1px}
+.hk{margin-top:8px;font-size:11px;opacity:.6}.fm{display:block;padding:8px 10px;margin:5px 0 8px;border-radius:10px;background:rgba(140,245,166,.1);color:var(--ok);font-size:15px;font-weight:700;letter-spacing:1px}
 .grow{display:flex;align-items:center;gap:8px;margin:5px 0}.gl{width:62px;flex:none}.bar2{flex:1;height:7px;border-radius:4px;background:var(--s3);overflow:hidden}.bar2 i{display:block;height:100%;transition:width .12s}.grow b{width:18px;text-align:right;color:var(--on);font-weight:700}
 #panel{position:fixed;z-index:6;background:var(--s1);border-radius:28px;overflow:auto;right:12px;top:116px;bottom:12px;width:340px;transform:translateX(120%);padding:20px;transition:transform .45s cubic-bezier(.2,0,0,1);box-shadow:0 20px 60px #000a}body.panel-open #panel{transform:none}
 .x{position:absolute;right:12px;top:12px;width:38px;height:38px;border-radius:50%;background:var(--s2)}
@@ -141,7 +141,14 @@ else if(pend){const n=pend.n;if(n.t=='sw')n.on=1-n.on;if(n.t=='btn')n.on=0;sel=n
 drag=null;pend=null}
 cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
 cv.addEventListener('wheel',e=>{e.preventDefault();const w=[(e.clientX-cx)/s,(e.clientY-cy)/s];s=Math.max(18,Math.min(90,s*(e.deltaY<0?1.1:.91)));cx=e.clientX-w[0]*s;cy=e.clientY-w[1]*s},{passive:false});
-addEventListener('keydown',e=>{if((e.key=='Delete'||e.key=='Backspace')&&sel)del(sel);if(e.key=='Escape'){tool=null;$('#erase').classList.remove('on');$('#menu').classList.remove('on');closeP();drag=pend=grab=null}});
+let clip=null;
+function putNode(x,y){if(!clip)return;const n=mk(clip.t,x,y,{on:clip.t=='sw'?clip.on:0});while(nodes.some(m=>Math.abs(m.x-n.x)<n.w&&Math.abs(m.y-n.y)<3))n.y+=3;nodes.push(n);tick();panel(n)}
+addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&!e.altKey&&!e.shiftKey&&['KeyC','KeyV','KeyD'].includes(e.code)){e.preventDefault();const k=e.code;
+if(k=='KeyC'&&sel){clip={t:sel.t,on:sel.on};toast('Скопировано')}
+else if(k=='KeyV'){if(!clip)return toast('Буфер пуст');const w=clip.t=='not'||!F[clip.t]?2:3,m=mouse[0]||mouse[1]?mouse:[W/2,H/2];putNode(Math.round((m[0]-cx)/s-w/2),Math.round((m[1]-cy)/s-1))}
+else if(k=='KeyD'&&sel){clip={t:sel.t,on:sel.on};putNode(sel.x,sel.y+3)}
+return}
+if((e.key=='Delete'||e.key=='Backspace')&&sel)del(sel);if(e.key=='Escape'){tool=null;$('#erase').classList.remove('on');$('#menu').classList.remove('on');closeP();drag=pend=grab=null}});
 const M=['sw','btn','c1','c0','clk','lamp','and','or','not','xor','nand','nor','xnor'];
 $('#menu').innerHTML=M.map(t=>`<button data-t="${t}"><i style="color:${D[t].col}"></i>${D[t].n}</button>`).join('');
 $('#menu').onclick=e=>{const b=e.target.closest('button');if(!b)return;const t=b.dataset.t;let x=Math.round((W/2-cx)/s-1),y=Math.round((H/2-cy)/s-1);const n=mk(t,x,y);while(nodes.some(m=>Math.abs(m.x-n.x)<n.w&&Math.abs(m.y-n.y)<3))n.y+=3;nodes.push(n);$('#menu').classList.remove('on');toast('Кликните элемент для выбора. Чтобы переместить, зажмите его до появления кружка. Для соединения потяните от выходного кружка к входному')};
@@ -177,7 +184,7 @@ $('#nav').onclick=e=>{const b=e.target.closest('.chip');if(b)load(b.dataset.p)};
 function hud(){const L={};nodes.forEach(n=>{if(n.lab)L[n.lab]=n.v});let h=`<b class="t">${info.t}</b><div class="verdict">${info.h}</div>`;
 if(info.calc)h+=`<div class="fm">${info.calc(L)}</div>`;
 nodes.filter(n=>n.lab&&n.t!='clk').slice(0,10).forEach(n=>h+=`<div class="grow"><span class="gl">${n.lab}</span><div class="bar2"><i style="width:${n.v?100:0}%;background:${n.v?ON:'#4b4556'}"></i></div><b>${n.v}</b></div>`);
-if(h!=hudS){hudS=h;$('#hud').innerHTML=h}}
+h+='<div class="hk">Ctrl+C / V / D — копия, вставка, дубль · Del — удалить</div>';if(h!=hudS){hudS=h;$('#hud').innerHTML=h}}
 function resize(){DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR}
 addEventListener('resize',()=>{resize();if(!nodes.length)fit()});
 function frame(ts){const dt=Math.min(ts-last,100);last=ts;T=ts/1000;if(!paused){acc+=dt;const ms=160/SP[si];while(acc>=ms){acc-=ms;tick(true)}}draw();hud();requestAnimationFrame(frame)}
