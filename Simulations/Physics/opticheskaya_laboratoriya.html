@@ -78,10 +78,16 @@ body{background:radial-gradient(900px 620px at 12% 18%,rgba(120,70,200,.24),tran
 body::before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 28%,rgba(255,90,90,.055) 38%,rgba(255,200,70,.055) 44%,rgba(90,255,150,.05) 50%,rgba(80,170,255,.055) 56%,rgba(170,100,255,.055) 62%,transparent 72%)}
 .grow{display:flex;align-items:center;gap:8px;font-size:12px;margin:6px 0;color:var(--on2)}.gl{width:74px;flex:none}.sw{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}.bar2{flex:1;height:7px;border-radius:4px;background:var(--s3);overflow:hidden}.bar2 i{display:block;height:100%;background:var(--acc)}.grow b{width:42px;text-align:right;color:var(--on);font-weight:500}
 .verdict{padding:10px 12px;border-radius:14px;font-size:12px;line-height:1.5;background:var(--s2)}.verdict.ok{background:#1f4d2c;color:#d8ffe0}.verdict.warn{background:#5a4a1a;color:#ffefc2}.verdict.no{background:#5a1f1a;color:#ffd9d4}
+.pill-btn{cursor:pointer;border:1px solid transparent}.pill-btn:hover,.pill-btn.on{background:var(--s3);border-color:var(--ol)}
+#loadpop{position:fixed;right:12px;top:calc(66px + env(safe-area-inset-top,0px));width:min(340px,calc(100vw - 24px));z-index:9;padding:14px 16px;border-radius:20px;display:none}#loadpop.on{display:block}
+#loadpop h4{font-size:14px;margin-bottom:4px}#loadpop .note2{font-size:11px;color:var(--on2);line-height:1.45;margin-bottom:8px}
+#loadpop .lrow{margin:10px 0}#loadpop .lrow>div{display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--on2);font-size:12px}#loadpop .lrow b{color:var(--on);font-variant-numeric:tabular-nums}#loadpop input[type=range]{width:100%;accent-color:var(--pr);margin-top:4px}
+#loadpop .lreset{margin-top:6px;padding:7px 12px;border-radius:12px;background:var(--s2);font-size:12px;font-weight:500}
 </style></head>
 <body>
 <canvas id="scene" aria-label="Интерактивная оптическая скамья"></canvas>
-<header id="top" class="glass"><h1>Оптическая лаборатория</h1><span class="pill">⚛ <span class="lb">Физика света</span></span><span class="pill" id="readout">λ 650 нм</span></header>
+<header id="top" class="glass"><h1>Оптическая лаборатория</h1><span class="pill">⚛ <span class="lb">Физика света</span></span><span class="pill" id="readout">λ 650 нм</span><button class="pill pill-btn" id="loadbtn" aria-expanded="false" title="Лимиты лучей и отражений">⚙ <span class="lb">Нагрузка</span></button></header>
+<div id="loadpop" class="glass" role="dialog" aria-label="Нагрузка"></div>
 <nav id="nav"></nav>
 <div id="status" class="glass">Геометрическая оптика · координаты и расстояния в условных мм модели</div>
 <div id="hud-container"></div>
@@ -93,6 +99,8 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:li
 const $=s=>document.querySelector(s),canvas=$('#scene'),ctx=canvas.getContext('2d');
 let W,H,DPR,showRays=true,showLabels=true,showGrid=false,showExtensions=true,educationLevel=7,selected=null,drag=null,scale=1,offset={x:0,y:0};
 let snapStep=0,extraRays=[];
+// Лимиты нагрузки: по умолчанию как раньше; максимум — для любознательных
+const LIM_DEF={laser:11,bulb:9,steps:12},LIM_MAX={laser:60,bulb:40,steps:60};let LIM={...LIM_DEF};
 
 const WAVE = [650, 610, 580, 550, 510, 470, 430, 400];
 const modeName=()=>educationLevel===7?'кратко':'подробно';
@@ -175,8 +183,8 @@ function select(id){
 
 function renderPanel(){
   const o=byId(selected);if(!o)return;const d=defs[o.type];let controls='';
-  if(o.type==='laser')controls=`${range('Направление луча','angle',-35,35,1,'°')}${range('Длина волны','wave',400,700,5,'нм')}${range('Количество пучков','beams',1,11,1,'шт.')}${range('Расстояние между пучками','spacing',3,18,1,'мм')}`;
-  if(o.type==='bulb')controls=`${range('Количество лучей','beams',1,9,1,'шт.')}${range('Угол раскрытия','spread',10,80,1,'°')}<div class="note" style="margin-top:6px">Лампа излучает белый свет (весь спектр). Призма разлагает его в радугу.</div>`;
+  if(o.type==='laser')controls=`${range('Направление луча','angle',-35,35,1,'°')}${range('Длина волны','wave',400,700,5,'нм')}${range('Количество пучков','beams',1,LIM.laser,1,'шт.')}${range('Расстояние между пучками','spacing',3,18,1,'мм')}`;
+  if(o.type==='bulb')controls=`${range('Количество лучей','beams',1,LIM.bulb,1,'шт.')}${range('Угол раскрытия','spread',10,80,1,'°')}<div class="note" style="margin-top:6px">Лампа излучает белый свет (весь спектр). Призма разлагает его в радугу.</div>`;
   if(isLensType(o.type))controls=`<div class="note">Форма: ${LENS_TYPES[o.type].name}. ${lensConverging(o)?'Собирающая':'Рассеивающая'} линза.</div>${range('Фокусное расстояние','f',60,400,10,'мм')}${range('Диаметр линзы','diam',60,220,10,'мм')}`;
   if(o.type==='prism')controls=`${range('Размер призмы','size',70,180,5,'мм')}${range('Поворот грани','apex',-25,25,1,'°')}<div class="note" style="margin-top:6px">Стекло BK7 · n(λ) дисперсия.</div>`;
   if(o.type==='mirror')controls=`${range('Угол зеркала','angle',-75,75,1,'°')}${range('Длина','length',70,240,5,'мм')}`;
@@ -210,7 +218,7 @@ function renderPanel(){
   function range(label,key,min,max,step){let val=o[key]??({wave:650,beams:3,spacing:8}[key]??0);if(key==='f')val=Math.abs(val);return `<div class="rangebox"><div class="field"><span>${label}</span><input class="numeric" type="number" min="${min}" max="${max}" step="${step}" value="${val}" data-key="${key}"></div><input style="width:100%;accent-color:var(--pr)" type="range" min="${min}" max="${max}" step="${step}" value="${val}" data-key="${key}"></div>`}
   function setParam(k,v){
     if(!Number.isFinite(v))return;
-    let limits={angle:[-180,180],wave:[380,700],beams:[1,11],spacing:[3,18],spread:[10,80],f:[60,400],diam:[60,220],size:[70,180],apex:[-25,25],length:[70,320],h:[100,300],height:[-400,400],radius:[50,150]};
+    let limits={angle:[-180,180],wave:[380,700],beams:[1,LIM_MAX.laser],spacing:[3,18],spread:[10,80],f:[60,400],diam:[60,220],size:[70,180],apex:[-25,25],length:[70,320],h:[100,300],height:[-400,400],radius:[50,150]};
     let active=$('#panel').querySelector(`[data-key="${k}"]`);let [mn,mx]=active?[+active.min,+active.max]:(limits[k]||[-10000,10000]);
     v=Math.max(mn,Math.min(mx,v));
     if(k==='f'&&!lensConverging(o))v=-Math.abs(v);else if(k==='f')v=Math.abs(v);
@@ -369,7 +377,7 @@ function getImageAnalysisCore(subject){
 }
 function trace(start,dir,lambda,color,opts={}){
   let p={...start},d=norm(dir),path=[{...p}],events=[],medium=null,steps=0,I=opts.I??1,dim=(opts.I??1)<1,segI=[],depth=opts.depth||0,reflected=false,hasCM=objects.some(q=>isCurved(q.type));
-  for(;steps<12;steps++){
+  for(;steps<LIM.steps;steps++){
     let best=null,ob=null,hitType='';
     for(const o of objects){
       if(isLensType(o.type)){
@@ -468,14 +476,14 @@ function rays(){
   let out=[];extraRays=[];
   for(const o of objects){
     if(o.type==='laser'){
-      let a=(o.angle||0)*Math.PI/180,count=Math.max(1,Math.min(11,o.beams||5)),sp=o.spacing||8;
+      let a=(o.angle||0)*Math.PI/180,count=Math.max(1,Math.min(LIM.laser,o.beams||5)),sp=o.spacing||8;
       for(let i=0;i<count;i++){
         let off=(i-(count-1)/2)*sp,lam=o.wave||650;
         out.push(trace({x:o.x+14-Math.sin(a)*off,y:o.y+Math.cos(a)*off},{x:Math.cos(a),y:Math.sin(a)},lam,wavelengthColor(lam)));
       }
     }
     if(o.type==='bulb'){
-      let count=o.beams||3,spread=(o.spread||35)*Math.PI/180;
+      let count=Math.max(1,Math.min(LIM.bulb,o.beams||3)),spread=(o.spread||35)*Math.PI/180;
       for(let i=0;i<count;i++){
         let a=count===1?0:-spread+2*spread*i/(count-1);
         for(let lam of WAVE)out.push(trace({x:o.x+9,y:o.y},{x:Math.cos(a),y:Math.sin(a)},lam,wavelengthColor(lam)));
@@ -861,7 +869,7 @@ $('#add').onclick=()=>{
   elementMenu.querySelector('.element-menu-search').focus();
 };
 
-$('#nav').innerHTML=`<button class="chip on" data-mode="focus"><i style="background:#ffbd78"></i>Фокусировка</button><button class="chip" data-mode="image"><i style="background:#ffd27a"></i>Изображение в линзе</button><button class="chip" data-mode="mirror"><i style="background:#d5d9e8"></i>Плоское зеркало</button><button class="chip" data-mode="spectrum"><i style="background:#d0bcff"></i>Спектр</button><button class="chip" data-mode="refraction"><i style="background:#8edcff"></i>Преломление</button><button class="chip" data-mode="glass"><i style="background:#9be3a8"></i>Цветное стекло</button><button class="chip" data-mode="grating"><i style="background:#ffb86b"></i>Решётка</button>`;
+$('#nav').innerHTML=`<button class="chip on" data-mode="focus"><i style="background:#ffbd78"></i>Фокусировка</button><button class="chip" data-mode="image"><i style="background:#ffd27a"></i>Изображение в линзе</button><button class="chip" data-mode="mirror"><i style="background:#d5d9e8"></i>Плоское зеркало</button><button class="chip" data-mode="spectrum"><i style="background:#d0bcff"></i>Спектр</button><button class="chip" data-mode="refraction"><i style="background:#8edcff"></i>Преломление</button><button class="chip" data-mode="glass"><i style="background:#9be3a8"></i>Цветное стекло</button><button class="chip" data-mode="grating"><i style="background:#ffb86b"></i>Решётка</button><button class="chip" data-mode="empty"><i style="background:#8f8a99"></i>Пустое поле</button>`;
 $('#nav').onclick=e=>{
   let b=e.target.closest('[data-mode]');if(!b)return;
   document.querySelectorAll('#nav .chip').forEach(q=>q.classList.toggle('on',q===b));
@@ -872,8 +880,21 @@ $('#nav').onclick=e=>{
   if(b.dataset.mode==='grating'){objects=[{id:1,type:'bulb',x:115,y:310,spread:10,beams:1},{id:2,type:'grating',x:380,y:310,lines:300,h:200},{id:3,type:'screen',x:720,y:310,w:8,h:300,angle:0,showHud:true,hudX:24,hudY:140}];nextId=4;toast('Опыт: решётка раскладывает белый свет в спектры')}
   if(b.dataset.mode==='glass'){objects=[{id:1,type:'bulb',x:115,y:310,spread:10,beams:3},{id:2,type:'glass',x:380,y:310,wl:540,bw:70,h:230},{id:3,type:'screen',x:700,y:310,w:8,h:260,angle:0,showHud:true,hudX:24,hudY:140}];nextId=4;toast('Опыт: зелёное стекло из белого света оставляет зелёный')}
   if(b.dataset.mode==='refraction'){objects=[{id:1,type:'laser',x:115,y:310,angle:12,color:'#ff525e',wave:550},{id:2,type:'prism',x:420,y:310,size:140,apex:0,material:'BK7'},{id:3,type:'screen',x:720,y:310,w:8,h:260,angle:0,showHud:true,hudX:24,hudY:140}];nextId=4;toast('Опыт: преломление монохроматического луча')}
+  if(b.dataset.mode==='empty'){objects=[];nextId=1;toast('Пустое поле: добавляй элементы кнопкой «＋ Добавить элемент»')}
   select(null);
 };
+
+// Нагрузка: лимиты лучей и взаимодействий (шапка)
+{const pop=$('#loadpop'),btn=$('#loadbtn');
+const ROWS=[['laser','Пучков у лазера (максимум)',1],['bulb','Лучей у лампы (максимум)',1],['steps','Отражений и преломлений на луч',2]];
+const build=()=>{pop.innerHTML=`<h4>Нагрузка</h4><div class="note2">По умолчанию — как раньше. Повышай, если нужно больше лучей или длинные цепочки отражений между зеркалами. Лампа считает ещё и 8 цветов на каждый луч, так что при больших значениях сцена может подтормаживать.</div>`+ROWS.map(([k,t,mn])=>`<div class="lrow"><div><span>${t}</span><b id="lv-${k}">${LIM[k]}</b></div><input type="range" min="${mn}" max="${LIM_MAX[k]}" step="1" value="${LIM[k]}" data-lim="${k}"></div>`).join('')+`<button class="lreset" id="lim-reset">Вернуть по умолчанию</button>`};
+build();
+pop.addEventListener('input',e=>{const k=e.target.dataset&&e.target.dataset.lim;if(!k)return;LIM[k]=+e.target.value;$('#lv-'+k).textContent=LIM[k];if(selected)renderPanel()});
+pop.addEventListener('click',e=>{if(e.target.id==='lim-reset'){LIM={...LIM_DEF};build();if(selected)renderPanel();toast('Лимиты нагрузки сброшены')}});
+const setOpen=v=>{pop.classList.toggle('on',v);btn.classList.toggle('on',v);btn.setAttribute('aria-expanded',v)};
+btn.onclick=()=>setOpen(!pop.classList.contains('on'));
+document.addEventListener('pointerdown',e=>{if(pop.classList.contains('on')&&!pop.contains(e.target)&&!btn.contains(e.target))setOpen(false)});
+}
 
 // Высота нижней панели → CSS-переменная (на узких экранах кнопки переносятся на несколько строк)
 {const dock=$('#dock'),setDock=()=>document.documentElement.style.setProperty('--dockH',dock.offsetHeight+'px');setDock();addEventListener('resize',setDock);if(window.ResizeObserver)new ResizeObserver(setDock).observe(dock)}
