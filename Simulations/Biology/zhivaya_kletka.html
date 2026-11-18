@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Живая клетка — биология</title>
-<style>@font-face{font-family:"Roboto Flex";font-style:normal;font-weight:400 900;font-display:swap;src:url("../../fonts/roboto-flex.woff") format("woff")}</style><style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
 :root{color-scheme:dark;--bg:#0b0912;--s1:#1d1a24;--s2:#272330;--s3:#322d3d;--on:#e8e0ee;--on2:#cbc3d4;--ol:#4b4556;--pr:#d0bcff;--acc:#ffb0c8;--ok:#9be3a8;--er:#ffb4ab;box-sizing:border-box}
 *{box-sizing:border-box;margin:0}html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--on);font:400 14px/1.45 "Roboto Flex",Roboto,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
 canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:block}button,input{font:inherit;color:inherit}button{border:0;background:none;cursor:pointer}button:focus-visible,input:focus-visible{outline:2px solid var(--pr);outline-offset:2px}
@@ -13,11 +14,11 @@ canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:b
 .pill{padding:8px 13px;border-radius:16px;background:var(--s2);font-weight:500;white-space:nowrap}#score{color:#ffe29a;transition:.3s}#score.pop{transform:scale(1.2);background:#5b4a14}
 #nav{position:fixed;left:12px;right:12px;top:calc(72px + env(safe-area-inset-top,0px));display:flex;gap:8px;z-index:4}
 .chip{display:flex;align-items:center;gap:8px;height:36px;padding:0 15px 0 11px;border-radius:10px;border:1px solid var(--ol);background:rgba(29,26,36,.75);white-space:nowrap;font-weight:500;transition:.2s}.chip i{width:14px;height:14px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c)}.chip.on{background:var(--c);color:#14101c;border-color:transparent}
-#dock{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:30px;z-index:5;max-width:calc(100% - 16px);flex-wrap:wrap;justify-content:center}
+#dock,#ddock{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:30px;z-index:5;max-width:calc(100% - 16px);flex-wrap:wrap;justify-content:center}
 .tg{height:40px;padding:0 13px;border-radius:12px;border:1px solid var(--ol);font-weight:500;white-space:nowrap}.tg.on{background:#4a4458;color:#eaddff;border-color:transparent}.tg.primary{background:var(--pr);color:#27154d;border-color:transparent;font-weight:700}
 .seg{display:flex;border:1px solid var(--ol);border-radius:14px;overflow:hidden}.seg button{height:38px;padding:0 12px;font-weight:500;border-right:1px solid var(--ol)}.seg button:last-child{border:0}.seg .on{background:#4a4458;color:#eaddff}
 .sl{display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:12px;border:1px solid var(--ol)}.sl input{width:100px;accent-color:var(--pr)}
-#hint{position:fixed;left:14px;top:calc(120px + env(safe-area-inset-top,0px));z-index:3;padding:12px 15px;border-radius:18px;max-width:270px;color:var(--on2);font-size:12px;pointer-events:none}#hint b{display:block;color:var(--on);font-size:14px;margin-bottom:3px}
+#hint{position:fixed;left:14px;top:calc(120px + env(safe-area-inset-top,0px));z-index:3;padding:13px 15px;border-radius:18px;width:310px;max-height:calc(100% - 330px);overflow:hidden;color:var(--on2);font-size:12.5px;pointer-events:none}
 #status{position:fixed;left:14px;z-index:3;padding:10px 14px;border-radius:14px;color:var(--on2);font-size:12px;max-width:min(430px,calc(100% - 28px));pointer-events:none}
 #panel{position:fixed;z-index:6;background:var(--s1);border-radius:28px;overflow:auto;right:12px;top:120px;bottom:12px;width:360px;transform:translateX(120%);padding:20px;transition:transform .45s cubic-bezier(.2,0,0,1);box-shadow:0 20px 60px #000a}
 body.po #panel{transform:none}#panel:before{content:"";position:absolute;inset:0 0 auto;height:170px;background:radial-gradient(circle at 20% 0,var(--pc,#d0bcff),transparent 70%);opacity:.22;pointer-events:none}
@@ -31,20 +32,26 @@ body.po #panel{transform:none}#panel:before{content:"";position:absolute;inset:0
 .btn{width:100%;height:44px;border-radius:24px;background:var(--pr);color:#171020;font-weight:700;margin-top:10px}.btn.sec2{background:var(--s3);color:var(--on)}
 table{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}td,th{padding:6px 5px;border-bottom:1px solid var(--ol);text-align:left}th{color:var(--on2);font-weight:500}
 #toast{position:fixed;left:50%;top:calc(130px + env(safe-area-inset-top,0px));transform:translate(-50%,-20px);opacity:0;z-index:9;padding:11px 18px;border-radius:16px;background:var(--s3);box-shadow:0 8px 30px #000a;pointer-events:none;transition:.3s;max-width:90%;text-align:center}#toast.show{opacity:1;transform:translate(-50%,0)}
+.evh{font-weight:700;color:var(--on);font-size:14px;margin-bottom:7px}.evt{padding:9px 11px;border-radius:12px;background:rgba(255,255,255,.07);border-left:3px solid var(--acc);color:var(--on)}.evt b{display:block;margin-bottom:2px}.evt.fl{animation:fl .9s}@keyframes fl{from{background:rgba(255,224,130,.38)}to{background:rgba(255,255,255,.07)}}.nw{margin-top:8px;color:var(--on2)}.nw b{color:var(--on)}#hint .formula{font-size:11.5px;padding:8px 10px}#dph button{padding:0 9px;font-size:13px}
 @media(max-width:760px){#panel{left:10px;right:10px;width:auto;top:auto;bottom:10px;height:52vh;transform:translateY(120%)}body.po #panel{transform:none}#hint{display:none}.lb{display:none}.chip{height:34px}}
 </style></head>
 <body>
 <canvas id="scene" aria-label="Интерактивная клетка"></canvas>
 <header id="top" class="glass"><h1>Живая клетка</h1><span class="pill" id="readout">—</span><span class="pill">⭐ <span id="score">0</span></span></header>
 <nav id="nav"><button class="chip on" data-t="animal" style="--c:#ffb0c8"><i></i>Животная клетка</button><button class="chip" data-t="plant" style="--c:#9be3a8"><i></i>Растительная клетка</button></nav>
-<div id="hint" class="glass"><b>Нажимай на органоиды</b>Тяни их мышкой или пальцем. Меняй среду и «энергию» клетки внизу — смотри, что произойдёт.</div>
+<div id="hint" class="glass"><div class="evh">Что происходит</div><div id="ev" class="evt"></div><div id="now"></div></div>
 <div id="status" class="glass"></div>
 <aside id="panel"></aside>
 <div id="dock" class="glass">
 <div class="seg" id="env"><button data-v="1">💧 Пресная вода</button><button class="on" data-v="0">⚖ Изотоник</button><button data-v="-1">🧂 Солёный р-р</button></div>
 <label class="sl"><span id="lvn">Активность</span><input type="range" id="lv" min="0" max="100" value="60"></label>
-<button class="tg" id="game">🎯 Игра</button><button class="tg" id="lab">🧪 Опыт</button><button class="tg on" id="labels">Подписи</button><button class="tg" id="level">Режим: кратко</button><button class="tg" id="reset">↺</button>
+<button class="tg" id="game">🎯 Игра</button><button class="tg" id="lab">🧪 Опыт</button><button class="tg primary" id="divb">🧬 Деление</button><button class="tg on" id="labels">Подписи</button><button class="tg" id="level">Режим: кратко</button><button class="tg" id="reset">↺</button>
 </div>
+<div id="ddock" class="glass" style="display:none"><button class="tg" id="dback">← К клетке</button>
+<div class="seg" id="dph"><button data-i="0">Интерфаза</button><button data-i="1">Профаза</button><button data-i="2">Метафаза</button><button data-i="3">Анафаза</button><button data-i="4">Телофаза</button></div>
+<button class="tg primary" id="dplay">▶ Пуск</button><input type="range" id="dp" min="0" max="1000" value="0" style="width:140px;accent-color:var(--pr)">
+<div class="seg" id="dsp"><button data-v=".5">0,5×</button><button class="on" data-v="1">1×</button><button data-v="2">2×</button></div>
+<button class="tg" id="dlevel">Режим: кратко</button><button class="tg on" id="dlabels">Подписи</button></div>
 <div id="toast"></div>
 <script>
 (()=>{
@@ -59,7 +66,7 @@ er:{n:'ЭПС',k:'Органоид · транспортная сеть',c:'#f48
 golgi:{n:'Аппарат Гольджи',k:'Органоид · «почта клетки»',c:'#ffd54f',sz:'1–3 мкм',wh:'Животные и растения',f:'Назван в честь итальянца Камилло Гольджи (1898 г.).',d:'Стопка уплощённых мешочков. Принимает белки из ЭПС, дорабатывает, «упаковывает» в пузырьки (везикулы) и отправляет: наружу, в лизосомы или к мембране.',m:'Везикулы идут: ЭПС → Гольджи → мембрана.\nЭкзоцитоз — выброс содержимого наружу.'},
 ribo:{n:'Рибосомы',k:'Органоид без мембраны',c:'#ff8a80',sz:'20–30 нм',wh:'Все клетки',f:'В клетке их тысячи–миллионы, и они есть даже у бактерий.',d:'Крошечные «3D-принтеры белка»: читают мРНК и по ней собирают цепочку аминокислот. Бывают свободные и прикреплённые к ЭПС.',m:'Скорость: ≈ 20 аминокислот в секунду у эукариот.\nСостав: рРНК + белки (большая и малая субъединицы).'},
 lyso:{n:'Лизосома',k:'Органоид · «пищеварение»',c:'#ff7a7a',sz:'0,2–0,8 мкм',wh:'Чаще у животных',f:'Внутри лизосомы кислая среда — примерно как в желудке (pH ≈ 4,5–5).',d:'Пузырёк с ферментами: переваривает пищу, старые органоиды и бактерий. У растений похожую роль часто играет вакуоль.',m:'Кислые гидролазы работают при pH ≈ 5.\nАутофагия — «уборка» клетки от изношенных частей.'},
-cent:{n:'Центриоли',k:'Органоид · «разметчик деления»',c:'#9be3a8',sz:'≈ 0,2 × 0,5 мкм',wh:'Животные (у высших растений нет)',f:'Две центриоли стоят под прямым углом друг к другу.',d:'Цилиндры из микротрубочек. При делении клетки строят «веретено», которое растаскивает хромосомы по двум новым клеткам.',m:'Устройство: 9 триплетов микротрубочек («9×3»).\nВ делении: центросома удваивается → два полюса веретена.'},
+cent:{n:'Центриоли',k:'Органоид · «разметчик деления»',c:'#9be3a8',sz:'≈ 0,2 × 0,5 мкм',wh:'Животные (у высших растений нет)',f:'Две центриоли стоят под прямым углом друг к другу.',d:'Два цилиндра из микротрубочек, стоящие под прямым углом (на рисунке один виден сбоку, другой — торцом: на нём видны 9 триплетов). При делении клетки строят «веретено», которое растаскивает хромосомы. Загляни в режим «Деление»!',m:'Устройство: 9 триплетов микротрубочек («9×3»).\nВ делении: центросома удваивается → два полюса веретена.'},
 vac:{n:'Вакуоль',k:'Органоид · «водохранилище»',c:'#8ec9ff',sz:'до 90% объёма клетки',wh:'Особенно растения',f:'Вакуоль держит форму травинки: без воды растение вянет.',d:'Большой мешок с клеточным соком: вода, сахара, соли, пигменты. Давит на стенку изнутри — это тургор. Попробуй «Солёный р-р»: вода уйдёт и вакуоль съёжится.',m:'Тургорное давление не даёт стеблю обвиснуть.\nПлазмолиз: протопласт отходит от стенки в гипертоническом растворе.'},
 wall:{n:'Клеточная стенка',k:'Оболочка · только у растений',c:'#7fcf8e',sz:'0,1–10 мкм',wh:'Растения, грибы, бактерии',f:'Целлюлоза — самое распространённое органическое вещество на Земле.',d:'Прочный каркас из целлюлозы снаружи мембраны. Защищает и задаёт форму. Она пропускает воду и растворы — это не «барьер», а «сито».',m:'Целлюлоза — полимер глюкозы (C₆H₁₀O₅)ₙ.\nБлагодаря стенке растительная клетка не лопается в пресной воде.'},
 mem:{n:'Мембрана',k:'Оболочка · граница клетки',c:'#f2b8d0',sz:'7–10 нм',wh:'Все клетки',f:'Толщина мембраны — в 10 000 раз меньше толщины листа бумаги.',d:'Двойной слой липидов с белками. Полупроницаемая: одно пропускает, другое нет. Регулирует, что входит и выходит. Через неё идёт осмос.',m:'Жидкостно-мозаичная модель (Сингер, Николсон, 1972).\nОсмос: вода идёт туда, где больше растворённых веществ.\nπ = i·C·R·T (закон Вант-Гоффа)'},
@@ -70,7 +77,7 @@ function build(){P=[];rib=[];journal=journal;
  if(type==='animal'){
   mk('nuc',-.25,-.05,.42,{ax:0,ay:0});mk('er',.45,-.05,.28,{ax:0,ay:0});mk('golgi',.98,-.02,.2,{ax:0,ay:0});
   [[.55,.5],[-.85,.4],[.75,-.5],[-.75,-.55],[.05,.68]].forEach(p=>mk('mito',p[0],p[1],.17));
-  [[-1,-.05],[.95,.55],[-.45,.65]].forEach(p=>mk('lyso',p[0],p[1],.1));mk('cent',-.62,-.68,.14,{ax:.02,ay:.02});
+  [[-1,-.05],[.95,.55],[-.45,.65]].forEach(p=>mk('lyso',p[0],p[1],.1));mk('cent',-.62,-.62,.15,{ax:.06,ay:.05});
  }else{
   mk('vac',.3,.05,.62,{ax:0,ay:0});mk('nuc',-.92,-.42,.28,{ax:0,ay:0});mk('er',-.52,-.2,.24,{ax:0,ay:0});mk('golgi',-.55,.4,.16,{ax:0,ay:0});
   [[-.95,.55],[-.35,.8],[.4,.8],[1.05,.62],[-.2,-.8],[.55,-.8],[1.1,-.4]].forEach(p=>mk('chlo',p[0],p[1],.16,{ax:.05,ay:.03}));
@@ -82,10 +89,10 @@ function build(){P=[];rib=[];journal=journal;
 }
 function geo(){const u=Math.min(W*(W<760?.3:.26),H*.33),pw=document.body.classList.contains('po')&&W>760?190:0;
  const hx=u*(type==='animal'?1.4:1.38),hy=u*(type==='animal'?1:1);return{u,hx,hy,cx:W/2-pw,cy:H*.5+(W<760?-10:10)}}
-const kkF=()=>type==='animal'?1+.1*s-(s<-.15?.1*(-s-.15):0):(s<0?1+.3*s:1);
+const kkF=(v=s)=>type==='animal'?1+.1*v-(v<-.15?.1*(-v-.15):0):(v<0?1+.3*v:1);
 function rel(o){return o.ax||o.ay?{x:o.x+o.ax*Math.cos(t*o.sp+o.ph),y:o.y+o.ay*Math.sin(t*o.sp*1.3+o.ph)}:{x:o.x,y:o.y}}
 function pos(o){const g=geo(),B=kkF(),p=rel(o);return{x:g.cx+p.x*g.u*B,y:g.cy+p.y*g.u*B}}
-function resize(){D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;ctx.setTransform(D,0,0,D,0,0);const d=$('#dock');$('#status').style.bottom=(d.offsetHeight+26)+'px'}
+function resize(){D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;ctx.setTransform(D,0,0,D,0,0);const d=div.on?$('#ddock'):$('#dock');$('#status').style.bottom=(d.offsetHeight+26)+'px'}
 function hit(mx,my){const g=geo(),B=kkF();
  for(let i=items.length-1;i>=0;i--){const o=items[i],p=pos(o);
   if(o.id==='vac'){const vs=s<0?1+.5*s:1+.1*s;if(((mx-(g.cx+o.x*g.u*B))/(.7*g.u*vs*B))**2+((my-(g.cy+o.y*g.u*B))/(.5*g.u*vs*B))**2<1)return o}
@@ -114,8 +121,13 @@ function dER(x,y,r){ctx.lineWidth=4;ctx.lineCap='round';for(let k=0;k<4;k++){con
 function dGolgi(x,y,r){ctx.lineCap='round';for(let k=0;k<5;k++){const d=Math.abs(k-2);ctx.strokeStyle=['#ffe082','#ffd54f','#ffca28','#ffd54f','#ffe082'][k];ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(x,y+(k-2)*r*.38,r*(1-.14*d),r*.22,0,.15*Math.PI,.85*Math.PI);ctx.stroke()}
  ctx.fillStyle='#fff3b0';for(let k=0;k<3;k++){const a=t*.9+k*2.1;ctx.beginPath();ctx.arc(x+r*1.15*Math.cos(a)*.6+r*.7,y+Math.sin(a)*r*.9,2.6,0,7);ctx.fill()}}
 function dLyso(x,y,r){ctx.fillStyle=grad(x,y,r,'#ffa3a3','#d94a4a');ctx.strokeStyle='#ffd0d0';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();ctx.stroke();ctx.fillStyle='#7a1c1c';[[-.3,-.2],[.3,.1],[-.1,.35]].forEach(p=>{ctx.beginPath();ctx.arc(x+p[0]*r,y+p[1]*r,r*.16,0,7);ctx.fill()})}
-function dCent(x,y,r){ctx.fillStyle='#9be3a8';ctx.strokeStyle='#d8ffe0';ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(x-r,y-r*.28,r*2,r*.56,4);ctx.fill();ctx.stroke();ctx.beginPath();ctx.roundRect(x-r*.28,y+r*.4,r*.56,r*1.5,4);ctx.fill();ctx.stroke();
- ctx.strokeStyle='#2b7a42';ctx.beginPath();for(let i=-3;i<=3;i++){ctx.moveTo(x+i*r*.28,y-r*.28);ctx.lineTo(x+i*r*.28,y+r*.28)}ctx.stroke()}
+function dCent(x,y,r){ctx.save();ctx.translate(x,y);ctx.rotate(.3*Math.sin(t*.5));
+ const L=r*1.8,Wd=r*.6,cy0=-r*.62,g=ctx.createLinearGradient(0,cy0-Wd/2,0,cy0+Wd/2);g.addColorStop(0,'#d2f7da');g.addColorStop(1,'#4fbf72');
+ ctx.fillStyle=g;ctx.strokeStyle='#e4ffe9';ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(-L/2,cy0-Wd/2,L,Wd,Wd/2);ctx.fill();ctx.stroke();
+ ctx.strokeStyle='rgba(20,90,45,.5)';ctx.beginPath();for(let i=-3;i<=3;i++){ctx.moveTo(i*L*.12,cy0-Wd*.28);ctx.lineTo(i*L*.12,cy0+Wd*.28)}ctx.stroke();
+ const ey=r*.68,er=r*.46;ctx.fillStyle='#2c7d4b';ctx.strokeStyle='#e4ffe9';ctx.beginPath();ctx.arc(0,ey,er,0,7);ctx.fill();ctx.stroke();
+ ctx.fillStyle='#d8ffe0';for(let j=0;j<9;j++){const a=j/9*6.283;ctx.beginPath();ctx.arc(Math.cos(a)*er*.7,ey+Math.sin(a)*er*.7,Math.max(1.2,r*.1),0,7);ctx.fill()}
+ ctx.beginPath();ctx.arc(0,ey,Math.max(1,r*.07),0,7);ctx.fill();ctx.restore()}
 function nm(id){return I[id].n}
 /* ---------- кадр ---------- */
 function draw(){const g=geo(),B=kkF(),{u,hx,hy,cx,cy}=g,L=lv/100;
@@ -123,7 +135,7 @@ function draw(){const g=geo(),B=kkF(),{u,hx,hy,cx,cy}=g,L=lv/100;
  ctx.fillStyle=s>0?`rgba(70,150,255,${.1*s})`:`rgba(255,160,70,${-.09*s})`;ctx.fillRect(0,0,W,H);
  const bg=ctx.createRadialGradient(cx,cy,u*.3,cx,cy,u*2.6);bg.addColorStop(0,'rgba(120,100,200,.13)');bg.addColorStop(1,'transparent');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
  /* вода */
- const bnd=B;ctx.fillStyle='#8fd0ff';water.forEach(w=>{const r=1.0+w.ph*.7,al=Math.min(1,(r-1)*6)*.75;ctx.globalAlpha=al;const ex=type==='plant'&&s<0?1:1;ctx.beginPath();ctx.arc(cx+Math.cos(w.a)*hx*bnd*r*ex,cy+Math.sin(w.a)*hy*bnd*r*ex,3,0,7);ctx.fill()});ctx.globalAlpha=1;
+ const bnd=B;ctx.fillStyle='#8fd0ff';water.forEach(w=>{const r=1.0+w.ph*.7,al=Math.min(1,(r-1)*6,(1.7-r)*8)*.75;ctx.globalAlpha=al;const ex=type==='plant'&&s<0?1:1;ctx.beginPath();ctx.arc(cx+Math.cos(w.a)*hx*bnd*r*ex,cy+Math.sin(w.a)*hy*bnd*r*ex,3,0,7);ctx.fill()});ctx.globalAlpha=1;
  /* клетка */
  const cg=ctx.createRadialGradient(cx,cy,u*.2,cx,cy,u*1.5);cg.addColorStop(0,'rgba(130,115,190,.42)');cg.addColorStop(1,'rgba(85,65,140,.6)');
  let memPath;
@@ -163,7 +175,7 @@ function draw(){const g=geo(),B=kkF(),{u,hx,hy,cx,cy}=g,L=lv/100;
   if(rib.length)ctx.fillText('Рибосомы',cx+rib[0].x*u*B+6,cy+rib[0].y*u*B-4);ctx.fillText('Мембрана',cx+hx*B*(type==='animal'?.0:.0)-30,cy-hy*B-(type==='plant'?10:8));if(type==='plant')ctx.fillText('Клеточная стенка',cx+hx-120,cy+hy+28);ctx.shadowBlur=0}
 }
 function step(dt){t+=dt;s+=(sT-s)*Math.min(1,dt*1.6);const L=lv/100;
- water.forEach(w=>{const v=s*.32;w.ph-=v*dt;if(Math.abs(s)<.05)w.ph+=(Math.random()-.5)*dt*.8;if(w.ph>1)w.ph-=1;if(w.ph<0)w.ph+=1});
+ water.forEach(w=>{const v=s*.3+w.dir*.2*(1-Math.abs(s));w.ph-=v*dt;if(w.ph>1)w.ph-=1;if(w.ph<0)w.ph+=1});
  const g=geo(),ms=items.filter(o=>o.id==='mito'),cs=items.filter(o=>o.id==='chlo'),ex=type==='animal'?1.4:1.38;
  const edge=()=>{const a=Math.random()*6.283;return{x:Math.cos(a)*ex*.98,y:Math.sin(a)*.98}};
  acc.a+=dt*L*ms.length*.6;acc.o+=dt*L*(type==='animal'?ms.length*.35:cs.length*.5);acc.g+=dt*L*cs.length*.25;
@@ -173,8 +185,8 @@ function step(dt){t+=dt;s+=(sT-s)*Math.min(1,dt*1.6);const L=lv/100;
   while(acc.g>1){acc.g--;const c=rel(cs[Math.random()*cs.length|0]),m=rel(ms[Math.random()*ms.length|0]);P.push({k:'glu',sx:c.x,sy:c.y,tx:m.x,ty:m.y,l:0,d:2.4})}acc.a=0}
  for(let i=P.length-1;i>=0;i--){const q=P[i];q.l+=dt/q.d;if(q.l>=1){if(q.k==='glu'){for(let k=0;k<2;k++)P.push({k:'atp',sx:q.tx,sy:q.ty,tx:q.tx+(Math.random()-.5)*.3,ty:q.ty,l:0,d:1.5})}P.splice(i,1)}}
  if(P.length>150)P.splice(0,30);
- const pl=type==='plant';$('#readout').innerHTML=detail?(pl?`Объём протопласта ${Math.round(kkF()**2*100)}% · ${pl?'свет':'акт.'} ${lv}%`:`Объём клетки ${Math.round(kkF()**2*100)}% · АТФ ${lv}%`):(type==='animal'?'Клетка животного':'Клетка растения')}
-let last=performance.now();function loop(n){const dt=Math.min(.05,(n-last)/1000);last=n;step(dt);draw();requestAnimationFrame(loop)}
+ const pl=type==='plant';nowTick(dt,pl,ms.length,cs.length);$('#readout').innerHTML=detail?(pl?`Объём протопласта ${Math.round(kkF()**2*100)}% · ${pl?'свет':'акт.'} ${lv}%`:`Объём клетки ${Math.round(kkF()**2*100)}% · АТФ ${lv}%`):(type==='animal'?'Клетка животного':'Клетка растения')}
+let last=performance.now();function loop(n){const dt=Math.min(.05,(n-last)/1000);last=n;if(div.on){stepDiv(dt);drawDiv()}else{step(dt);draw()}requestAnimationFrame(loop)}
 /* ---------- панель, игра, журнал ---------- */
 const $p=$('#panel');
 function say(m){const e=$('#toast');e.textContent=m;e.classList.add('show');clearTimeout(say.t);say.t=setTimeout(()=>e.classList.remove('show'),2400)}
@@ -182,7 +194,7 @@ function openInfo(id){sel=id;const o=I[id];$p.style.setProperty('--pc',o.c);docu
  $p.innerHTML=`<button class="x" id="cl">✕</button><div class="hero"><div class="orb"></div><div><div class="kind">${o.k}</div><h2>${o.n}</h2></div></div><div class="fact">💡 ${o.f}</div><div class="grid"><div class="tile"><small>Размер</small><b>${o.sz}</b></div><div class="tile"><small>Где встречается</small><b>${o.wh}</b></div></div><div class="sec"><h3>Что делает</h3><div class="note">${o.d}</div></div>${detail?`<div class="sec"><h3>Подробнее (старшие классы)</h3><div class="formula">${o.m.replace(/\n/g,'<br>')}</div></div>`:''}`;$('#cl').onclick=closeP}
 function closeP(){sel=null;document.body.classList.remove('po')}
 const envTxt=()=>{const a=type==='animal';return s>.5?(a?'💧 Пресная вода — гипотоническая среда: воды снаружи больше, она входит в клетку, клетка набухает. Без стенки может лопнуть!':'💧 Пресная вода: вода входит, вакуоль растёт, стенка не даёт лопнуть — клетка упругая (тургор).'):s<-.5?(a?'🧂 Солёный раствор — гипертонический: вода выходит, клетка сморщивается (кренация).':'🧂 Солёный раствор: вода уходит из вакуоли, мембрана отходит от стенки — плазмолиз.'):'⚖ Изотоническая среда: воды входит и выходит поровну, объём не меняется (для крови человека — 0,9% NaCl).'};
-function status(){$('#status').innerHTML=game?`🎯 <b>Найди на клетке: ${nm(game.t)}</b> · серия ×${game.s}`:envTxt();$('#lvn').textContent=type==='plant'?'☀ Свет':'⚡ Активность'}
+function status(){const st=$('#status');st.innerHTML=game?`🎯 <b>Найди на клетке: ${nm(game.t)}</b> · серия ×${game.s}`:evT;st.style.display=(game||W<=760)?'block':'none';$('#lvn').textContent=type==='plant'?'☀ Свет':'⚡ Активность'}
 function nextQ(){const ids=[...new Set(items.map(o=>o.id)),'mem'];if(type==='plant')ids.push('wall');let n;do{n=ids[Math.random()*ids.length|0]}while(game&&n===game.t&&ids.length>1);game=game||{s:0};game.t=n;status()}
 function addScore(n){score+=n;$('#score').textContent=score;const e=$('#score').parentNode;e.classList.add('pop');setTimeout(()=>e.classList.remove('pop'),300)}
 function labPanel(){sel='lab';document.body.classList.add('po');$p.style.setProperty('--pc','#ffe29a');const pl=type==='plant',vol=Math.round(kkF()**2*100);
@@ -195,27 +207,131 @@ function labPanel(){sel='lab';document.body.classList.add('po');$p.style.setProp
  ${detail?`<div class="sec"><h3>Теория</h3><div class="formula">π = i·C·R·T<br>вода идёт к большей C<br>Ψ = Ψs + Ψp (водный потенциал)<br>в тургоре: Ψp &gt; 0</div></div>`:''}
  <button class="btn sec2" id="clr">Очистить журнал</button>`;
  $('#cl').onclick=closeP;$('#rec').onclick=()=>{journal.push([pl?'Растение':'Животное',s>.5?'Пресная':s<-.5?'Солёная':'Изотон.',Math.round(kkF()**2*100),lv]);if(journal.length>8)journal.shift();addScore(5);labPanel()};$('#clr').onclick=()=>{journal=[];labPanel()}}
+/* ---------- пояснения слева ---------- */
+let evT='',nowT='',nowAcc=0;
+function setEv(a,b){evT=a+'. '+b;const e=$('#ev');e.innerHTML='<b>'+a+'</b>'+b;e.classList.remove('fl');void e.offsetWidth;e.classList.add('fl');status()}
+function setNow(h){if(h!==nowT){nowT=h;$('#now').innerHTML=h}}
+function envEv(){const a=type==='animal',v=sT>.5?1:sT<-.5?-1:0,vol=Math.round(kkF(v)**2*100);
+ const T={'1':['Среда: пресная вода',a?'Растворённых веществ в воде меньше, чем в клетке, поэтому вода по осмосу входит внутрь (синие точки идут в клетку). Клетка набухает. Стенки нет — в реальности она могла бы лопнуть (лизис).':'Вода входит в клетку, вакуоль набухает и давит на стенку — это тургор. Прочная стенка не даёт клетке лопнуть, поэтому свежие листья упругие.'],
+ '0':['Среда: изотонический раствор','Снаружи и внутри одинаковая концентрация: сколько воды входит, столько и выходит (точки идут в обе стороны). Объём не меняется. Для клеток человека это 0,9% NaCl.'],
+ '-1':['Среда: солёный раствор',a?'Снаружи растворённых веществ больше, и вода уходит из клетки (точки идут наружу). Клетка сморщивается, края становятся зубчатыми — это кренация.':'Вода уходит из вакуоли, протопласт сжимается и отходит от стенки — это плазмолиз. Так вянет растение, если полить его слишком солёной водой.']};
+ const r=T[v];setEv(r[0],r[1]+' Объём '+(a?'клетки':'протопласта')+' станет ≈ '+vol+'%.')}
+function lvEv(){const a=type==='animal',x=lv;let m;
+ if(a)m=x==0?'Митохондрии «отдыхают»: АТФ не образуется, кислород не нужен.':x<35?'Митохондрии работают вполсилы: немного АТФ, немного O₂.':x<70?'Кислород (голубые точки) заходит в клетку, митохондрии «сжигают» глюкозу и выпускают АТФ (жёлтые ромбики).':'Как у работающей мышцы: митохондрии горят и быстро делают АТФ. C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O + АТФ.';
+ else m=x==0?'Темно: фотосинтеза нет, O₂ и глюкоза не образуются. Клетка живёт запасами и только дышит.':x<35?'Слабый свет: фотосинтез идёт медленно — мало O₂ и глюкозы.':x<70?'Хороший свет: хлоропласты делают глюкозу (розовые точки уходят к митохондриям) и выпускают O₂ (голубые пузырьки уходят наружу). Митохондрии превращают глюкозу в АТФ.':'Яркий свет: фотосинтез на максимуме, хлоропласты светятся. 6CO₂ + 6H₂O + свет → C₆H₁₂O₆ + 6O₂.';
+ setEv((a?'Активность: ':'Свет: ')+x+'%',m)}
+function nowTick(dt,pl,nmi,nch){if(div.on)return;nowAcc+=dt;if(nowAcc<.3)return;nowAcc=0;const L=lv/100,vol=Math.round(kkF()**2*100),rate=pl?'≈ '+(L*nch*.5).toFixed(1)+' O₂/с':'≈ '+(L*nmi*.6).toFixed(1)+' АТФ/с',env=sT>.5?'пресная вода':sT<-.5?'солёный раствор':'изотоническая';
+ setNow('<div class="nw">Среда: <b>'+env+'</b></div><div class="nw">Объём '+(pl?'протопласта':'клетки')+': <b>'+vol+'%</b></div><div class="nw">'+(pl?'Свет':'Активность')+': <b>'+lv+'%</b> · '+rate+' (в модели)</div>'+(detail?'<div class="nw formula">'+(pl?'6CO₂ + 6H₂O + свет → C₆H₁₂O₆ + 6O₂':'C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O + АТФ')+'</div>':''))}
+function toggleLevel(){detail=!detail;['#level','#dlevel'].forEach(q=>{const b=$(q);b.textContent='Режим: '+(detail?'подробно':'кратко');b.classList.toggle('on',detail)});if(div.on){phaseText(false);if(sel==='phase')openPhase()}else if(sel==='lab')labPanel();else if(sel)openInfo(sel)}
+/* ---------- деление клетки (митоз) ---------- */
+const div={on:false,p:0,play:false,sp:1};let lastPh=-1;
+const PB=[0,.16,.34,.5,.64,1.0001];
+const PH=[
+{n:'Интерфаза',t:'Самая долгая часть',set:'2n2c → 2n4c',s:'Клетка растёт и копирует свою ДНК. Деления ещё нет, но всё готовится.',d:'Ядро с оболочкой хорошо видно, хромосомы — тонкие нити хроматина. Во второй половине (S-период) ДНК удваивается: теперь каждая хромосома состоит из двух копий. У животных удваиваются и центриоли.',m:'G1 (рост) → S (удвоение ДНК) → G2 (подготовка)\nНабор: 2n2c → 2n4c\nn — число хромосом, c — число молекул ДНК.\nНа модели 2n = 4 (у человека 2n = 46).'},
+{n:'Профаза',t:'Самая долгая фаза митоза',set:'2n4c',s:'Хромосомы скручиваются и становятся видны. Оболочка ядра исчезает.',d:'Нити хроматина плотно скручиваются — получаются видимые «Х»: две одинаковые хроматиды, соединённые в центромере. Ядро растворяется. Центриоли расходятся к полюсам и строят веретено деления из микротрубочек. У растений центриолей нет — веретено строится без них.',m:'Конденсация нужна, чтобы длинные нити ДНК не запутались и не порвались при переносе.\nНабор: 2n4c'},
+{n:'Метафаза',t:'Средняя',set:'2n4c',s:'Хромосомы выстраиваются по «экватору». Нити веретена прикрепляются к центромерам.',d:'Все хромосомы собираются в одной плоскости посередине клетки. К центромере каждой хромосомы с двух сторон прикрепляются нити от разных полюсов. Хромосомы лучше всего видны — их удобно считать под микроскопом.',m:'Контрольная точка веретена: пока не все хромосомы правильно прикреплены, клетка не перейдёт к анафазе.\nНабор: 2n4c'},
+{n:'Анафаза',t:'Самая короткая',set:'4n4c',s:'Хроматиды разъединяются и расходятся к полюсам. Клетка вытягивается.',d:'Центромеры делятся, и сестринские хроматиды становятся самостоятельными хромосомами. Нити веретена укорачиваются и растаскивают их к противоположным полюсам. Каждый полюс получает полный набор.',m:'На миг хромосом становится вдвое больше: 4n4c.\nХромосомы тянутся за счёт укорочения микротрубочек.'},
+{n:'Телофаза и цитокинез',t:'Средняя',set:'2n2c в каждой клетке',s:'Вокруг двух наборов образуются новые ядра, и клетка делится на две.',d:'Хромосомы раскручиваются обратно в тонкие нити, вокруг каждого набора появляется ядерная оболочка, веретено исчезает. Затем делится цитоплазма: у животных клетка перетягивается бороздой из белков актина и миозина, у растений в центре строится клеточная пластинка — из неё вырастает новая стенка.',m:'Итог: две дочерние клетки 2n2c, генетически идентичные материнской.\nМитоз нужен для роста, заживления ран и замены клеток.'}];
+const phIdx=p=>{for(let i=0;i<5;i++)if(p<PB[i+1])return i;return 4};
+const sm=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)};
+const CH=[{L:.2,c:'#ff8ab5'},{L:.2,c:'#7fb5ff'},{L:.13,c:'#ff8ab5'},{L:.13,c:'#7fb5ff'}];
+const CH0=[[-.12,-.08,.9],[.1,-.1,-.7],[-.09,.1,1.6],[.11,.09,-1.2]];
+const dm=[];for(let i=0;i<9;i++){const a=rnd()*6.283,r=.5+.32*rnd();let bx=Math.cos(a)*r*1.3;const by=Math.sin(a)*r*.8;if(Math.abs(bx)<.45)bx=(bx<0?-1:1)*(.45+rnd()*.2);dm.push({bx,by,sd:bx>0?1:-1,sp:.4+rnd()*.4,ph:rnd()*6,rot:rnd()*3})}
+function phaseText(evt){const i=phIdx(div.p),o=PH[i];if(evt)setEv('Фаза '+(i+1)+' из 5: '+o.n,o.s);setNow('<div class="nw">'+o.d+'</div>'+(detail?'<div class="nw formula">'+o.m.replace(/\n/g,'<br>')+'</div>':''))}
+function openPhase(){const i=phIdx(div.p),o=PH[i];sel='phase';$p.style.setProperty('--pc','#ffb0c8');document.body.classList.add('po');
+ $p.innerHTML='<button class="x" id="cl">✕</button><div class="hero"><div class="orb"></div><div><div class="kind">Митоз · фаза '+(i+1)+' из 5</div><h2>'+o.n+'</h2></div></div><div class="fact">💡 '+o.s+'</div><div class="grid"><div class="tile"><small>Длительность</small><b>'+o.t+'</b></div><div class="tile"><small>Набор</small><b>'+o.set+'</b></div></div><div class="sec"><h3>Что происходит</h3><div class="note">'+o.d+'</div></div>'+(detail?'<div class="sec"><h3>Подробнее (старшие классы)</h3><div class="formula">'+o.m.replace(/\n/g,'<br>')+'</div></div>':'')+'<div class="sec note">'+(type==='plant'?'🌿 У растений нет центриолей, а клетка делится клеточной пластинкой.':'🐾 У животных клетка делится перетяжкой — бороздой деления.')+'</div>';$('#cl').onclick=closeP}
+function setDiv(on){div.on=on;div.play=false;closeP();$('#dock').style.display=on?'none':'flex';$('#ddock').style.display=on?'flex':'none';
+ if(on){game=null;$('#game').classList.remove('on');div.p=0;$('#dp').value=0;$('#dplay').textContent='▶ Пуск';lastPh=-1}else{nowT='';setEv('Подсказка','Снова обычная клетка: меняй среду и энергию, нажимай на органоиды.')}resize();status()}
+function stepDiv(dt){t+=dt;if(div.play){div.p+=dt*div.sp/20;if(div.p>=1){div.p=1;div.play=false;$('#dplay').textContent='↻ Заново'}$('#dp').value=div.p*1000}
+ const ph=phIdx(div.p);if(ph!==lastPh){lastPh=ph;phaseText(true);if(sel==='phase')openPhase();document.querySelectorAll('#dph button').forEach((b,i)=>b.classList.toggle('on',i===ph))}}
+function chrX(x,y,L,ang,col,w,a){ctx.save();ctx.globalAlpha=a;ctx.translate(x,y);ctx.rotate(ang);ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap='round';const ax=w*.9;
+ ctx.beginPath();ctx.moveTo(-ax,-L);ctx.quadraticCurveTo(ax*.5,0,ax,L);ctx.stroke();ctx.beginPath();ctx.moveTo(ax,-L);ctx.quadraticCurveTo(-ax*.5,0,-ax,L);ctx.stroke();
+ ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,w*.38,0,7);ctx.fill();ctx.restore()}
+function chrV(x,y,L,ang,col,w,a){ctx.save();ctx.globalAlpha=a;ctx.translate(x,y);ctx.rotate(ang);ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap='round';ctx.lineJoin='round';
+ ctx.beginPath();ctx.moveTo(-L*.9,-L*.6);ctx.lineTo(0,0);ctx.lineTo(-L*.9,L*.6);ctx.stroke();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,w*.38,0,7);ctx.fill();ctx.restore()}
+function chrS(x,y,sd,col,r,a,off){ctx.save();ctx.globalAlpha=a;ctx.strokeStyle=col;ctx.lineWidth=2;ctx.lineCap='round';ctx.beginPath();
+ for(let k=0;k<26;k++){const px=x+off+Math.sin(k*.5+sd*2+t*.4)*r*(.4+.6*Math.sin(k*.13+sd)),py=y+Math.cos(k*.62+sd+t*.3)*r*(.5+.4*Math.cos(k*.2));k?ctx.lineTo(px,py):ctx.moveTo(px,py)}ctx.stroke();ctx.restore()}
+function nucC(x,y,r,a,nucleolus){ctx.save();ctx.globalAlpha=a;ctx.fillStyle='rgba(120,100,200,.38)';ctx.strokeStyle='#cbbcff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();ctx.stroke();
+ ctx.fillStyle='#e8dcff';for(let i=0;i<14;i++){const an=i/14*6.283;ctx.beginPath();ctx.arc(x+Math.cos(an)*r,y+Math.sin(an)*r,1.8,0,7);ctx.fill()}
+ if(nucleolus){ctx.fillStyle='rgba(42,29,92,.8)';ctx.beginPath();ctx.arc(x+r*.3,y+r*.3,r*.2,0,7);ctx.fill()}ctx.restore()}
+function drawDiv(){const g=geo(),{u,hx,hy,cx,cy}=g,p=div.p,ph=phIdx(p),q=(p-PB[ph])/(PB[ph+1]-PB[ph]),pl=type==='plant';
+ ctx.clearRect(0,0,W,H);ctx.fillStyle='#0b0912';ctx.fillRect(0,0,W,H);
+ const bg=ctx.createRadialGradient(cx,cy,u*.3,cx,cy,u*2.6);bg.addColorStop(0,'rgba(120,100,200,.13)');bg.addColorStop(1,'transparent');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+ const e=sm((p-.5)/.3),Hx=hx*(1+(pl?.15:.28)*e),c=sm((p-.66)/.3);
+ const cg=ctx.createRadialGradient(cx,cy,u*.2,cx,cy,Hx*1.1);cg.addColorStop(0,'rgba(130,115,190,.42)');cg.addColorStop(1,'rgba(85,65,140,.6)');
+ if(!pl){const n=90,Y=x=>hy*Math.sqrt(Math.max(0,1-(x/Hx)**2))*(1-c*Math.exp(-((x/(.2*Hx))**2)));ctx.beginPath();
+  for(let i=0;i<=n;i++){const x=-Hx+i/n*2*Hx;i?ctx.lineTo(cx+x,cy-Y(x)):ctx.moveTo(cx+x,cy-Y(x))}
+  for(let i=n;i>=0;i--){const x=-Hx+i/n*2*Hx;ctx.lineTo(cx+x,cy+Y(x))}ctx.closePath();
+  ctx.fillStyle=cg;ctx.fill();ctx.strokeStyle='#f2b8d0';ctx.lineWidth=5;ctx.stroke();ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=1.2;ctx.stroke()}
+ else{ctx.beginPath();ctx.roundRect(cx-Hx,cy-hy,Hx*2,hy*2,u*.2);ctx.fillStyle=cg;ctx.fill();ctx.strokeStyle='#5aa86a';ctx.lineWidth=15;ctx.stroke();ctx.strokeStyle='#9be3a8';ctx.lineWidth=2;ctx.stroke();
+  const len=c*hy*2*.98;if(len>1){ctx.lineCap='butt';ctx.strokeStyle='#5aa86a';ctx.lineWidth=12;ctx.beginPath();ctx.moveTo(cx,cy-len/2);ctx.lineTo(cx,cy+len/2);ctx.stroke();ctx.strokeStyle='#cdf5c0';ctx.lineWidth=2;ctx.stroke()}}
+ /* митохондрии расходятся по дочерним клеткам */
+ ctx.save();ctx.globalAlpha=.6;dm.forEach(m=>{dMito(cx+m.bx*u*(Hx/hx)+Math.sin(t*m.sp+m.ph)*.03*u,cy+m.by*u+Math.cos(t*m.sp*1.2+m.ph)*.03*u,.09*u,m.rot,0)});ctx.restore();
+ /* полюса */
+ const ps=ph===0?0:ph===1?sm(q):1,gap=ph===0&&q>.5?10:0,py=cy-.6*u*(1-ps),px=Hx*.88*ps;
+ const PL={x:cx-px-gap,y:py},PR={x:cx+px+gap,y:py};
+ /* ядра */
+ const rn=.42*u,nA=ph===0?1:ph===1?Math.max(0,1-q*1.5):0;if(nA>0)nucC(cx,cy,rn,nA,ph===0||q<.3);
+ const n2=ph===4?sm(q*1.5):0;if(n2>0){nucC(cx-.5*Hx,cy,.36*u,n2,false);nucC(cx+.5*Hx,cy,.36*u,n2,false)}
+ /* хромосомы */
+ const cs=[],tL=[],tR=[];
+ CH.forEach((ch,i)=>{const L=ch.L*u*.6,w=u*.034,ys=(i-1.5)*.27*u,n0=CH0[i],nx=cx+n0[0]*u,ny=cy+n0[1]*u;
+  if(ph===0){const a2=sm((q-.45)/.4);cs.push(()=>{chrS(nx,ny,i,ch.c,.2*u,1,0);if(a2>0)chrS(nx,ny,i,ch.c,.2*u,a2,5)})}
+  else if(ph===1){const sa=1-Math.min(1,q*2.2),xa=Math.min(1,q*2),k=.45+.55*Math.min(1,q*1.5);cs.push(()=>{if(sa>0)chrS(nx,ny,i,ch.c,.2*u,sa,5);if(xa>0)chrX(nx,ny,L*k,n0[2],ch.c,w,xa)});tL.push([nx,ny]);tR.push([nx,ny])}
+  else if(ph===2){const m=sm(q/.7),x=cx+n0[0]*u*(1-m),y=cy+n0[1]*u+(ys-n0[1]*u)*m,an=n0[2]*(1-m);cs.push(()=>chrX(x,y,L,an,ch.c,w,1));tL.push([x,y]);tR.push([x,y])}
+  else if(ph===3){const d=sm((q-.1)/.9)*.5*Hx,yy=cy+ys*(1-.25*sm(q));
+   if(q<.1){cs.push(()=>chrX(cx,yy,L,0,ch.c,w,1));tL.push([cx,yy]);tR.push([cx,yy])}
+   else{cs.push(()=>{chrV(cx+d,yy,L,0,ch.c,w,1);chrV(cx-d,yy,L,Math.PI,ch.c,w,1)});tL.push([cx-d,yy]);tR.push([cx+d,yy])}}
+  else{const yy=cy+ys*.75,va=1-Math.min(1,q*2),sa=Math.min(1,q*2);
+   cs.push(()=>{[-1,1].forEach(sg=>{const x=cx+sg*.5*Hx;if(va>0)chrV(x,yy,L,sg>0?0:Math.PI,ch.c,w,va);if(sa>0)chrS(x,cy+(i-1.5)*.1*u,i+(sg>0?3:0),ch.c,.12*u,sa,0)})});
+   tL.push([cx-.5*Hx,yy]);tR.push([cx+.5*Hx,yy])}});
+ /* веретено */
+ const sa=ph===0?0:ph===1?sm(q*1.2)*.9:ph<4?.9:.9*(1-sm(q*1.6));
+ if(ph===2){ctx.strokeStyle='rgba(255,255,255,.12)';ctx.setLineDash([4,6]);ctx.beginPath();ctx.moveTo(cx,cy-hy*.9);ctx.lineTo(cx,cy+hy*.9);ctx.stroke();ctx.setLineDash([])}
+ if(sa>.02){ctx.lineWidth=1.2;ctx.strokeStyle='rgba(255,255,255,'+.34*sa+')';
+  tL.forEach(tp=>{ctx.beginPath();ctx.moveTo(PL.x,PL.y);ctx.lineTo(tp[0],tp[1]);ctx.stroke()});tR.forEach(tp=>{ctx.beginPath();ctx.moveTo(PR.x,PR.y);ctx.lineTo(tp[0],tp[1]);ctx.stroke()});
+  ctx.strokeStyle='rgba(255,255,255,'+.16*sa+')';[-1,1].forEach(sg=>{ctx.beginPath();ctx.moveTo(PL.x,PL.y);ctx.quadraticCurveTo(cx,cy+sg*.62*u,PR.x,PR.y);ctx.stroke()});
+  if(!pl){ctx.strokeStyle='rgba(255,255,255,'+.25*sa+')';[PL,PR].forEach(pp=>{for(let k=0;k<9;k++){const a=k/9*6.283;ctx.beginPath();ctx.moveTo(pp.x+Math.cos(a)*.09*u,pp.y+Math.sin(a)*.09*u);ctx.lineTo(pp.x+Math.cos(a)*.17*u,pp.y+Math.sin(a)*.17*u);ctx.stroke()}})}}
+ cs.forEach(f=>f());
+ /* центриоли / полюса */
+ if(!pl){if(ph===0&&q<=.5)dCent(cx,py,.075*u);else{dCent(PL.x,PL.y,.075*u);dCent(PR.x,PR.y,.075*u)}}
+ else if(ps>0){[PL,PR].forEach(pp=>{ctx.strokeStyle='rgba(155,227,168,'+Math.min(1,sa*1.1)+')';ctx.lineWidth=3;ctx.beginPath();ctx.arc(pp.x,pp.y,9,0,7);ctx.stroke()})}
+ /* подписи */
+ if(labels){ctx.font='500 12px "Roboto Flex",sans-serif';ctx.shadowColor='#000';ctx.shadowBlur=5;ctx.fillStyle='#fff';const T=(s,x,y)=>ctx.fillText(s,x,y);
+  if(ph===0){T('Ядро',cx+rn+8,cy-rn*.5);T('Хроматин',cx-rn-70,cy+rn*.4);if(q>.5)T('ДНК удвоена',cx-rn-86,cy+rn*.4+16);if(!pl)T('Центриоли',cx+24,py)}
+  if(ph===1){T('Хромосомы из двух хроматид',cx-80,cy+.62*u);if(ps>.3)T(pl?'Полюс веретена':'Центриоли',PR.x-30,PR.y-.2*u)}
+  if(ph===2){T('Экваториальная пластинка',cx+10,cy+hy*.9);T('Нити веретена',cx+.3*Hx,cy-.5*u);T(pl?'Полюс':'Центриоли',PR.x-30,PR.y-.2*u)}
+  if(ph===3){T('Хроматиды идут к полюсам',cx-85,cy-hy*.78);T('Нити укорачиваются',cx-70,cy+hy*.82)}
+  if(ph===4){if(n2>.5)T('Новые ядра',cx+.5*Hx-32,cy+.46*u);if(c>.05)T(pl?'Клеточная пластинка':'Борозда деления',cx-52,cy-hy-12)}
+  ctx.shadowBlur=0}}
+
 /* ---------- события ---------- */
 function xy(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
-cv.addEventListener('pointerdown',e=>{const p=xy(e),o=hit(p.x,p.y);cv.setPointerCapture(e.pointerId);drag={o,x:p.x,y:p.y,moved:false}});
-cv.addEventListener('pointermove',e=>{const p=xy(e);if(drag){const dx=p.x-drag.x,dy=p.y-drag.y;
+cv.addEventListener('pointerdown',e=>{if(div.on){drag=null;sel==='phase'?closeP():openPhase();return}const p=xy(e),o=hit(p.x,p.y);cv.setPointerCapture(e.pointerId);drag={o,x:p.x,y:p.y,moved:false}});
+cv.addEventListener('pointermove',e=>{if(div.on)return;const p=xy(e);if(drag){const dx=p.x-drag.x,dy=p.y-drag.y;
   if(!drag.moved&&Math.hypot(dx,dy)>6&&drag.o&&drag.o.x!==undefined&&drag.o.id!=='vac')drag.moved=true;
   if(drag.moved){const g=geo(),B=kkF(),o=drag.o;let nx=(p.x-g.cx)/(g.u*B),ny=(p.y-g.cy)/(g.u*B);const lim=type==='animal'?.88:1;if(type==='animal'&&(nx/1.4)**2+ny**2>.72){const k=Math.sqrt((nx/1.4)**2+ny**2)/.85;nx/=k;ny/=k}nx=Math.max(-1.2,Math.min(1.2,nx));ny=Math.max(-.85,Math.min(.85,ny));o.x=nx;o.y=ny;o.ax=o.ay=0}return}
  const o=hit(p.x,p.y);hover=o&&o.x!==undefined?o:null;cv.style.cursor=o?'pointer':'default'});
-cv.addEventListener('pointerup',e=>{if(!drag)return;const d=drag;drag=null;if(d.moved||!d.o){if(!d.o&&!d.moved)closeP();return}
+cv.addEventListener('pointerup',e=>{if(!drag)return;const d=drag;drag=null;if(d.moved){setEv('Ты перетащил: '+nm(d.o.id),'В живой клетке органоиды тоже перемещаются: их возят «моторные» белки по нитям цитоскелета.');return}if(!d.o){closeP();return}
  const id=d.o.id;
  if(game){if(id===game.t){game.s++;addScore(10+Math.min(game.s,5)*2);say('✅ Верно! '+I[id].f);nextQ()}else{game.s=0;say('❌ Это «'+nm(id)+'». Ищем: '+nm(game.t));status()}}
- else openInfo(id)});
-$('#nav').onclick=e=>{const b=e.target.closest('.chip');if(!b||b.dataset.t===type)return;document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===b));type=b.dataset.t;sel=null;closeP();rnd;build();game=game?{s:0}:null;if(game)nextQ();status();say(type==='plant'?'🌿 Растительная клетка: стенка, вакуоль, хлоропласты':'🐾 Животная клетка: лизосомы и центриоли, но нет стенки')};
-$('#env').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#env button').forEach(c=>c.classList.toggle('on',c===b));sT=+b.dataset.v;status()};
-$('#lv').oninput=e=>{lv=+e.target.value};
-$('#labels').onclick=e=>{labels=!labels;e.target.classList.toggle('on',labels)};
-$('#level').onclick=e=>{detail=!detail;e.target.textContent='Режим: '+(detail?'подробно':'кратко');e.target.classList.toggle('on',detail);if(sel==='lab')labPanel();else if(sel)openInfo(sel)};
+ else{openInfo(id);setEv('Выбрано: '+nm(id),'Подробности — в карточке справа. Попробуй перетащить этот органоид.')}});
+$('#nav').onclick=e=>{const b=e.target.closest('.chip');if(!b||b.dataset.t===type)return;document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===b));type=b.dataset.t;sel=null;closeP();rnd;build();game=game?{s:0}:null;if(game)nextQ();status();if(div.on)phaseText(true);else setEv(type==='plant'?'Растительная клетка':'Животная клетка',type==='plant'?'Есть клеточная стенка, большая вакуоль и хлоропласты (фотосинтез). Центриолей нет.':'Нет стенки и хлоропластов, зато есть лизосомы и центриоли.');say(type==='plant'?'🌿 Растительная клетка: стенка, вакуоль, хлоропласты':'🐾 Животная клетка: лизосомы и центриоли, но нет стенки')};
+$('#env').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#env button').forEach(c=>c.classList.toggle('on',c===b));sT=+b.dataset.v;envEv()};
+$('#lv').oninput=e=>{lv=+e.target.value;lvEv()};
+$('#labels').onclick=$('#dlabels').onclick=()=>{labels=!labels;['#labels','#dlabels'].forEach(q=>$(q).classList.toggle('on',labels))};
+$('#level').onclick=$('#dlevel').onclick=toggleLevel;
 $('#game').onclick=e=>{if(game){game=null;e.target.classList.remove('on');say('Игра остановлена. Счёт: '+score);status()}else{game={s:0};e.target.classList.add('on');closeP();nextQ();say('🎯 Находи органоиды по названию!')}};
 $('#lab').onclick=()=>{if(sel==='lab')closeP();else labPanel()};
-$('#reset').onclick=()=>{build();sT=0;s=0;document.querySelectorAll('#env button').forEach((c,i)=>c.classList.toggle('on',i===1));status()};
+$('#reset').onclick=()=>{build();sT=0;s=0;document.querySelectorAll('#env button').forEach((c,i)=>c.classList.toggle('on',i===1));setEv('Сброс','Органоиды вернулись на места, среда — изотоническая.')};
+$('#divb').onclick=()=>setDiv(true);$('#dback').onclick=()=>setDiv(false);
+const dpl=()=>{$('#dplay').textContent=div.play?'⏸ Пауза':'▶ Пуск'};
+$('#dplay').onclick=()=>{if(div.play)div.play=false;else{if(div.p>=.999)div.p=0;div.play=true}dpl()};
+$('#dp').oninput=e=>{div.p=e.target.value/1000;div.play=false;dpl()};
+$('#dph').onclick=e=>{const b=e.target.closest('button');if(!b)return;div.p=PB[+b.dataset.i]+.002;$('#dp').value=div.p*1000;div.play=false;dpl()};
+$('#dsp').onclick=e=>{const b=e.target.closest('button');if(!b)return;div.sp=+b.dataset.v;document.querySelectorAll('#dsp button').forEach(c=>c.classList.toggle('on',c===b))};
 addEventListener('resize',resize);
-for(let i=0;i<44;i++)water.push({a:i/44*6.283+rnd()*.1,ph:rnd()});
-resize();build();status();requestAnimationFrame(loop);
+for(let i=0;i<44;i++)water.push({a:i/44*6.283+rnd()*.1,ph:rnd(),dir:i%2?1:-1});
+resize();build();setEv('Подсказка','Нажимай на органоиды, тяни их, меняй среду и «энергию» клетки — здесь появится объяснение, что именно происходит. А кнопка «Деление» покажет митоз!');requestAnimationFrame(loop);
 })();
 </script></body></html>
