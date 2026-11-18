@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-18T06:33:06.214Z",
+  "generatedAt": "2026-11-18T11:30:08.819Z",
   "categories": [
     {
       "id": "astronomy",
@@ -54,7 +54,14 @@
       "name": "Информатика",
       "folder": "Informatics",
       "icon": "💻",
-      "items": []
+      "items": [
+        {
+          "title": "Логический конструктор",
+          "description": "Изучите работу логических состовляющих процессора, рассмотрите сумматор или даже создайте его сами",
+          "url": "Simulations/Informatics/logicheskiy_konstruktor.html",
+          "image": "Simulations/Informatics/logicheskiy_konstruktor.webp"
+        }
+      ]
     },
     {
       "id": "biology",
@@ -75,7 +82,14 @@
       "name": "География",
       "folder": "Geography",
       "icon": "🌍",
-      "items": []
+      "items": [
+        {
+          "title": "Дрейф плит",
+          "description": "Посмотрите как двигаются плиты, и что происходит на их стыке",
+          "url": "Simulations/Geography/drejf_plit.html",
+          "image": "Simulations/Geography/drejf_plit.webp"
+        }
+      ]
     }
   ]
 }

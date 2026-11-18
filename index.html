@@ -94,6 +94,7 @@
     .intro-label::before { content:""; width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 12px var(--accent); }
     .intro h2 { max-width:680px; margin:9px 0 8px; font-size:clamp(26px,3.5vw,39px); line-height:1.04; letter-spacing:-1.1px; font-weight:900; }
     .intro p { max-width:650px; margin:0; color:var(--muted); font-size:13px; }
+    .intro p.intro-note { margin-top:10px; max-width:650px; color:#a79db3; font-size:12px; line-height:1.55; }
     .stats { display:flex; flex-wrap:wrap; gap:8px; margin-top:19px; }
     .stat { display:flex; align-items:center; gap:7px; padding:7px 10px; border:1px solid rgba(255,255,255,.08); border-radius:11px; color:var(--muted); background:rgba(255,255,255,.035); font-size:11px; }
     .stat b { color:var(--text); font-weight:800; font-variant-numeric:tabular-nums; }
@@ -299,7 +300,7 @@
             <div class="empty">Загружаем предметы…</div>
           </nav>
         </div>
-        <div class="subject-note"><b>Новые направления уже в планах.</b><br>Категории информатики, биологии и географии появятся в каталоге автоматически.</div>
+        <div class="subject-note"><b>Работа продолжается.</b><br>Мы разрабатываем новые симуляции и продолжаем дорабатывать уже существующие.</div>
       </aside>
 
       <main class="main">
@@ -307,6 +308,7 @@
           <div class="intro-label">Виртуальная лаборатория</div>
           <h2>Изучай науку.<br>Проверяй на практике.</h2>
           <p>Интерактивные модели, в которых можно экспериментировать, наблюдать закономерности и лучше понимать школьные предметы.</p>
+          <p class="intro-note">Сайт полностью бесплатен, и на этой странице лишь один рекламный блок. В самих симуляциях вы никогда не увидите рекламу. При обнаружении ошибок (будь то баг или вычисления) сообщите, пожалуйста, по кнопке выше.</p>
           <div class="stats">
             <div class="stat">🧪 <b id="total-count">—</b> симуляций</div>
             <div class="stat">📚 <b id="category-count">—</b> предметов</div>
@@ -356,7 +358,7 @@
     </footer>
   </div>
 
-  <!--CATALOG:START--><script type="application/json" id="catalog-data">{"generatedAt":"2026-11-18T06:33:06.214Z","categories":[{"id":"astronomy","name":"Астрономия","folder":"Astonomia","icon":"🪐","items":[{"title":"Солнечная система","description":"Рассматривайте планеты, ставьте свои объекты и запускайте кометы","url":"Simulations/Astronomia/solar_system.html","image":"Simulations/Astronomia/solar_system.webp"}]},{"id":"chemistry","name":"Химия","folder":"Himia","icon":"⚗️","items":[{"title":"Атомная лаборатория","description":"Смотрите как работает атом и регулируйте его протоны, нейтроны, электроны, а также занимайтесь синтезом и делением","url":"Simulations/Himia/atomnaya_laboratoriya.html","image":"Simulations/Himia/atomnaya_laboratoriya.webp"}]},{"id":"physics","name":"Физика","folder":"Physics","icon":"⚛️","items":[{"title":"Электрическая лаборатория","description":"Стройте свои электронные схемы и смотрите что получилось","url":"Simulations/Physics/elektricheskaya_laboratoriya.html","image":"Simulations/Physics/elektricheskaya_laboratoriya.webp"},{"title":"Оптическая лаборатория","description":"Изучайте свет, дисперсию, построения изображений и создавайте свои собственные эксперименты со светом","url":"Simulations/Physics/opticheskaya_laboratoriya.html","image":"Simulations/Physics/opticheskaya_laboratoriya.webp"}]},{"id":"informatics","name":"Информатика","folder":"Informatics","icon":"💻","items":[]},{"id":"biology","name":"Биология","folder":"Biology","icon":"🧬","items":[{"title":"Живая клетка","description":"Изучите строение растительной и животной клетки","url":"Simulations/Biology/zhivaya_kletka.html","image":"Simulations/Biology/zhivaya_kletka.webp"}]},{"id":"geography","name":"География","folder":"Geography","icon":"🌍","items":[]}]}</script><!--CATALOG:END-->
+  <!--CATALOG:START--><script type="application/json" id="catalog-data">{"generatedAt":"2026-11-18T11:30:08.819Z","categories":[{"id":"astronomy","name":"Астрономия","folder":"Astonomia","icon":"🪐","items":[{"title":"Солнечная система","description":"Рассматривайте планеты, ставьте свои объекты и запускайте кометы","url":"Simulations/Astronomia/solar_system.html","image":"Simulations/Astronomia/solar_system.webp"}]},{"id":"chemistry","name":"Химия","folder":"Himia","icon":"⚗️","items":[{"title":"Атомная лаборатория","description":"Смотрите как работает атом и регулируйте его протоны, нейтроны, электроны, а также занимайтесь синтезом и делением","url":"Simulations/Himia/atomnaya_laboratoriya.html","image":"Simulations/Himia/atomnaya_laboratoriya.webp"}]},{"id":"physics","name":"Физика","folder":"Physics","icon":"⚛️","items":[{"title":"Электрическая лаборатория","description":"Стройте свои электронные схемы и смотрите что получилось","url":"Simulations/Physics/elektricheskaya_laboratoriya.html","image":"Simulations/Physics/elektricheskaya_laboratoriya.webp"},{"title":"Оптическая лаборатория","description":"Изучайте свет, дисперсию, построения изображений и создавайте свои собственные эксперименты со светом","url":"Simulations/Physics/opticheskaya_laboratoriya.html","image":"Simulations/Physics/opticheskaya_laboratoriya.webp"}]},{"id":"informatics","name":"Информатика","folder":"Informatics","icon":"💻","items":[{"title":"Логический конструктор","description":"Изучите работу логических состовляющих процессора, рассмотрите сумматор или даже создайте его сами","url":"Simulations/Informatics/logicheskiy_konstruktor.html","image":"Simulations/Informatics/logicheskiy_konstruktor.webp"}]},{"id":"biology","name":"Биология","folder":"Biology","icon":"🧬","items":[{"title":"Живая клетка","description":"Изучите строение растительной и животной клетки","url":"Simulations/Biology/zhivaya_kletka.html","image":"Simulations/Biology/zhivaya_kletka.webp"}]},{"id":"geography","name":"География","folder":"Geography","icon":"🌍","items":[{"title":"Дрейф плит","description":"Посмотрите как двигаются плиты, и что происходит на их стыке","url":"Simulations/Geography/drejf_plit.html","image":"Simulations/Geography/drejf_plit.webp"}]}]}</script><!--CATALOG:END-->
   <script>
     (() => {
       'use strict';

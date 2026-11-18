@@ -1,2 +1,58 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b0912"><title>Обратная связь — скоро</title><style>@font-face{font-family:"Roboto Flex";font-style:normal;font-weight:400 900;font-display:swap;src:url("fonts/roboto-flex.woff") format("woff")}</style><style>
-:root{color-scheme:dark;--bg:#0b0912;--s1:#1d1a24;--text:#e8e0ee;--muted:#bdb5c8;--acc:#d0bcff}*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;color:var(--text);font:14px/1.5 "Roboto Flex",system-ui,sans-serif;background:radial-gradient(700px 500px at 20% 10%,rgba(120,70,200,.22),transparent 60%),var(--bg)}.card{width:min(520px,100%);padding:34px;border:1px solid rgba(255,255,255,.1);border-radius:26px;background:rgba(29,26,36,.94);text-align:center;box-shadow:0 20px 60px #0006}.symbol{font-size:38px;color:var(--acc)}h1{margin:12px 0 8px;font-size:28px;letter-spacing:-.7px}p{margin:0;color:var(--muted)}a{display:inline-block;margin-top:24px;padding:11px 17px;border-radius:13px;color:#251a39;background:var(--acc);font-weight:800;text-decoration:none}</style></head><body><main class="card"><div class="symbol">✎</div><h1>Обратная связь</h1><p>Здесь появится Яндекс Форма, через которую можно будет сообщить об ошибке или предложить идею.</p><a href="index.html">← Вернуться в каталог</a></main></body></html>
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0912">
+<title>Обратная связь — Виртуальная лаборатория</title>
+<style>@font-face{font-family:"Roboto Flex";font-style:normal;font-weight:400 900;font-display:swap;src:url("fonts/roboto-flex.woff") format("woff")}</style>
+<style>
+:root{color-scheme:dark;--bg:#0b0912;--s1:#1d1a24;--text:#e8e0ee;--muted:#bdb5c8;--acc:#d0bcff;--line:rgba(255,255,255,.1)}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;padding:20px 16px 40px;color:var(--text);font:14px/1.55 "Roboto Flex",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:radial-gradient(800px 520px at 15% 0%,rgba(120,70,200,.24),transparent 60%),radial-gradient(600px 420px at 100% 30%,rgba(70,110,200,.12),transparent 60%),var(--bg)}
+.wrap{width:min(760px,100%);margin:0 auto}
+.back{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border:1px solid var(--line);border-radius:13px;color:var(--acc);background:rgba(29,26,36,.8);font-weight:700;font-size:13px;text-decoration:none}
+.back:hover,.back:focus-visible{border-color:rgba(208,188,255,.45);outline:none}
+.head{margin:26px 4px 20px}
+.badge{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:15px;font-size:22px;color:var(--acc);background:rgba(208,188,255,.1);border:1px solid rgba(208,188,255,.2)}
+h1{margin:14px 0 8px;font-size:clamp(28px,6vw,38px);line-height:1.06;letter-spacing:-1px;font-weight:900}
+.lead{margin:0;max-width:600px;color:var(--muted);font-size:14px}
+.hints{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0;padding:0;list-style:none}
+.hints li{padding:6px 11px;border:1px solid var(--line);border-radius:999px;background:rgba(208,188,255,.05);color:#d9cbf4;font-size:12px}
+.panel{padding:10px;border:1px solid var(--line);border-radius:26px;background:rgba(29,26,36,.94);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.formbox{overflow:hidden;border-radius:18px;background:#fff;min-height:420px}
+.formbox iframe{display:block;width:100%;height:820px;border:0;background:#fff}
+.fallback{margin:14px 6px 4px;color:var(--muted);font-size:12.5px;text-align:center}
+.fallback a{color:var(--acc);font-weight:700}
+noscript .fallback{margin-top:0}
+@media (max-width:480px){body{padding:14px 10px 32px}.panel{padding:6px;border-radius:22px}.formbox{border-radius:16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← Вернуться в каталог</a>
+
+  <header class="head">
+    <div class="badge" aria-hidden="true">✎</div>
+    <h1>Обратная связь</h1>
+    <p class="lead">Нашли ошибку в симуляции или в расчётах, заметили неудобство или хотите предложить идею? Заполните форму — так проект становится лучше.</p>
+    <ul class="hints" aria-label="О чём можно написать">
+      <li>🐞 Баг или ошибка в вычислениях</li>
+      <li>💡 Идея новой симуляции</li>
+      <li>✨ Пожелание по сайту</li>
+    </ul>
+  </header>
+
+  <main class="panel">
+    <div class="formbox">
+      <iframe id="feedback-form" name="ya-form-6afd4cb849af47c18e22bf9b" title="Форма обратной связи" src="https://forms.yandex.ru/u/6afd4cb849af47c18e22bf9b?iframe=1" loading="lazy"></iframe>
+    </div>
+    <p class="fallback">Форма не отображается или неудобна на телефоне? <a href="https://forms.yandex.ru/u/6afd4cb849af47c18e22bf9b/" target="_blank" rel="noopener noreferrer">Открыть её в новой вкладке ↗</a></p>
+  </main>
+</div>
+<!-- Скрипт Яндекса сам подгоняет высоту формы под её содержимое. Если он не загрузится, форма всё равно работает. -->
+<script src="https://forms.yandex.ru/_static/embed.js" async></script>
+</body>
+</html>

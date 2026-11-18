@@ -80,7 +80,37 @@ async function isFile(filePath) {
   catch { return false; }
 }
 
+
+// Страховка: новые симуляции часто приходят с подключением шрифта с Google Fonts.
+// Из некоторых сетей (в т.ч. в РФ) он грузится очень долго и страница «зависает».
+// Перед сборкой заменяем его на локальный шрифт из папки fonts/ и добавляем noindex.
+async function normalizeSimulationPages() {
+  let folders = [];
+  try { folders = await fs.readdir(SIMULATIONS_DIR, { withFileTypes: true }); } catch { return; }
+  for (const folder of folders.filter(entry => entry.isDirectory())) {
+    const dir = path.join(SIMULATIONS_DIR, folder.name);
+    for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+      if (!entry.isFile() || !entry.name.toLowerCase().endsWith('.html')) continue;
+      const file = path.join(dir, entry.name);
+      const original = await fs.readFile(file, 'utf8');
+      let html = original;
+      if (/fonts\.(googleapis|gstatic)\.com/.test(html)) {
+        html = html.replace(/<noscript>\s*<link[^>]*fonts\.googleapis\.com[^>]*>\s*<\/noscript>/gi, '');
+        html = html.replace(/<link[^>]*fonts\.(googleapis|gstatic)\.com[^>]*>\s*/gi, '');
+        if (!html.includes('roboto-flex.woff')) {
+          const fontUrl = path.relative(dir, path.join(ROOT, 'fonts', 'roboto-flex.woff')).split(path.sep).join('/');
+          const face = `<style>@font-face{font-family:"Roboto Flex";font-style:normal;font-weight:400 900;font-display:swap;src:url("${fontUrl}") format("woff")}</style>`;
+          html = /<style[\s>]/i.test(html) ? html.replace(/<style[\s>]/i, match => face + match) : html.replace(/<\/head>/i, face + '</head>');
+        }
+      }
+      if (!/name=["']robots["']/i.test(html)) html = html.replace(/<meta charset=["']?utf-8["']?\s*\/?>/i, match => `${match}<meta name="robots" content="noindex, nofollow">`);
+      if (html !== original) { await fs.writeFile(file, html, 'utf8'); console.log(`Исправлена страница: ${path.relative(ROOT, file)}`); }
+    }
+  }
+}
+
 async function main() {
+  await normalizeSimulationPages();
   const simulationsStat = await fs.stat(SIMULATIONS_DIR).catch(() => null);
   if (!simulationsStat?.isDirectory()) {
     throw new Error('Не найдена папка Simulations рядом с build-catalog.mjs.');
