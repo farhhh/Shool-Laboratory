@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Атомная лаборатория — собери атом</title>
-<style>@font-face{font-family:"Roboto Flex";font-style:normal;font-weight:400 900;font-display:swap;src:url("../../fonts/roboto-flex.woff") format("woff")}</style><style>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
 :root{color-scheme:dark;--bg:#0b0912;--s1:#1d1a24;--s2:#272330;--s3:#322d3d;--on:#e8e0ee;--on2:#cbc3d4;--ol:#4b4556;--pr:#d0bcff;--acc:#d0bcff;--ok:#9be3a8;--er:#ffb4ab;box-sizing:border-box}
 *{box-sizing:border-box;margin:0}html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--on);font:400 14px/1.45 "Roboto Flex",Roboto,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
 body{background:radial-gradient(900px 620px at 12% 18%,rgba(120,70,200,.24),transparent 62%),radial-gradient(800px 600px at 92% 88%,rgba(40,150,210,.15),transparent 60%),var(--bg)}
@@ -14,9 +15,9 @@ body{background:radial-gradient(900px 620px at 12% 18%,rgba(120,70,200,.24),tran
 .pill{padding:8px 13px;border-radius:16px;background:var(--s2);font-weight:500;white-space:nowrap}
 #nav{position:fixed;left:12px;right:12px;top:calc(70px + env(safe-area-inset-top,0px));display:flex;gap:8px;overflow-x:auto;padding:2px;z-index:4;scrollbar-width:none}#nav::-webkit-scrollbar{display:none}
 .chip{height:34px;padding:0 14px;border-radius:10px;border:1px solid var(--ol);background:rgba(29,26,36,.7);white-space:nowrap;font-weight:500}.chip:hover{background:var(--s3)}
-#dock{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:30px;z-index:5;max-width:calc(100% - 16px);flex-wrap:wrap;justify-content:center}
+#dock,#xdock{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:30px;z-index:5;max-width:calc(100% - 16px);flex-wrap:wrap;justify-content:center}
 .tg{height:40px;padding:0 13px;border-radius:12px;border:1px solid var(--ol);font-weight:500;white-space:nowrap}.tg.on{background:#4a4458;color:#eaddff;border-color:transparent}.tg.primary{background:var(--pr);color:#27154d;border-color:transparent;font-weight:700}.sep{width:1px;height:26px;background:var(--ol);flex:none}
-#side{position:fixed;left:12px;top:calc(116px + env(safe-area-inset-top,0px));width:292px;max-height:calc(100% - 222px);overflow:auto;z-index:4;padding:14px;border-radius:20px;font-size:12px;color:var(--on2);scrollbar-width:thin}
+#side,#xp{position:fixed;left:12px;top:calc(116px + env(safe-area-inset-top,0px));width:292px;max-height:calc(100% - 222px);overflow:auto;z-index:4;padding:14px;border-radius:20px;font-size:12px;color:var(--on2);scrollbar-width:thin}
 .ctl{padding:8px 0 10px;border-bottom:1px solid rgba(255,255,255,.06)}.ct{display:flex;align-items:center;gap:8px;color:var(--on);font-size:14px;font-weight:500}.ct i{width:11px;height:11px;border-radius:50%}.ct span{flex:1}.ct b{font:900 20px/1 "Roboto Flex";font-variant-numeric:tabular-nums}
 .ctl small{display:block;margin:2px 0 4px 19px;font-size:11px}.cr{display:flex;align-items:center;gap:8px}.cr input{flex:1;accent-color:var(--pr);min-width:0}
 .st{width:36px;height:36px;border-radius:50%;background:var(--s3);font:700 20px/1 "Roboto Flex";touch-action:manipulation;user-select:none;flex:none}.st:active{background:var(--pr);color:#27154d}
@@ -33,17 +34,21 @@ body{background:radial-gradient(900px 620px at 12% 18%,rgba(120,70,200,.24),tran
 #pt{display:grid;grid-template-columns:repeat(18,minmax(28px,1fr));gap:3px;min-width:560px}#pt button{height:34px;border-radius:7px;font-weight:700;font-size:11.5px;color:var(--on);border:1px solid rgba(255,255,255,.12)}#pt button:hover{outline:2px solid var(--pr)}
 #toast{position:fixed;left:50%;bottom:120px;transform:translate(-50%,35px);opacity:0;background:#e8e0ee;color:#322f35;padding:12px 18px;border-radius:14px;z-index:10;transition:.3s;pointer-events:none;text-align:center;max-width:90%;font-weight:500}#toast.on{opacity:1;transform:translate(-50%,0)}
 @media(max-width:840px){#panel{left:8px;right:8px;width:auto;top:auto;bottom:8px;max-height:57vh;transform:translateY(120%)}body.panel-open #dock{transform:translateY(160%)}#top h1{font-size:16px}
-#side{left:8px;right:8px;width:auto;top:auto;bottom:calc(66px + env(safe-area-inset-bottom,0px));max-height:40vh;padding:10px}.ctl small{display:none}.ctl{padding:5px 0 6px}
-#dock{left:8px;right:8px;transform:none;max-width:none;flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;padding:8px;gap:6px;scrollbar-width:none}.tg{height:36px;padding:0 10px;font-size:12px;flex:none}#menu{bottom:calc(70px + env(safe-area-inset-bottom,0px))}}
+#side,#xp{left:8px;right:8px;width:auto;top:auto;bottom:calc(66px + env(safe-area-inset-bottom,0px));max-height:40vh;padding:10px}.ctl small{display:none}.ctl{padding:5px 0 6px}
+#dock,#xdock{left:8px;right:8px;transform:none;max-width:none;flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;padding:8px;gap:6px;scrollbar-width:none}.tg{height:36px;padding:0 10px;font-size:12px;flex:none}#menu{bottom:calc(70px + env(safe-area-inset-bottom,0px))}}
 .echem{padding:12px 14px;border-radius:16px;margin-bottom:8px;border:1px solid;line-height:1.5;font-size:12.5px}.echem .h{display:block;font-size:14.5px;margin-bottom:4px}
 .echem.cat{background:rgba(255,123,143,.16);border-color:rgba(255,123,143,.55);color:#ffd9de}.echem.an{background:rgba(142,220,255,.14);border-color:rgba(142,220,255,.5);color:#d4f2ff}.echem.neu{background:rgba(255,226,154,.12);border-color:rgba(255,226,154,.45);color:#fff0c8}.echem.full{background:rgba(208,188,255,.14);border-color:rgba(208,188,255,.5);color:#eaddff}.echem.ext{background:rgba(255,150,60,.2);border-color:rgba(255,170,80,.7);color:#ffe3c4}
 .pc{display:inline-block;margin:6px 6px 0 0;padding:3px 9px;border-radius:9px;background:rgba(255,255,255,.12);font-weight:700;color:var(--on)}
 .seg{display:flex;border:1px solid var(--ol);border-radius:12px;overflow:hidden;flex:none}.seg button{height:38px;padding:0 11px;font-weight:500;border-right:1px solid var(--ol);white-space:nowrap}.seg button:last-child{border:0}.seg button.on{background:var(--pr);color:#27154d;font-weight:700}.sl{color:var(--on2);font-size:12px;flex:none}
+.tab{cursor:pointer;border:1px solid transparent}.tab.on{background:var(--pr);color:#27154d;font-weight:700}
+body:not([data-mode=atom]) #side,body:not([data-mode=atom]) #dock,body:not([data-mode=atom]) #panel,body:not([data-mode=atom]) #menu{display:none!important}body[data-mode=atom] #xp,body[data-mode=atom] #xdock{display:none}
+.lg i.sq{border-radius:2px}
+@media(max-width:840px){.tab .lb{display:none}.tab{padding:8px 10px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style></head>
-<body>
+<body data-mode="atom">
 <canvas id="scene" aria-label="Модель атома: ядро из протонов и нейтронов и электроны на оболочках"></canvas>
-<header id="top" class="glass"><h1>Атомная лаборатория</h1><span class="pill" id="readout">⚛</span></header>
+<header id="top" class="glass"><h1>Атомная лаборатория</h1><button class="pill tab on" data-m="atom">⚛<span class="lb"> Атом</span></button><button class="pill tab" data-m="fus">☀<span class="lb"> Синтез</span></button><button class="pill tab" data-m="fis">☢<span class="lb"> Деление</span></button><span class="pill" id="readout">⚛</span></header>
 <nav id="nav"></nav>
 <div id="side" class="glass"><div id="ctl"></div><div id="hud"></div></div>
 <aside id="panel"></aside>
@@ -52,6 +57,7 @@ body{background:radial-gradient(900px 620px at 12% 18%,rgba(120,70,200,.24),tran
 <button class="tg on" id="neu">Нейтральный атом: да</button><button class="tg on" id="dec">Распад: авто</button><button class="tg" id="rst">↺ Как было</button><span class="sl">Скорость распада</span><div class="seg" id="ts"><button data-v=".25">0,25×</button><button data-v=".5" class="on">0,5×</button><button data-v="1">1×</button><button data-v="2">2×</button><button data-v="4">4×</button></div><button class="tg" id="pau">⏸ Пауза</button><button class="tg" id="lite">Графика: красиво</button><button class="tg" id="level">Режим: кратко</button>
 </div>
 <div id="menu" class="glass"><div id="pt"></div></div>
+<aside id="xp" class="glass"></aside><div id="xdock" class="glass"></div>
 <div id="toast"></div>
 <script>
 (()=>{
@@ -66,7 +72,7 @@ Object.values(BYA).forEach(a=>a.sort((x,y)=>x-y));
 const zline=A=>A/(1.98+.0155*Math.pow(A,2/3)); // линия бета-стабильности (приближённо)
 const nmax=Z=>Z<1?0:Z<=12?[0,2,6,8,12,14,16,16,16,22,24,28,28][Z]:Z<=20?28+1.5*(Z-12):40+2.3*(Z-20); // предел: больше нейтронов ядро не удержит
 const nmin=Z=>Z<7?[0,0,1,3,3,3,3][Z]:Z<=20?Math.round(.7*Z):14+1.15*(Z-20); // меньше нейтронов: протоны разлетятся
-const OV={'2,5':'n','2,7':'n','3,5':'p','4,8':'a','92,238':'a','90,234':'b-','91,234':'b-','92,234':'a','90,230':'a','88,226':'a','86,222':'a','84,218':'a','82,214':'b-','83,214':'b-','84,214':'a','82,210':'b-','83,210':'b-','84,210':'a'}; // исключения + цепочка урана-238
+const OV={'2,5':'n','2,7':'n','3,5':'p','4,8':'a','19,40':'b-','43,98':'b-','92,238':'a','90,234':'b-','91,234':'b-','92,234':'a','90,230':'a','88,226':'a','86,222':'a','84,218':'a','82,214':'b-','83,214':'b-','84,214':'a','82,210':'b-','83,210':'b-','84,210':'a'}; // исключения + цепочка урана-238
 const isStable=(Z,N)=>!!(ST[Z]&&ST[Z].includes(Z+N));
 function mode(Z,N){ // null — стабильно; 'free' — свободные нейтроны
  if(Z<1)return N>0?'free':null;if(isStable(Z,N))return null;const A=Z+N,o=OV[Z+','+A];if(o)return o;
@@ -158,7 +164,7 @@ for(const k of'pne')$('#r'+k).oninput=e=>setC(k,+e.target.value);
 $('#ctl').addEventListener('pointerdown',e=>{const b=e.target.closest('.st');if(!b)return;const k=b.dataset.k,dd=+b.dataset.d,go=()=>setC(k,get(k)+dd);go();let t=setTimeout(function r(){go();t=setTimeout(r,70)},380);const stop=()=>{clearTimeout(t);removeEventListener('pointerup',stop);removeEventListener('pointercancel',stop)};addEventListener('pointerup',stop);addEventListener('pointercancel',stop)});
 const PRE=[['Водород',1,0],['Дейтерий',1,1],['Гелий-4',2,2],['Углерод-12',6,6],['Углерод-14 ☢',6,8],['Неон (благородный газ)',10,10],['Ион натрия Na⁺',11,12,10],['Золото',79,118],['Перегруз нейтронами ☢',6,22],['Только протоны ☢',8,0],['Уран-238: цепочка ☢',92,146]];
 $('#nav').innerHTML=PRE.map((p,i)=>`<button class="chip" data-i="${i}">${p[0]}</button>`).join('');
-$('#nav').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;const p=PRE[b.dataset.i];setAll(p[1],p[2],p[3]??p[1],p[3]==null);if(p[3]!=null)toast('Электронов меньше, чем протонов — это положительный ион.')};
+$('#nav').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;if(mode0!=='atom'){xnav(+b.dataset.i);return}const p=PRE[b.dataset.i];setAll(p[1],p[2],p[3]??p[1],p[3]==null);if(p[3]!=null)toast('Электронов меньше, чем протонов — это положительный ион.')};
 /* таблица Менделеева */
 function buildPT(){let h='';for(let z=1;z<=118;z++){let r,c;if(z===1){r=1;c=1}else if(z===2){r=1;c=18}else if(z<=4){r=2;c=z-2}else if(z<=10){r=2;c=z+8}else if(z<=12){r=3;c=z-10}else if(z<=18){r=3;c=z}else if(z<=36){r=4;c=z-18}else if(z<=54){r=5;c=z-36}else if(z<=56){r=6;c=z-54}else if(z<=71){r=8.2;c=z-54}else if(z<=86){r=6;c=z-68}else if(z<=88){r=7;c=z-86}else if(z<=103){r=9.2;c=z-86}else{r=7;c=z-100}
  const rr=r>8?Math.round(r)+(r>9?0:0):r;h+=`<button data-z="${z}" title="${EL[z-1].n}" style="grid-row:${rr};grid-column:${c};background:${CAT[cat(z)][1]}2e;border-color:${CAT[cat(z)][1]}66">${EL[z-1].s}</button>`}
@@ -209,7 +215,7 @@ function layout(){const m=W<=840,po=document.body.classList.contains('panel-open
  if(m){cxT=W/2;cy=(112+H-66-Math.min(H*.4,300)-8)/2;Rav=Math.min(W/2-6,(H-66-Math.min(H*.4,300)-8-112)/2)}
  else{const l=312,r=po?360:0;cxT=l+(W-l-r)/2;cy=(112+H-90)/2;Rav=Math.min((W-l-r)/2,(H-112-90)/2)-4}
  Rav=Math.max(Rav,90)}
-function resize(){DPR=lite?1:Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*DPR|0;cv.height=H*DPR|0;layout();cx=cxT;dirty=60}
+function resize(){DPR=lite?1:Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*DPR|0;cv.height=H*DPR|0;layout();cx=cxT;dirty=60;if(mode0!=='atom')xInit()}
 function update(dt){let ns=1;const sh=shells(E);for(let n=7;n>=1;n--)if(sh[n]){ns=n;break}
  const gT=Math.min(Rav/(ns+.9),Rav/2.6),k6=1-Math.exp(-dt*6);g+=(gT-g)*k6;cx+=(cxT-cx)*k6;
  d+=(Math.min(.5*g,1.1*g/(.525*Math.sqrt(Math.max(Z+N,6))))-d)*(1-Math.exp(-dt*8));
@@ -236,14 +242,127 @@ function draw(){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);
 function loop(t){requestAnimationFrame(loop);const dt=Math.min(.05,Math.max(.001,(t-last)/1000||.016));last=t;fa+=(dt-fa)*.05;
  if(!lite&&++fc>150&&fa>.034)setLite(true,true);
  if(uiDirty){uiDirty=false;ui()}
+ if(mode0!=='atom'){if(!paused)xStep(dt*xs);xDraw();if((xT-=dt)<=0){xT=.25;xStats()}return}
  if(paused&&dirty<=0&&!parts.length)return;
  update(paused?Math.min(dt,.03):dt);draw();if(dirty>0)dirty--}
 /* клик: выбить электрон или открыть информацию о ядре */
 function hit(x,y){for(let i=epn-1;i>=0;i--)if(Math.hypot(ep[i*2]-x,ep[i*2+1]-y)<14)return i+1;return Math.hypot(x-cx,y-cy)<.525*d*Math.sqrt(nuc.length+1)+d?-1:0}
-cv.addEventListener('pointerdown',e=>{const h=hit(e.clientX,e.clientY);if(h>0){if(neutral)setNeutral(false,true);setC('e',E-1);toast('Электрон выбит! Атом стал положительным ионом.')}else if(h<0)togglePanel(true)});
-cv.addEventListener('pointermove',e=>{cv.style.cursor=hit(e.clientX,e.clientY)?'pointer':'default'});
+cv.addEventListener('pointerdown',e=>{const h=mode0==='atom'?hit(e.clientX,e.clientY):0;if(h>0){if(neutral)setNeutral(false,true);setC('e',E-1);toast('Электрон выбит! Атом стал положительным ионом.')}else if(h<0)togglePanel(true)});
+cv.addEventListener('pointermove',e=>{cv.style.cursor=mode0==='atom'&&hit(e.clientX,e.clientY)?'pointer':'default'});
 addEventListener('resize',resize);
 if(matchMedia('(prefers-reduced-motion:reduce)').matches){paused=true;$('#pau').textContent='▶ Пуск';$('#pau').classList.add('on')}
+/* ================= РЕЖИМЫ: АТОМ / СИНТЕЗ / ДЕЛЕНИЕ ================= */
+let mode0='atom',xT=0,xs=.5;
+const xbox=()=>W<=840?{x0:8,y0:112,x1:W-8,y1:H-66-Math.min(H*.4,300)-8}:{x0:312,y0:112,x1:W-12,y1:H-90};
+const f1=x=>x.toFixed(1).replace('.',','),sci=x=>{if(!x)return'0';const e=Math.floor(Math.log10(x));return(x/Math.pow(10,e)).toPrecision(2).replace('.',',')+'·10'+(e<0?'⁻':'')+sp(Math.abs(e))};
+const sl=(k,l,c,mn,mx,v,h)=>`<div class="ctl"><div class="ct"><i style="background:${c}"></i><span>${l}</span><b id="xv_${k}"></b></div><small>${h}</small><div class="cr"><input type="range" data-s="${k}" min="${mn}" max="${mx}" value="${v}" aria-label="${l}"></div></div>`;
+const lgd=a=>'<div class="lg">'+a.map(([c,t,q])=>`<span><i class="${q?'sq':''}" style="background:${c}"></i>${t}</span>`).join('')+'</div>';
+const clr=()=>{ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H)};
+const gs=()=>(Math.random()+Math.random()+Math.random()-1.5)*2,rnd=(a,b)=>a+Math.random()*(b-a);
+const SU=spr('#ffd27a','#a8651a'),S8=spr('#a79dc4','#4a4266'),SF=spr('#ffd0a0','#c4672a','rgba(255,170,110,.55)'),SS=spr('#b6ffcb','#2f9a52','rgba(150,255,190,.55)');
+function ring(a,k){for(let i=a.length-1;i>=0;i--){const f=a[i];f.l-=k;if(f.l<=0)a.splice(i,1)}}
+function drawRings(a,c){for(const f of a){ctx.globalAlpha=Math.max(0,f.l/.7);ctx.strokeStyle=c;ctx.lineWidth=3;ctx.beginPath();ctx.arc(f.x,f.y,(.7-f.l)*160+6,0,6.2832);ctx.stroke()}ctx.globalAlpha=1}
+/* ---------- СИНТЕЗ ---------- */
+const RX=[
+{n:'D + T → He-4 + n',a:'D',b:'T',Q:17.6,EG:1.17,f:1,dm:.0189,out:['He4','n'],eq:'²₁H + ³₁H → ⁴₂He + ¹₀n + 17,6 МэВ',fact:'Самая «лёгкая» реакция синтеза: на неё делают ставку термоядерные реакторы. Нейтрон уносит ≈ 80% энергии.'},
+{n:'D + D → He-3 + n',a:'D',b:'D',Q:3.27,EG:.98,f:.4,dm:.0035,out:['He3','n'],eq:'²₁H + ²₁H → ³₂He + ¹₀n + 3,27 МэВ',fact:'Дейтерия много в обычной воде, но эта реакция даёт меньше энергии, чем D+T. (У D+D есть и вторая ветка — с тритием и протоном; здесь для простоты одна.)'},
+{n:'p + p → D + e⁺ (Солнце)',a:'p',b:'p',Q:1.44,EG:.49,f:.00003,dm:.0015,out:['D','e+'],eq:'¹₁p + ¹₁p → ²₁H + e⁺ + ν + 1,44 МэВ',fact:'Так горит Солнце. Реакция очень редкая: в момент столкновения один протон должен превратиться в нейтрон. Отдельному протону приходится ждать миллиарды лет, а Солнце горит за счёт огромного числа протонов.'}];
+const FZ={rx:0,ps:[],fx:[],cnt:0,en:0,tau:100,n:24,out:false,fu:12};
+const KV=14,CE=3/(11.6*KV*KV),BOOST=3000,MS={p:1,n:1,D:2,T:3,He3:3,He4:4,'e+':.1};
+const CMP={p:[[1,0,0]],n:[[0,0,0]],D:[[1,-.5,0],[0,.5,0]],T:[[1,0,-.55],[0,-.5,.4],[0,.5,.4]],He3:[[1,-.5,-.3],[1,.5,-.3],[0,0,.5]],He4:[[1,-.5,-.5],[0,.5,-.5],[0,-.5,.5],[1,.5,.5]]};
+const LB={p:'p',D:'D',T:'T',He3:'³He',He4:'⁴He'},rad=k=>FZ.fu*(.55+.3*Math.sqrt(CMP[k].length)),esc=k=>k==='n'||k==='e+';
+function newF(k,b){const sg=KV*Math.sqrt(FZ.tau)*.707/Math.sqrt(MS[k]);return{k,f:1,x:rnd(b.x0+20,b.x1-20),y:rnd(b.y0+20,b.y1-20),vx:gs()*sg,vy:gs()*sg}}
+function seedF(){const b=xbox(),R=RX[FZ.rx];FZ.fu=cl(Math.min(b.x1-b.x0,b.y1-b.y0)/38,9,15);FZ.ps=[];FZ.fx=[];FZ.cnt=0;FZ.en=0;FZ.out=false;for(let i=0;i<FZ.n;i++)FZ.ps.push(newF(i%2?R.b:R.a,b))}
+function fUpd(dt){const b=xbox(),R=RX[FZ.rx];let ps=FZ.ps,dead=false;const add=[];ring(FZ.fx,dt);
+ for(const p of ps){p.x+=p.vx*dt;p.y+=p.vy*dt;if(esc(p.k)){if(p.x<b.x0-80||p.x>b.x1+80||p.y<b.y0-80||p.y>b.y1+80)p.dead=dead=true;continue}const r=rad(p.k);
+  if(p.x<b.x0+r){p.x=b.x0+r;p.vx=Math.abs(p.vx)}else if(p.x>b.x1-r){p.x=b.x1-r;p.vx=-Math.abs(p.vx)}if(p.y<b.y0+r){p.y=b.y0+r;p.vy=Math.abs(p.vy)}else if(p.y>b.y1-r){p.y=b.y1-r;p.vy=-Math.abs(p.vy)}}
+ for(let i=0;i<ps.length;i++){const a=ps[i];if(a.dead||esc(a.k))continue;for(let j=i+1;j<ps.length;j++){const c=ps[j];if(c.dead||esc(c.k))continue;
+  const dx=c.x-a.x,dy=c.y-a.y,rr=rad(a.k)+rad(c.k),d2=dx*dx+dy*dy;if(d2>=rr*rr||d2<1e-6)continue;
+  const d=Math.sqrt(d2),nx=dx/d,ny=dy/d,vn=(c.vx-a.vx)*nx+(c.vy-a.vy)*ny;if(vn>=0)continue;const ma=MS[a.k],mc=MS[c.k],mu=ma*mc/(ma+mc);
+  if(a.f&&c.f&&((a.k===R.a&&c.k===R.b)||(a.k===R.b&&c.k===R.a))){const dvx=c.vx-a.vx,dvy=c.vy-a.vy,E=.5*mu*(dvx*dvx+dvy*dvy)*CE;
+   if(Math.random()<R.f*BOOST*Math.exp(-Math.sqrt(R.EG*1000/E))){a.dead=c.dead=dead=true;const mx=(a.x+c.x)/2,my=(a.y+c.y)/2,vx=(a.vx*ma+c.vx*mc)/(ma+mc),vy=(a.vy*ma+c.vy*mc)/(ma+mc),an=rnd(0,6.283);
+    add.push({k:R.out[0],f:0,x:mx,y:my,vx,vy},{k:R.out[1],f:0,x:mx,y:my,vx:Math.cos(an)*320,vy:Math.sin(an)*320});FZ.cnt++;FZ.en+=R.Q;FZ.fx.push({x:mx,y:my,l:.7});continue}}
+  const jm=-2*vn/(1/ma+1/mc),o=(rr-d)/2;a.vx-=jm*nx/ma;a.vy-=jm*ny/ma;c.vx+=jm*nx/mc;c.vy+=jm*ny/mc;a.x-=nx*o;a.y-=ny*o;c.x+=nx*o;c.y+=ny*o}}
+ if(dead)ps=FZ.ps=ps.filter(p=>!p.dead);if(add.length)ps.push(...add);
+ let na=0,nb=0;for(const p of ps)if(p.f){p.k===R.a&&na++;p.k===R.b&&nb++}const ex=R.a===R.b?na<2:(!na||!nb);if(ex&&!FZ.out&&FZ.cnt){FZ.out=true;toast('Топливо закончилось. Добавьте ещё кнопкой «＋ Топливо».')}FZ.exh=ex}
+function fDraw(){const b=xbox();clr();const h=cl((FZ.tau-5)/300,0,1);ctx.fillStyle=`rgba(${60+195*h|0},${110-50*h|0},${230-170*h|0},.12)`;ctx.fillRect(b.x0,b.y0,b.x1-b.x0,b.y1-b.y0);ctx.strokeStyle='rgba(208,188,255,.4)';ctx.lineWidth=2;ctx.strokeRect(b.x0,b.y0,b.x1-b.x0,b.y1-b.y0);
+ ctx.fillStyle='rgba(203,195,212,.75)';ctx.font='500 11px "Roboto Flex"';ctx.textAlign='left';ctx.fillText('Магнитная ловушка · горячая плазма',b.x0+10,b.y0+16);
+ const u=FZ.fu;ctx.font='700 10px "Roboto Flex"';ctx.textAlign='center';
+ for(const p of FZ.ps){if(p.k==='n'){ctx.drawImage(SN,p.x-u/2,p.y-u/2,u,u);continue}if(p.k==='e+'){ctx.drawImage(SQ,p.x-u,p.y-u,u*2,u*2);continue}
+  for(const[t,dx,dy]of CMP[p.k])ctx.drawImage(t?SP:SN,p.x+dx*u-u/2,p.y+dy*u-u/2,u,u);ctx.fillStyle=p.f?'#fff':'#ffe29a';ctx.fillText(LB[p.k],p.x,p.y-rad(p.k)-3)}
+ drawRings(FZ.fx,'#ffe29a')}
+function fStats(){const R=RX[FZ.rx],kT=FZ.tau/11.6,P=R.f*BOOST*Math.exp(-Math.sqrt(R.EG*1000/(2*kT)));
+ let c=P<1e-3?'no':P<.03?'warn':'ok',t=P<1e-3?'Слишком холодно: ядра отталкиваются и отскакивают друг от друга. Повышайте температуру.':P<.03?'Синтез идёт редко: только самые быстрые ядра прорываются сквозь барьер отталкивания.':'Синтез идёт активно!';
+ if(FZ.exh){c='warn';t='Топливо закончилось. Нажмите «＋ Топливо».'}
+ let h=`<div class="verdict ${c}">${t}</div><span class="fm">${RX[FZ.rx].eq}</span><span class="fm">Реакций: ${FZ.cnt}<small>выделено ≈ ${f1(FZ.en)} МэВ</small></span><span class="fm">${R.fact}</span>`;
+ if(detail)h+=`<span class="fm">Δm ≈ ${String(R.dm).replace('.',',')} а.е.м. → E = Δm·c² ≈ ${String(R.Q).replace('.',',')} МэВ<small>масса продуктов чуть меньше массы исходных ядер: «пропавшая» масса стала энергией</small></span><span class="fm">kT ≈ ${f1(kT)} кэВ<small>1 кэВ ≈ 11,6 млн К. Барьер отталкивания D+T ≈ 0,4 МэВ (≈ 5 млрд К), но из-за туннельного эффекта реакции идут уже при ≈ 100 млн К.</small></span><span class="fm">Вероятность реакции в симуляции увеличена примерно в 3000 раз, чтобы события успевали происходить на экране.</span>`;
+ h+=lgd([['#ff7b8f','протон'],['#aab4cf','нейтрон'],['#ffe29a','продукт реакции']]);return h}
+/* ---------- ДЕЛЕНИЕ ---------- */
+const FS={nu:[],ns:[],fr:[],fx:[],fis:0,en:0,bt:[],tt:[],hist:[],t:0,hA:0,fc:0,eN:85,mod:85,rod:0,n:120,r:12,boom:false,src:false,sa:0,tx:[]},FAST=260,SLOW=110;
+function seedS(){const b=xbox(),w=b.x1-b.x0,h=b.y1-b.y0,M=FS.n,cols=Math.ceil(Math.sqrt(M*w/h)),rows=Math.ceil(M/cols),cw=w/cols,ch=h/rows;FS.r=cl(Math.sqrt(w*h/M)/4,5,12);FS.nu=[];
+ for(let i=0;i<M;i++)FS.nu.push({x:b.x0+(i%cols+.5+rnd(-.3,.3))*cw,y:b.y0+((i/cols|0)+.5+rnd(-.3,.3))*ch,q:Math.random(),d:0,cap:0});
+ Object.assign(FS,{ns:[],fr:[],fx:[],tx:[],fis:0,en:0,bt:[],tt:[],hist:[],t:0,hA:0,fc:0,boom:false})}
+function shoot(){const b=xbox(),a=rnd(-.5,.5);FS.ns.push({x:b.x0+2,y:rnd(b.y0+20,b.y1-20),vx:Math.cos(a)*FAST,vy:Math.sin(a)*FAST,f:1,cd:0})}
+function inRod(n,b){const h=FS.rod/100*(b.y1-b.y0);if(!h||n.y>b.y0+h)return false;for(let i=0;i<7;i++)if(Math.abs(n.x-(b.x0+(i+.5)*(b.x1-b.x0)/7))<6)return true;return false}
+function split(u){u.d=1;const k=Math.random()<.43?3:2,a=u.fa;FS.fr.push({x:u.x,y:u.y,vx:Math.cos(a)*170,vy:Math.sin(a)*170,l:2.4,c:'#ffb86b'},{x:u.x,y:u.y,vx:-Math.cos(a)*170,vy:-Math.sin(a)*170,l:2.4,c:'#8edcff'});
+ for(let j=0;j<k;j++){const b=rnd(0,6.283);FS.ns.push({x:u.x,y:u.y,vx:Math.cos(b)*FAST,vy:Math.sin(b)*FAST,f:1,cd:FS.t+.12});FS.bt.push(FS.t)}
+ FS.tx.push({x:u.x,y:u.y,l:1.2,s:'+'+k+' n'});FS.fx.push({x:u.x,y:u.y,l:.7});FS.fis++;FS.fc++;FS.en+=200}
+function sUpd(dt){const b=xbox(),ns=FS.ns,r2=FS.r*FS.r;FS.t+=dt;if(FS.src&&(FS.sa+=dt)>1.2){FS.sa=0;shoot()}ring(FS.fx,dt);for(const u of FS.nu)if(u.d===2&&(u.fl-=dt)<=0)split(u);
+ for(const f of FS.fr){const dr=Math.pow(.35,dt);f.vx*=dr;f.vy*=dr;f.x+=f.vx*dt;f.y+=f.vy*dt;f.l-=dt}FS.fr=FS.fr.filter(f=>f.l>0);for(const t of FS.tx){t.y-=22*dt;t.l-=dt}FS.tx=FS.tx.filter(t=>t.l>0);
+ for(let i=ns.length-1;i>=0;i--){const n=ns[i];let gone=false;
+  if(n.f&&Math.random()<FS.mod/100*3.5*dt){n.f=0;const a=Math.atan2(n.vy,n.vx);n.vx=Math.cos(a)*SLOW;n.vy=Math.sin(a)*SLOW}
+  n.x+=n.vx*dt;n.y+=n.vy*dt;
+  if(n.x<b.x0||n.x>b.x1||n.y<b.y0||n.y>b.y1||inRod(n,b))gone=true;
+  else if(n.cd<=FS.t)for(const u of FS.nu){if(u.d)continue;const dx=u.x-n.x,dy=u.y-n.y;if(dx*dx+dy*dy>=r2)continue;
+   if(u.q<FS.eN/100){if(Math.random()<(n.f?.04:.9)){u.d=2;u.fl=.4;u.fa=Math.atan2(n.vy,n.vx)+1.57;gone=true;FS.fx.push({x:u.x,y:u.y,l:.7});break}}
+   else if(Math.random()<(n.f?.1:.03)){u.cap=1;gone=true;break}
+   const a=rnd(0,6.283),sp0=n.f?FAST:SLOW;n.vx=Math.cos(a)*sp0;n.vy=Math.sin(a)*sp0;n.x=u.x+Math.cos(a)*(FS.r+2);n.y=u.y+Math.sin(a)*(FS.r+2);n.cd=FS.t+.1;break}
+  if(gone){FS.tt.push(FS.t);ns.splice(i,1)}}
+ if(ns.length>260){ns.splice(0,ns.length-260);if(!FS.boom){FS.boom=true;toast('Лавина нейтронов! Опускайте стержни — иначе реактор «разгонится».')}}
+ while(FS.bt.length&&FS.bt[0]<FS.t-3)FS.bt.shift();while(FS.tt.length&&FS.tt[0]<FS.t-3)FS.tt.shift();
+ FS.hA+=dt;if(FS.hA>=.25){FS.hA=0;FS.hist.push(FS.fc);FS.fc=0;if(FS.hist.length>100)FS.hist.shift()}}
+function sDraw(){const b=xbox(),w=b.x1-b.x0,h=b.y1-b.y0;clr();ctx.fillStyle=`rgba(120,200,255,${FS.mod/100*.16})`;ctx.fillRect(b.x0,b.y0,w,h);ctx.strokeStyle='rgba(208,188,255,.4)';ctx.lineWidth=2;ctx.strokeRect(b.x0,b.y0,w,h);
+ const r=FS.r,s=r*2.2;for(const u of FS.nu){if(u.d===1){const c=Math.cos(u.fa),sn=Math.sin(u.fa),o=r*.7;ctx.globalAlpha=.55;ctx.fillStyle='#ffb86b';ctx.beginPath();ctx.arc(u.x+c*o,u.y+sn*o,r*.38,0,6.2832);ctx.fill();ctx.fillStyle='#8edcff';ctx.beginPath();ctx.arc(u.x-c*o,u.y-sn*o,r*.38,0,6.2832);ctx.fill();ctx.globalAlpha=1;continue}
+  if(u.d===2){const p=1-u.fl/.4,o=r*.9*p,c=Math.cos(u.fa),sn=Math.sin(u.fa),w=1+.25*Math.sin(p*25);ctx.drawImage(SU,u.x+c*o-s*w/2,u.y+sn*o-s*w/2,s*w,s*w);ctx.drawImage(SU,u.x-c*o-s*w/2,u.y-sn*o-s*w/2,s*w,s*w);ctx.fillStyle=`rgba(255,255,255,${.5*(1-p)+.2})`;ctx.beginPath();ctx.arc(u.x,u.y,r*(1.1+p),0,6.2832);ctx.fill();continue}ctx.drawImage(u.q<FS.eN/100?SU:S8,u.x-s/2,u.y-s/2,s,s);if(u.cap){ctx.strokeStyle='#ffe29a';ctx.lineWidth=1;ctx.beginPath();ctx.arc(u.x,u.y,r+2,0,6.2832);ctx.stroke()}}
+ for(const f of FS.fr){ctx.globalAlpha=Math.min(1,f.l);ctx.fillStyle=f.c;ctx.beginPath();ctx.arc(f.x,f.y,r*.85,0,6.2832);ctx.fill()}ctx.globalAlpha=1;
+ ctx.lineWidth=3;for(const n of FS.ns){ctx.strokeStyle=n.f?'rgba(255,170,110,.55)':'rgba(150,255,190,.55)';ctx.beginPath();ctx.moveTo(n.x,n.y);ctx.lineTo(n.x-n.vx*.09,n.y-n.vy*.09);ctx.stroke();ctx.drawImage(n.f?SF:SS,n.x-20,n.y-20,40,40)}
+ drawRings(FS.fx,'#ffb86b');ctx.font='700 14px "Roboto Flex"';ctx.fillStyle='#ffe29a';ctx.textAlign='center';for(const t of FS.tx){ctx.globalAlpha=Math.min(1,t.l);ctx.fillText(t.s,t.x,t.y-r-4)}ctx.globalAlpha=1;
+ const rh=FS.rod/100*h;if(rh){ctx.fillStyle='#3a3548';ctx.strokeStyle='#8a8298';ctx.lineWidth=1;for(let i=0;i<7;i++){const x=b.x0+(i+.5)*w/7-6;ctx.fillRect(x,b.y0,12,rh);ctx.strokeRect(x,b.y0,12,rh)}}
+ const gx=b.x1-230,gy=b.y0+8,mx=Math.max(5,...FS.hist);ctx.fillStyle='rgba(11,9,18,.95)';ctx.fillRect(gx,gy,222,64);ctx.fillStyle='rgba(203,195,212,.8)';ctx.font='500 10px "Roboto Flex"';ctx.textAlign='left';ctx.fillText('Мощность: делений за 0,25 с',gx+6,gy+12);
+ ctx.strokeStyle='#ffb86b';ctx.lineWidth=2;ctx.beginPath();FS.hist.forEach((v,i)=>{const x=gx+6+i*2.1,y=gy+60-v/mx*40;i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke()}
+function sStats(){const al=FS.nu.reduce((a,u)=>a+(!u.d&&u.q<FS.eN/100?1:0),0),k=FS.tt.length>=6?FS.bt.length/FS.tt.length:null;let c='',t;
+ if(!FS.ns.length&&!al&&FS.fis){c='warn';t='Топливо (U-235) выгорело, реакция закончилась.'}
+ else if(!FS.ns.length){t=FS.fis?'Нейтроны закончились — реакция затухла. Выстрелите снова.':'Нейтронов нет. Нажмите «Выстрел» — один нейтрон запустит цепочку.'}
+ else if(k===null)t='Реакция только началась — подождите пару секунд.';
+ else if(k<.9){c='warn';t='Реакция затухает: нейтронов теряется больше, чем рождается (k < 1).'}else if(k<=1.1){c='ok';t='Стабильная цепная реакция (k ≈ 1) — так работает ядерный реактор.'}else{c='no';t='Разгон (k > 1): число делений растёт лавиной. В реакторе так нельзя — нужны стержни!'}
+ let h=`<div class="verdict ${c}">${t}</div><span class="fm">²³⁵₉₂U + n → ¹⁴¹₅₆Ba + ⁹²₃₆Kr + 3n + ≈ 200 МэВ<small>одна из многих возможных пар осколков; рождается 2–3 новых нейтрона</small></span><span class="fm">Делений: ${FS.fis} · нейтронов в поле: ${FS.ns.length}<small>k = ${k===null?'—':f1(k).replace(',0','')+(k<=1.1&&k>=.9?'':'')}${k!==null?' (сколько новых нейтронов рождается на каждый исчезнувший)':''}</small></span>`;
+ if(detail)h+=`<span class="fm">Энергия: ${f1(FS.en)} МэВ ≈ ${sci(FS.en*1.602e-13)} Дж<small>одно деление ≈ 200 МэВ ≈ 3,2·10⁻¹¹ Дж. Полное деление 1 кг U-235 даёт ≈ 8·10¹³ Дж — примерно в три миллиона раз больше, чем сгорание 1 кг угля (≈ 3·10⁷ Дж).</small></span><span class="fm">Зачем замедлитель?<small>Быстрые нейтроны почти не делят U-235, а медленные (тепловые) — очень охотно. Поэтому в реакторах есть вода или графит.</small></span><span class="fm">Роль U-238<small>Его ядра в основном рассеивают нейтроны и лишь изредка поглощают. Природный уран — это 0,7% U-235; в реакторах обычно 3–5%. Наша 2D-модель сильно упрощена, поэтому «ровная работа» получается при большем обогащении.</small></span>`;
+ return h+lgd([['#ffd27a','U-235 (делится)'],['#a79dc4','U-238'],['#ffb07a','быстрый нейтрон'],['#9be3a8','медленный нейтрон'],['#3a3548','стержни',1],['#ffb86b','осколки деления']])}
+/* ---------- переключение режимов ---------- */
+const FP=[['Цепная реакция',85,85,0,0,120],['Природный уран (≈ 1%)',1,60,0,0,100],['Реактор: ровная работа',42,70,25,1,100],['Стержни опущены: заглушка',42,70,100,1,100]];
+const xvals=()=>{const set=(k,v,t)=>{const i=document.querySelector('[data-s="'+k+'"]'),l=$('#xv_'+k);if(i)i.value=v;if(l)l.textContent=t};
+ if(mode0==='fus'){set('tau',FZ.tau,FZ.tau+' млн К');set('n',FZ.n,FZ.n)}else{set('e',FS.eN,FS.eN+'%');set('m',FS.mod,FS.mod+'%');set('r',FS.rod,FS.rod+'%');set('n',FS.n,FS.n)}};
+function xBuild(){const lv='<button class="tg" data-x="level">Режим: '+(detail?'подробно':'кратко')+'</button>',ps='<button class="tg" data-x="pause">'+(paused?'▶ Пуск':'⏸ Пауза')+'</button>',sg='<div class="seg">'+[.25,.5,1].map(v=>`<button data-xs="${v}"${v===xs?' class="on"':''}>${String(v).replace('.',',')}×</button>`).join('')+'</div>';
+ if(mode0==='fus'){$('#xp').innerHTML=sl('tau','Температура','#ff9d8a',5,500,FZ.tau,'нагрей плазму: ядра полетят быстрее')+sl('n','Частиц топлива','#8edcff',8,60,FZ.n,'меняет количество частиц и перезапускает опыт')+'<div id="xst"></div>';
+  $('#xdock').innerHTML='<button class="tg primary" data-x="fuel">＋ Топливо</button><button class="tg" data-x="reset">↺ Заново</button>'+ps+sg+lv;$('#nav').innerHTML=RX.map((r,i)=>`<button class="chip" data-i="${i}">${r.n}</button>`).join('');$('#readout').textContent='☀ Синтез'}
+ else{$('#xp').innerHTML=sl('e','Обогащение U-235','#ffd27a',1,100,FS.eN,'доля делящихся ядер среди всех')+sl('m','Замедлитель','#8edcff',0,100,FS.mod,'замедляет нейтроны — они лучше делят уран')+sl('r','Стержни-поглотители','#aab4cf',0,100,FS.rod,'глубже — больше нейтронов поглощается')+sl('n','Количество ядер','#ffb86b',30,140,FS.n,'плотнее — меньше нейтронов вылетает наружу')+'<div id="xst"></div>';
+  $('#xdock').innerHTML='<button class="tg primary" data-x="shot">⚛ Выстрел</button><button class="tg" data-x="burst">Залп ×5</button><button class="tg" data-x="reset">↺ Заново</button><button class="tg'+(FS.src?' on':'')+'" data-x="src">Источник: '+(FS.src?'вкл':'выкл')+'</button>'+ps+sg+lv;$('#nav').innerHTML=FP.map((r,i)=>`<button class="chip" data-i="${i}">${r[0]}</button>`).join('');$('#readout').textContent='☢ Деление'}
+ xvals();xT=0}
+const xInit=()=>mode0==='fus'?seedF():seedS(),xStep=dt=>mode0==='fus'?fUpd(dt):sUpd(dt),xDraw=()=>mode0==='fus'?fDraw():sDraw();
+let xc='';function xStats(){const h=mode0==='fus'?fStats():sStats();if(h!==xc){const e=$('#xst');if(e){e.innerHTML=h;xc=h}}}
+function setMode(m){if(m===mode0)return;mode0=m;xc='';document.body.dataset.mode=m;document.body.classList.remove('panel-open');$('#menu').classList.remove('on');for(const t of document.querySelectorAll('.tab'))t.classList.toggle('on',t.dataset.m===m);
+ if(m==='atom'){$('#nav').innerHTML=PRE.map((p,i)=>`<button class="chip" data-i="${i}">${p[0]}</button>`).join('');layout();uiDirty=true;dirty=60;return}
+ layout();xBuild();xInit();if(m==='fis')for(let i=0;i<5;i++)shoot()}
+function xnav(i){if(mode0==='fus'){FZ.rx=i;seedF()}else{const p=FP[i];FS.eN=p[1];FS.mod=p[2];FS.rod=p[3];FS.src=!!p[4];FS.n=p[5];xBuild();seedS();if(!p[4]&&p[1]>50)for(let k=0;k<5;k++)shoot()}xc='';xT=0}
+function xset(k,v){if(mode0==='fus'){if(k==='tau'){const r=Math.sqrt(v/FZ.tau);for(const p of FZ.ps)if(!esc(p.k)){p.vx*=r;p.vy*=r}FZ.tau=v}else{FZ.n=v;seedF()}}
+ else{if(k==='e')FS.eN=v;else if(k==='m')FS.mod=v;else if(k==='r')FS.rod=v;else{FS.n=v;seedS()}}xvals();xT=0}
+$('#xp').oninput=e=>{const t=e.target;if(t.dataset.s)xset(t.dataset.s,+t.value)};
+$('#xdock').onclick=e=>{const q=e.target.closest('[data-xs]');if(q){xs=+q.dataset.xs;for(const x of q.parentNode.children)x.classList.toggle('on',x===q);return}const b=e.target.closest('[data-x]');if(!b)return;const k=b.dataset.x;
+ if(k==='pause'){paused=!paused;b.textContent=paused?'▶ Пуск':'⏸ Пауза';b.classList.toggle('on',paused)}
+ else if(k==='level'){$('#level').click();b.textContent='Режим: '+(detail?'подробно':'кратко');xc='';xT=0}
+ else if(mode0==='fus'){if(k==='reset')seedF();else{const R=RX[FZ.rx],bx=xbox();for(let i=0;i<6;i++)FZ.ps.push(newF(R.a,bx),newF(R.b,bx));FZ.out=false}xT=0}
+ else{if(k==='src'){FS.src=!FS.src;b.textContent='Источник: '+(FS.src?'вкл':'выкл');b.classList.toggle('on',FS.src)}else if(k==='reset')seedS();else{for(let i=0;i<(k==='burst'?5:1);i++)shoot()}xT=0}};
+for(const t of document.querySelectorAll('.tab'))t.onclick=()=>setMode(t.dataset.m);
 resize();setAll(6,6,6);requestAnimationFrame(loop);
 })();
 </script>
