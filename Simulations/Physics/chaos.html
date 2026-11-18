@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Хаос двойного маятника</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0912;--s1:#1d1a24;--s2:#272330;--s3:#322d3d;--on:#e8e0ee;--on2:#cbc3d4;--ol:#4b4556;--pr:#d0bcff;--ok:#9be3a8;--er:#ffb4ab;box-sizing:border-box}
+*{box-sizing:border-box;margin:0}html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--on);font:400 14px/1.45 "Roboto Flex",Roboto,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block}button,input,select{font:inherit;color:inherit}button{border:0;background:none;cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--pr);outline-offset:2px}
+.glass{background:rgba(29,26,36,.94);border:1px solid rgba(255,255,255,.09);box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#top{position:fixed;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:10px;padding:9px 12px 9px 18px;border-radius:28px;z-index:5}
+#top h1{font:900 19px/1 "Roboto Flex",Roboto,system-ui,sans-serif;letter-spacing:-.4px;flex:1;white-space:nowrap;background:linear-gradient(90deg,#ffe29a,#ffb0c8,var(--pr));-webkit-background-clip:text;background-clip:text;color:transparent}
+.pill{padding:8px 13px;border-radius:16px;background:var(--s2);font-weight:500;white-space:nowrap;font-variant-numeric:tabular-nums}
+#dock{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:30px;z-index:5;max-width:calc(100% - 16px);flex-wrap:wrap;justify-content:center}
+.tg{height:40px;padding:0 13px;border-radius:12px;border:1px solid var(--ol);font-weight:500;white-space:nowrap}.tg.on{background:#4a4458;color:#eaddff;border-color:transparent}.tg.primary{background:var(--pr);color:#27154d;border-color:transparent;font-weight:700}
+.seg{display:flex;border:1px solid var(--ol);border-radius:12px;overflow:hidden;flex:none}.seg button{height:38px;padding:0 11px;font-weight:500;border-right:1px solid var(--ol);white-space:nowrap}.seg button:last-child{border:0}.seg button.on{background:var(--pr);color:#27154d;font-weight:700}
+.sl{color:var(--on2);font-size:12px;flex:none}
+#side{position:fixed;left:12px;top:calc(116px + env(safe-area-inset-top,0px));width:292px;max-height:calc(100% - 222px);overflow:auto;z-index:4;padding:14px;border-radius:20px;font-size:12px;color:var(--on2);scrollbar-width:thin}#side.off{display:none}
+#side h3{font-size:13px;color:var(--on);margin:12px 0 6px}#side h3:first-child{margin-top:0}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 0}.row b{color:var(--on);font-weight:500;font-variant-numeric:tabular-nums}
+.rb{margin:9px 0}.rb .row{margin:0 0 3px}.rb input{width:100%;accent-color:var(--pr)}
+select{background:var(--s2);border:1px solid var(--ol);padding:7px 9px;border-radius:10px}
+.fm{display:block;padding:7px 10px;margin:5px 0;border-radius:10px;background:rgba(255,255,255,.05);color:var(--on);font-size:12.5px;font-variant-numeric:tabular-nums}.fm small{display:block;color:var(--on2);font-size:10.5px}
+.fm.ok{background:rgba(155,227,168,.14)}.fm.hot{background:rgba(255,176,200,.16)}
+.gr{width:100%;height:auto;aspect-ratio:3/1;display:block;border-radius:10px;background:rgba(0,0,0,.25);margin-bottom:6px}#gw{display:none}body.det #gw{display:block}.dt{display:none}body.det .dt{display:block}body.det .br{display:none}
+#toast{position:fixed;left:50%;bottom:120px;transform:translate(-50%,35px);opacity:0;background:#e8e0ee;color:#322f35;padding:12px 18px;border-radius:14px;z-index:10;transition:.3s;pointer-events:none;text-align:center;max-width:90%;font-weight:500}#toast.on{opacity:1;transform:translate(-50%,0)}
+#nav{position:fixed;left:12px;right:12px;top:calc(70px + env(safe-area-inset-top,0px));display:flex;gap:8px;overflow-x:auto;padding:2px;z-index:4;scrollbar-width:none}#nav::-webkit-scrollbar{display:none}
+.chip{height:34px;padding:0 14px;border-radius:10px;border:1px solid var(--ol);background:rgba(29,26,36,.7);white-space:nowrap;font-weight:500}.chip:hover{background:var(--s3)}.chip.on{background:var(--pr);color:#14101c;border-color:transparent}
+#c{touch-action:none;cursor:grab}
+#md{position:fixed;z-index:12;left:50%;top:50%;transform:translate(-50%,-50%);width:min(580px,calc(100vw - 24px));max-height:78vh;overflow:auto;padding:22px;border-radius:24px;display:none;color:var(--on2);font-size:13px;line-height:1.55}#md.on{display:block}
+#md h2{font:900 22px/1.1 "Roboto Flex",Roboto,system-ui,sans-serif;color:var(--on);margin-bottom:10px;padding-right:40px}#md h4{color:var(--on);margin:14px 0 4px;font-size:14px}#md li{margin:5px 0 5px 18px}#md b{color:var(--on)}
+.x{position:absolute;right:12px;top:12px;width:36px;height:36px;border-radius:50%;background:var(--s2)}
+@media(max-width:760px){.lb{display:none}#top h1{font-size:15px}#side{left:8px;right:8px;width:auto;top:auto;bottom:calc(66px + env(safe-area-inset-bottom,0px));max-height:42vh;padding:10px}}
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Два почти одинаковых двойных маятника, которые постепенно расходятся"></canvas>
+<header id="top" class="glass"><h1>Хаос двойного маятника</h1><button class="pill" id="bw">❓<span class="lb"> Зачем это</span></button><button class="pill" id="ba">ℹ<span class="lb"> Допущения</span></button><span class="pill" id="rd">t = 0,0 с</span></header>
+<nav id="nav"></nav>
+<div id="side" class="glass"><div id="ctl"></div><div id="hud"><div id="ht"></div>
+<div id="gw"><h3>Расхождение: lg d(t)</h3><canvas class="gr" id="g1" width="540" height="180"></canvas><h3>Энергия: (E − E₀) / E_масш</h3><canvas class="gr" id="g2" width="540" height="180"></canvas></div></div></div>
+<div id="dock" class="glass">
+<button class="tg primary" id="pau">⏸ Пауза</button><button class="tg" id="rst">↺ Заново</button><button class="tg" id="pan">⚙ Панель</button>
+<span class="sl">Скорость</span><div class="seg" id="ts"><button data-v=".25">0,25×</button><button data-v=".5">0,5×</button><button data-v="1" class="on">1×</button><button data-v="2">2×</button></div>
+<button class="tg" id="lens">Лупа: авто</button><button class="tg" id="lite">Графика: красиво</button><button class="tg" id="level">Режим: кратко</button>
+</div>
+<div id="md" class="glass"><button class="x" id="mx" aria-label="Закрыть">✕</button><div id="mdc"></div></div><div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s),cv=$('#c'),ctx=cv.getContext('2d');
+const fm=(x,d=2)=>x.toLocaleString('ru-RU',{maximumFractionDigits:d,minimumFractionDigits:d});
+const sup=s=>String(s).replace(/-/g,'⁻').replace(/\d/g,c=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[c]);
+const sc=x=>{if(!x)return'0';const e=Math.floor(Math.log10(Math.abs(x)));return fm(x/10**e,1)+'·10'+sup(e)};
+const len=m=>m<1e-6?fm(m*1e9,1)+' нм':m<1e-3?fm(m*1e6,1)+' мкм':m<1?fm(m*1e3,1)+' мм':fm(m,2)+' м';
+/* ---------- состояние ---------- */
+let N=2,ang=120,dexp=-6,g=9.81,damp=0,trailN=600,spd=1,detail=false,lite=false,paused=true,lensOn=true,drag=-1,presetNote='',zl=null,pD=1e-6,cD=1e-6,nextS=1;
+const startTh=new Float64Array(5).fill(120*Math.PI/180);
+let T=0,accT=0,last=0,fa=.016,fc=0,hc=0,sc3=0,DPR=1,W=0,H=0,cx=0,cy=0,U=100,E0=0,d0=1e-6,div=null;
+const H0=.002,MAXT=1500,HC=3000;
+let ya=new Float64Array(10),yb=new Float64Array(10);
+const tr=[new Float32Array(2*MAXT),new Float32Array(2*MAXT)],th=[0,0],tc=[0,0];
+const H1=new Float32Array(HC),H2=new Float32Array(HC);let hn=0,hs=.05,hacc=0;
+/* ---------- физика: N-звенный маятник, уравнения Лагранжа ----------
+   Все массы m=1, длины l=1. A(θ)·θ'' = −Σ M·sin(θi−θj)·ωj² − g·M_i·sin θi − γ·ωi,
+   A_ij = M_max(i,j)·cos(θi−θj), M_i — суммарная масса звеньев от i-го до конца. */
+const MA=new Float64Array(25),RH=new Float64Array(5),WK=new Float64Array(30),DD=new Float64Array(5);
+function accel(y,n,out){
+ for(let i=0;i<n;i++){let r=-g*(n-i)*Math.sin(y[i])-damp*y[n+i];
+  for(let j=0;j<n;j++){const m=n-(i>j?i:j),d=y[i]-y[j];MA[i*n+j]=m*Math.cos(d);r-=m*Math.sin(d)*y[n+j]*y[n+j]}RH[i]=r}
+ const w=n+1;for(let i=0;i<n;i++){for(let j=0;j<n;j++)WK[i*w+j]=MA[i*n+j];WK[i*w+n]=RH[i]}
+ for(let c=0;c<n;c++){const p=WK[c*w+c];for(let r=c+1;r<n;r++){const f=WK[r*w+c]/p;for(let k=c;k<=n;k++)WK[r*w+k]-=f*WK[c*w+k]}}
+ for(let i=n-1;i>=0;i--){let s=WK[i*w+n];for(let j=i+1;j<n;j++)s-=WK[i*w+j]*out[j];out[i]=s/WK[i*w+i]}}
+const K1=new Float64Array(10),K2=new Float64Array(10),K3=new Float64Array(10),K4=new Float64Array(10),TM=new Float64Array(10);
+function fd(y,o){const n=N;accel(y,n,DD);for(let i=0;i<n;i++){o[i]=y[n+i];o[n+i]=DD[i]}}
+function rk4(y,h){const m=2*N;fd(y,K1);for(let i=0;i<m;i++)TM[i]=y[i]+h/2*K1[i];fd(TM,K2);for(let i=0;i<m;i++)TM[i]=y[i]+h/2*K2[i];fd(TM,K3);for(let i=0;i<m;i++)TM[i]=y[i]+h*K3[i];fd(TM,K4);for(let i=0;i<m;i++)y[i]+=h/6*(K1[i]+2*K2[i]+2*K3[i]+K4[i])}
+function energy(y){const n=N;let t=0,v=0;for(let i=0;i<n;i++){v-=g*(n-i)*Math.cos(y[i]);for(let j=0;j<n;j++)t+=.5*(n-(i>j?i:j))*Math.cos(y[i]-y[j])*y[n+i]*y[n+j]}return t+v}
+const eref=()=>g*N*(N+1)/2;
+function tip(y,k){let x=0,z=0;for(let i=0;i<N;i++){x+=Math.sin(y[i]);z+=Math.cos(y[i])}return k?[x,z]:[x,z]}
+function init(){const n=N;ya.fill(0);yb.fill(0);for(let i=0;i<n;i++)ya[i]=yb[i]=startTh[i];d0=10**dexp;yb[0]+=d0;
+ T=0;accT=0;hn=0;hs=.05;hacc=0;div=null;tc[0]=tc[1]=0;th[0]=th[1]=0;E0=energy(ya);lastD=d0;pD=cD=d0;nextS=1;zl=null;setPause(true);hud(1)}
+function push(k,y){const p=tip(y,k),b=tr[k],h=th[k];b[2*h]=p[0];b[2*h+1]=p[1];th[k]=(h+1)%MAXT;if(tc[k]<MAXT)tc[k]++}
+function step(h){rk4(ya,h);rk4(yb,h);T+=h;if(++sc3%3===0){push(0,ya);push(1,yb)}
+ if((hacc+=h)>=hs){hacc-=hs;let s=0;for(let i=0;i<N;i++){const d=ya[i]-yb[i];s+=d*d}const d=Math.sqrt(s);
+  if(!div&&d>1)div={t:T,lam:Math.log(d/d0)/T};
+  if(hn>=HC){for(let i=0;i<HC/2;i++){H1[i]=H1[2*i];H2[i]=H2[2*i]}hn=HC/2;hs*=2}
+  H1[hn]=Math.log10(Math.max(d,1e-12));H2[hn]=(energy(ya)-E0)/eref();hn++;lastD=d;if(T>=nextS){pD=cD;cD=d;nextS+=1}}}
+let lastD=1e-6;
+/* ---------- графика ---------- */
+function spr(c1,c2){const s=document.createElement('canvas');s.width=s.height=48;const x=s.getContext('2d'),r=x.createRadialGradient(18,18,2,24,24,22);r.addColorStop(0,'#fff');r.addColorStop(.35,c1);r.addColorStop(.7,c2);r.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=r;x.beginPath();x.arc(24,24,22,0,6.2832);x.fill();return s}
+const SP=[spr('#d0bcff','rgba(208,188,255,.35)'),spr('#ffb0c8','rgba(255,176,200,.35)')],COL=['#d0bcff','#ffb0c8'];
+const px=(y,i)=>{let x=cx,z=cy;for(let k=0;k<=i;k++){x+=U*Math.sin(y[k]);z+=U*Math.cos(y[k])}return[x,z]};
+function trail(k){const n=Math.min(tc[k],lite?Math.min(trailN,300):trailN);if(n<2)return;const b=tr[k],q=lite?2:4;ctx.strokeStyle=COL[k];ctx.lineWidth=2;ctx.lineJoin='round';
+ for(let s=0;s<q;s++){const a=(n*s/q)|0,e=Math.min(n-1,((n*(s+1)/q)|0)+1);ctx.globalAlpha=.12+.6*(s+1)/q;ctx.beginPath();
+  for(let i=a;i<=e;i++){const p=(th[k]-n+i+MAXT)%MAXT,X=cx+U*b[2*p],Y=cy+U*b[2*p+1];i===a?ctx.moveTo(X,Y):ctx.lineTo(X,Y)}ctx.stroke()}ctx.globalAlpha=1}
+function pend(y,k){ctx.strokeStyle=COL[k];ctx.globalAlpha=.9;ctx.lineWidth=3;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(cx,cy);for(let i=0;i<N;i++){const p=px(y,i);ctx.lineTo(p[0],p[1])}ctx.stroke();ctx.globalAlpha=1;
+ for(let i=0;i<N;i++){const p=px(y,i);ctx.drawImage(SP[k],p[0]-13,p[1]-13,26,26)}}
+function drawLens(){const A=px(ya,N-1),B=px(yb,N-1),sep=Math.hypot(B[0]-A[0],B[1]-A[1]);if(!lensOn||!(sep>0)||sep>=30){zl=null;return}const tg=Math.floor(2*Math.log10(110/sep))/2;if(zl===null)zl=tg;zl+=(tg-zl)*.12;if(Math.abs(tg-zl)<.01)zl=tg;const z=10**zl;
+ const mx=(A[0]+B[0])/2,my=(A[1]+B[1])/2,lx=Math.max(110,Math.min(W-110,mx+(W>760?150:100))),ly=Math.max(230,Math.min(H-215,my-150));
+ ctx.strokeStyle='rgba(208,188,255,.5)';ctx.lineWidth=1;ctx.setLineDash([4,5]);ctx.beginPath();ctx.moveTo(mx,my);ctx.lineTo(lx,ly);ctx.stroke();ctx.setLineDash([]);
+ ctx.beginPath();ctx.arc(mx,my,9,0,6.2832);ctx.stroke();
+ ctx.fillStyle='rgba(11,9,18,.95)';ctx.beginPath();ctx.arc(lx,ly,95,0,6.2832);ctx.fill();ctx.strokeStyle='#d0bcff';ctx.lineWidth=2;ctx.stroke();
+ const dx=(B[0]-A[0])*z,dy=(B[1]-A[1])*z;ctx.drawImage(SP[0],lx-dx/2-13,ly-dy/2-13,26,26);ctx.drawImage(SP[1],lx+dx/2-13,ly+dy/2-13,26,26);
+ const e=Math.floor(Math.log10(z));ctx.fillStyle='#e8e0ee';ctx.font='500 12px "Roboto Flex",Roboto,sans-serif';ctx.textAlign='center';
+ ctx.fillText('Лупа ×'+(e>=4?fm(z/10**e,0)+'·10'+sup(e):fm(z,z<10?1:0)),lx,ly+115);ctx.fillStyle='#cbc3d4';ctx.fillText('Δ = '+len(sep/U),lx,ly+131)}
+function draw(){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle='#0b0912';ctx.fillRect(0,0,W,H);
+ trail(1);trail(0);pend(yb,1);pend(ya,0);ctx.fillStyle='#e8e0ee';ctx.beginPath();ctx.arc(cx,cy,5,0,6.2832);ctx.fill();drawLens();hint()}
+function gdraw(c,d,lo,hi,col,fx,ref){const x=c.getContext('2d'),w=c.width,h=c.height;x.clearRect(0,0,w,h);x.font='11px sans-serif';x.fillStyle='#cbc3d4';x.strokeStyle='rgba(255,255,255,.1)';x.lineWidth=1;
+ const Y=v=>h-6-(v-lo)/(hi-lo)*(h-14);for(const v of fx){x.beginPath();x.moveTo(34,Y(v.v));x.lineTo(w,Y(v.v));x.stroke();x.fillText(v.l,2,Y(v.v)+4)}
+ if(ref!=null){x.strokeStyle='rgba(255,180,171,.6)';x.setLineDash([4,4]);x.beginPath();x.moveTo(34,Y(ref));x.lineTo(w,Y(ref));x.stroke();x.setLineDash([])}
+ if(hn<2)return;x.strokeStyle=col;x.lineWidth=2;x.beginPath();for(let i=0;i<hn;i++){const X=34+i/(hn-1)*(w-38);i?x.lineTo(X,Y(d[i])):x.moveTo(X,Y(d[i]))}x.stroke();x.fillStyle='#cbc3d4';x.textAlign='right';x.fillText('t = '+fm(hn*hs,0)+' с',w-2,12);x.textAlign='left'}
+function graphs(){gdraw($('#g1'),H1,-10,1,'#ffb0c8',[-9,-6,-3,0].map(v=>({v,l:'10'+sup(v)})),0);
+ let a=1e-12;for(let i=0;i<hn;i++)a=Math.max(a,Math.abs(H2[i]));a*=1.3;gdraw($('#g2'),H2,-a,a,'#9be3a8',[{v:0,l:'0'},{v:a/1.3,l:sc(a/1.3)}])}
+/* ---------- интерфейс ---------- */
+function ctl(){const seg=(a,cur,f)=>'<div class="seg">'+a.map(v=>`<button data-${f}="${v}"${v==cur?' class="on"':''}>${v}</button>`).join('')+'</div>';
+ const eq=Math.abs(dexp)<1?'':`≈ ${len(10**dexp)} на конце при длине звена 1 м`;
+ $('#ctl').innerHTML=`<h3>Маятник</h3><div class="row"><span>Звеньев</span>${seg([1,2,3,4,5],N,'n')}</div>
+ <div class="rb"><div class="row"><span>Стартовый угол (все звенья)</span><b>${ang}°</b></div><input type="range" id="a" min="5" max="179" step="1" value="${ang}"></div>
+ <div class="rb"><div class="row"><span>Разница между маятниками</span><b>10${sup(dexp)} рад</b></div><input type="range" id="d" min="-9" max="-2" step="1" value="${dexp}"><span>Конец маятника B сдвинут ${eq}</span></div>
+ <div class="row"><span>Где качаем</span><select id="g"><option value="9.81">Земля 9,81</option><option value="1.62">Луна 1,62</option><option value="3.71">Марс 3,71</option><option value="24.79">Юпитер 24,8</option></select></div>
+ <div class="dt"><div class="rb"><div class="row"><span>Трение в шарнирах</span><b>${fm(damp,2)}</b></div><input type="range" id="f" min="0" max="0.5" step="0.01" value="${damp}"></div>
+ <div class="rb"><div class="row"><span>Длина следа</span><b>${trailN}</b></div><input type="range" id="t" min="100" max="1500" step="100" value="${trailN}"></div></div>`;$('#g').value=String(g)}
+$('#ctl').addEventListener('click',e=>{const n=e.target.dataset.n;if(n){N=+n;pc();ctl();resize();init()}});
+$('#ctl').addEventListener('input',e=>{const i=e.target.id,v=+e.target.value;
+ if(i==='a'){ang=v;startTh.fill(v*Math.PI/180);e.target.previousElementSibling.lastElementChild.textContent=v+'°';pc();init()}
+ else if(i==='d'){dexp=v;e.target.previousElementSibling.lastElementChild.textContent='10'+sup(v)+' рад';e.target.nextElementSibling.textContent='Конец маятника B сдвинут ≈ '+len(10**v)+' на конце при длине звена 1 м';pc();init()}
+ else if(i==='g'){g=v;pc();init()}
+ else if(i==='f'){damp=v;e.target.previousElementSibling.lastElementChild.textContent=fm(v,2);E0=energy(ya)}
+ else if(i==='t'){trailN=v;e.target.previousElementSibling.lastElementChild.textContent=v}});
+$('#ts').onclick=e=>{const v=e.target.dataset.v;if(!v)return;spd=+v;[...$('#ts').children].forEach(b=>b.classList.toggle('on',b===e.target))};
+function setPause(v){paused=v;$('#pau').textContent=paused?'▶ Пуск':'⏸ Пауза'}$('#pau').onclick=()=>setPause(!paused);
+$('#rst').onclick=init;
+$('#pan').onclick=()=>{$('#side').classList.toggle('off');resize()};
+$('#lens').onclick=e=>{lensOn=!lensOn;e.target.textContent='Лупа: '+(lensOn?'авто':'выкл');e.target.classList.toggle('on',!lensOn)};
+$('#level').onclick=e=>{detail=!detail;document.body.classList.toggle('det',detail);e.target.textContent='Режим: '+(detail?'подробно':'кратко');e.target.classList.toggle('on',detail);ctl();hud(1)};
+$('#lite').onclick=()=>setLite(!lite);
+function setLite(v,auto){lite=v;const b=$('#lite');b.textContent='Графика: '+(v?'лёгкая':'красиво');b.classList.toggle('on',v);resize();if(auto)toast('Включена лёгкая графика, чтобы всё работало плавно')}
+let tt=0;function toast(s){const t=$('#toast');t.textContent=s;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),3200)}
+addEventListener('keydown',e=>{if(e.code==='Space'&&e.target.tagName!=='INPUT'&&e.target.tagName!=='SELECT'){e.preventDefault();$('#pau').click()}});
+function hud(force){$('#rd').textContent='t = '+fm(T,1)+' с';if(!force&&hc%6)return;
+ const A=px(ya,N-1),B=px(yb,N-1),sepM=Math.hypot(B[0]-A[0],B[1]-A[1])/U;
+ let st,cl='';const Em=-eref(),fr=E0>Em+1e-9?Math.max(0,(energy(ya)-Em)/(E0-Em)):1,gr=cD>pD*1.05?1:cD<pD*.95?-1:0;if(paused&&T===0){st=presetNote||'Нажмите «Пуск» — или перетащите шарики мышью и задайте свой старт.'}else if(damp>0&&fr<.03){st='Маятники почти остановились: энергии не осталось, и разница между ними исчезла. С трением хаос не вечен.';cl='ok'}else if(damp>0&&T>1){st=gr>0?'Разница пока ещё растёт — энергии хватает для хаоса. Но трение её съедает, и скоро всё затихнет.':gr<0?'Трение забирает энергию, и разница между маятниками сокращается: оба идут к остановке.':'Разница почти не меняется: трение уже заметно сгладило движение.';cl=gr>=0?'':'ok'}else if(N===1){st=detail?'Одно звено — обычный маятник: система регулярная, расстояние между копиями почти не растёт (в отличие от хаоса — не экспоненциально).':'Один маятник предсказуем: маленькая разница так и остаётся маленькой. Добавьте звено!';cl='ok'}
+ else if(div){st=`Прошло всего ${fm(div.t,1)} с — и маятники уже движутся совсем по-разному!`;cl='hot'}else st=T<.5?'Копии выглядят одинаково. Следите за лупой!':'Разница растёт… Она ещё мала, но уже заметна в лупе.';
+ let h=`<span class="fm ${cl}">${st}</span><span class="fm">Расстояние между концами<small>${len(sepM)} (длина звена принята за 1 м)</small></span>`;
+ if(!detail)h+='<span class="fm">Это и есть хаос<small>Крошечная разница в начале приводит к огромной разнице потом. Поэтому погоду нельзя предсказать надолго.</small></span>'+(damp>0?'':'<span class="fm">Почему они не останавливаются?<small>Мы не учитываем трение и сопротивление воздуха. Подробнее — кнопка «ℹ Допущения» сверху.</small></span>');
+ else{const lamLive=T>.5&&lastD<1&&lastD>d0?Math.log(lastD/d0)/T:null,lam=div?div.lam:lamLive;
+  h+=`<span class="fm">Расстояние в пространстве углов d<small>d = √Σ(θᵢ−θ′ᵢ)² = ${sc(lastD)} рад (начало: ${sc(d0)} рад)</small></span>`;
+  if(N>1)h+=`<span class="fm">Показатель Ляпунова λ ≈ ${lam?fm(lam,2)+' с⁻¹':'считаем…'}<small>d(t) ≈ d₀·e^(λt) пока d мало. Разница растёт в e^λ ≈ ${lam?fm(Math.exp(lam),1):'—'} раз за секунду. Прогноз до «полного расхождения»: t* ≈ ln(1/d₀)/λ ≈ ${lam?fm(Math.log(1/d0)/lam,1)+' с':'—'}.</small></span>`;
+  h+=`<span class="fm">Уравнения<small>Лагранжа для ${N} звеньев: A(θ)·θ″ = −Σ M·sin(θᵢ−θⱼ)·ωⱼ² − g·Mᵢ·sin θᵢ − γωᵢ. Интегрирует метод Рунге–Кутты 4-го порядка, шаг ${H0*1000} мс.</small></span>
+  ${damp>0?`<span class="fm">Осталось энергии: ${fm(fr*100,0)}%<small>Трение превращает энергию в тепло. Пока энергии много, малая разница растёт (хаос); когда она кончится, оба маятника придут в нижнее равновесие, и расхождение исчезнет. С трением систему можно рассчитать с конечной погрешностью: ошибка перестаёт расти, когда движение затухает. Поэтому итог (остановка) предсказуем, а точный путь к нему — нет.</small></span>`:''}<span class="fm">Точность расчёта<small>Без трения полная энергия должна сохраняться: её дрейф на нижнем графике — проверка точности. Но ошибки округления компьютера тоже растут по закону хаоса — как и в реальной жизни, долгий прогноз невозможен.</small></span>`}
+ $('#ht').innerHTML=h}
+function resize(){DPR=lite?1:Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*DPR|0;cv.height=H*DPR|0;
+ const side=W>760&&!$('#side').classList.contains('off')?312:0,aw=W-side,ah=H-215;cx=side+aw/2;cy=118+ah/2;U=Math.min(aw*.46,ah*.47)/N}
+function loop(t){requestAnimationFrame(loop);const dt=Math.min(.05,Math.max(.001,(t-last)/1000||.016));last=t;fa+=(dt-fa)*.05;
+ if(!lite&&++fc>150&&fa>.034)setLite(true,true);
+ if(!paused){accT+=dt*spd;let s=0;while(accT>=H0&&s<60){step(H0);accT-=H0;s++}if(s>=60)accT=0}
+ draw();hc++;hud();if(detail&&hc%4===0)graphs()}
+const PR=[
+{n:'Классика',N:2,a:[120,120],t:'Классика хаоса: оба звена под 120°. Копии отличаются на 10⁻⁶ рад — глазом не заметить.'},
+{n:'Горизонтально',N:2,a:[90,90],t:'Оба звена горизонтально — традиционный старт опыта.'},
+{n:'Змейка',N:2,a:[120,-120],t:'Звенья смотрят в разные стороны — энергии много, хаос включается сразу.'},
+{n:'Почти вверх',N:2,a:[179,179],t:'Почти неустойчивое равновесие: маятник долго «выбирает», в какую сторону упасть.'},
+{n:'Ровно вверх 180°',N:2,a:[180,180],t:'Идеальное неустойчивое равновесие: A стоит неподвижно, а B из-за крошечной разницы падает. Позже упадёт и A: его столкнёт погрешность округления компьютера.'},
+{n:'Малые углы',N:2,a:[10,10],t:'Энергии мало, движение почти регулярное и разница растёт медленно. Хаосу нужна энергия.'},
+{n:'Один маятник',N:1,a:[120],t:'Одно звено — регулярная система: разница не растёт экспоненциально. Хаосу нужны хотя бы два звена.'},
+{n:'Три звена',N:3,a:[100,100,100],t:'Три звена: ещё больше свободы, хаос ещё сильнее.'},
+{n:'Пять звеньев',N:5,a:[90,90,90,90,90],t:'Пять звеньев: цепочка ведёт себя как гибкая нить.'},
+{n:'С трением',N:2,a:[120,120],f:.15,t:'С трением: сначала движение хаотично, потом энергия уходит и маятники останавливаются.'},
+{n:'Луна',N:2,a:[120,120],g:1.62,t:'Лунная гравитация: всё то же, но в замедленном темпе.'},
+{n:'Микроразница',N:2,a:[120,120],d:-9,t:'Разница всего 10⁻⁹ рад (~1 нм). Маятники расходятся чуть позже, но обязательно разойдутся.'}];
+function pc(){document.querySelectorAll('.chip.on').forEach(b=>b.classList.remove('on'));presetNote=''}
+function preset(i){const p=PR[i];N=p.N;for(let k=0;k<5;k++)startTh[k]=p.a[Math.min(k,p.a.length-1)]*Math.PI/180;ang=Math.max(5,Math.min(179,p.a[0]));dexp=p.d||-6;damp=p.f||0;g=p.g||9.81;pc();presetNote=p.t;$('#nav').children[i].classList.add('on');ctl();resize();init()}
+$('#nav').innerHTML=PR.map(p=>`<button class="chip">${p.n}</button>`).join('');
+$('#nav').onclick=e=>{const k=[...$('#nav').children].indexOf(e.target);if(k>=0)preset(k)};
+function hint(){if(!paused||T>0)return;ctx.fillStyle='rgba(203,195,212,.85)';ctx.font='500 13px "Roboto Flex",Roboto,sans-serif';ctx.textAlign='center';ctx.fillText('Перетащите шарики, чтобы задать старт, затем нажмите «Пуск»',cx,H-92)}
+cv.addEventListener('pointerdown',e=>{let b=-1,bd=1600;for(let i=0;i<N;i++){const p=px(ya,i),d=(p[0]-e.clientX)**2+(p[1]-e.clientY)**2;if(d<bd){bd=d;b=i}}if(b<0)return;if(T>0)for(let i=0;i<N;i++)startTh[i]=ya[i];drag=b;cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing';pc()});
+cv.addEventListener('pointermove',e=>{if(drag<0)return;const p=drag?px(ya,drag-1):[cx,cy];startTh[drag]=Math.atan2(e.clientX-p[0],e.clientY-p[1]);init()});
+['pointerup','pointercancel'].forEach(t=>cv.addEventListener(t,()=>{drag=-1;cv.style.cursor='grab'}));
+const TXT={
+why:['Зачем этот опыт',()=>`<p>Двойной маятник показывает главное свойство хаоса: <b>движение полностью определено законами физики, но предсказать его надолго нельзя</b>. Любая крошечная неточность в начале растёт в разы каждую секунду.</p><h4>Где это важно</h4><ul><li><b>Погода.</b> В 1961 году Эдвард Лоренц повторил расчёт, округлив число 0,506127 до 0,506, — и получил совсем другую погоду. Поэтому прогнозы надёжны лишь на несколько дней, не больше пары недель.</li><li><b>Планеты.</b> Орбиты в Солнечной системе тоже хаотичны, но ошибка растёт очень медленно — за миллионы лет.</li><li><b>Измерения.</b> У любого прибора конечная точность, поэтому долгий прогноз хаотической системы невозможен даже при идеальных формулах.</li></ul><h4>Что попробовать</h4><p>Сравните 1, 2 и 5 звеньев, малые и большие углы, движение без трения и с ним. Хаосу нужны хотя бы два звена и достаточно энергии.</p>`],
+as:['Что мы не учитываем',()=>`<p>Модель идеализирована. Мы считаем, что:</p><ul><li>звенья — жёсткие невесомые стержни, вся масса сосредоточена в шариках, массы и длины звеньев равны;</li><li><b>нет трения в шарнирах и сопротивления воздуха</b> (по умолчанию);</li><li>ускорение свободного падения постоянно, а движение происходит в одной плоскости;</li><li>стержни не гнутся, люфтов нет, а маятники A и B друг на друга не влияют — это два отдельных опыта;</li><li>время считается численно (метод Рунге–Кутты 4-го порядка, шаг 2 мс): ошибка вычислений крошечная, но хаос усиливает и её.</li></ul><h4>Почему они качаются бесконечно</h4><p>Без трения и сопротивления воздуха единственная сила, совершающая работу, — тяжесть, и она не теряет энергию. Полная энергия постоянна, поэтому маятники качаются вечно. У настоящих маятников энергия уходит в тепло, и они останавливаются.</p><h4>Если включить трение</h4><p>Ползунок «Трение» есть в подробном режиме или в пресете «С трением». Пока энергии много, разница между маятниками растёт, а потом затухает вместе с движением: оба приходят в нижнее положение. С трением расчёт можно вести с конечной погрешностью — ошибка перестаёт расти.</p><h4>Про 180°</h4><p>Строго вверх — неустойчивое равновесие: идеальный маятник мог бы стоять так вечно, но любая малая разница его роняет. Поэтому ползунок угла ограничен 179°, а ровно 180° вынесено в отдельный пресет.</p>`]};
+function openMd(k){$('#mdc').innerHTML='<h2>'+TXT[k][0]+'</h2>'+TXT[k][1]();$('#md').classList.add('on')}
+$('#bw').onclick=()=>openMd('why');$('#ba').onclick=()=>openMd('as');$('#mx').onclick=()=>$('#md').classList.remove('on');
+addEventListener('keydown',e=>{if(e.key==='Escape')$('#md').classList.remove('on')});
+addEventListener('resize',resize);
+if(innerWidth<=760)$('#side').classList.add('off');
+preset(0);requestAnimationFrame(loop);
+</script>
+</body>
+</html>
