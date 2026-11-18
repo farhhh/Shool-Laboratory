@@ -1,49 +1,53 @@
 {
-  "generatedAt": "2026-11-17T13:34:49.342Z",
+  "generatedAt": "2026-11-18T05:49:46.450Z",
   "categories": [
     {
+      "id": "astronomy",
       "name": "Астрономия",
       "folder": "Astonomia",
       "icon": "🪐",
       "items": [
         {
           "title": "Солнечная система",
-          "description": "Добавь описание в файл solar_system.txt рядом с этой симуляцией.",
-          "url": "Simulations/Astonomia/solar_system.html"
+          "description": "Рассматривайте планеты, ставьте свои объекты и запускайте кометы",
+          "url": "Simulations/Astronomia/solar_system.html",
+          "image": "Simulations/Astronomia/solar_system.png"
         }
-      ],
-      "id": "astronomy"
+      ]
     },
     {
+      "id": "chemistry",
       "name": "Химия",
       "folder": "Himia",
       "icon": "⚗️",
       "items": [
         {
           "title": "Атомная лаборатория",
-          "description": "Добавь описание в файл atomnaya_laboratoriya.txt рядом с этой симуляцией.",
-          "url": "Simulations/Himia/atomnaya_laboratoriya.html"
+          "description": "Смотрите как работает атом и регулируйте его протоны, нейтроны, электроны, а также занимайтесь синтезом и делением",
+          "url": "Simulations/Himia/atomnaya_laboratoriya.html",
+          "image": "Simulations/Himia/atomnaya_laboratoriya.png"
         }
-      ],
-      "id": "chemistry"
+      ]
     },
     {
+      "id": "physics",
       "name": "Физика",
       "folder": "Physics",
       "icon": "⚛️",
       "items": [
         {
           "title": "Электрическая лаборатория",
-          "description": "Добавь описание в файл elektricheskaya_laboratoriya.txt рядом с этой симуляцией.",
-          "url": "Simulations/Physics/elektricheskaya_laboratoriya.html"
+          "description": "Стройте свои электронные схемы и смотрите что получилось",
+          "url": "Simulations/Physics/elektricheskaya_laboratoriya.html",
+          "image": "Simulations/Physics/elektricheskaya_laboratoriya.png"
         },
         {
           "title": "Оптическая лаборатория",
-          "description": "Добавь описание в файл opticheskaya_laboratoriya.txt рядом с этой симуляцией.",
-          "url": "Simulations/Physics/opticheskaya_laboratoriya.html"
+          "description": "Изучайте свет, дисперсию, построения изображений и создавайте свои собственные эксперименты со светом",
+          "url": "Simulations/Physics/opticheskaya_laboratoriya.html",
+          "image": "Simulations/Physics/opticheskaya_laboratoriya.png"
         }
-      ],
-      "id": "physics"
+      ]
     },
     {
       "id": "informatics",
@@ -57,7 +61,14 @@
       "name": "Биология",
       "folder": "Biology",
       "icon": "🧬",
-      "items": []
+      "items": [
+        {
+          "title": "Живая клетка",
+          "description": "Изучите строение растительной и животной клетки",
+          "url": "Simulations/Biology/zhivaya_kletka.html",
+          "image": "Simulations/Biology/zhivaya_kletka.png"
+        }
+      ]
     },
     {
       "id": "geography",

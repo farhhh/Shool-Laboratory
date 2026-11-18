@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const SIMULATIONS_DIR = path.join(ROOT, 'Simulations');
 const OUTPUT = path.join(ROOT, 'catalog.json');
+const INDEX = path.join(ROOT, 'index.html');
 
 // Known subjects are pre-created so the navigation can show planned subjects
 // (Informatics, Biology, Geography) even before their first simulation exists.
@@ -159,6 +160,14 @@ async function main() {
 
   const catalog = { generatedAt: new Date().toISOString(), categories };
   await fs.writeFile(OUTPUT, `${JSON.stringify(catalog, null, 2)}\n`, 'utf8');
+
+  // Встраиваем каталог прямо в index.html: страница больше не зависит от второго сетевого запроса.
+  const indexHtml = await fs.readFile(INDEX, 'utf8');
+  const json = JSON.stringify(catalog).replace(/</g, '\\u003c');
+  const embedded = `<!--CATALOG:START--><script type="application/json" id="catalog-data">${json}</script><!--CATALOG:END-->`;
+  const updated = indexHtml.replace(/<!--CATALOG:START-->[\s\S]*?<!--CATALOG:END-->/, () => embedded);
+  if (updated === indexHtml && !indexHtml.includes(embedded)) throw new Error('В index.html не найден блок <!--CATALOG:START-->…<!--CATALOG:END-->.');
+  await fs.writeFile(INDEX, updated, 'utf8');
   const count = categories.reduce((sum, category) => sum + category.items.length, 0);
   console.log(`Каталог обновлён: ${count} симуляций в ${categories.length} предметах → catalog.json`);
 }

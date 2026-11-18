@@ -65,6 +65,10 @@ Simulations/
 Время: 10–15 минут
 ```
 
+## Важно: каталог встроен в index.html
+
+`npm run build` теперь не только пересоздаёт `catalog.json`, но и вставляет каталог прямо в `index.html` (между маркерами `<!--CATALOG:START-->` и `<!--CATALOG:END-->`). Не удаляй эти маркеры. Если публикуешь вручную (Netlify Drop / GitHub Pages без сборки), сначала выполни `npm run build` локально и загрузи обновлённые `index.html` и `catalog.json`.
+
 ## Как работает обновление
 
 При каждом GitHub commit Netlify запускает команду из `netlify.toml`:

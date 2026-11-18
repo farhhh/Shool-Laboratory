@@ -8,7 +8,7 @@
   <title>Научные симуляции — интерактивная лаборатория</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'"><noscript><link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
   <style>
     :root {
       color-scheme: dark;
@@ -349,6 +349,7 @@
     </footer>
   </div>
 
+  <!--CATALOG:START--><script type="application/json" id="catalog-data">{"generatedAt":"2026-11-18T05:49:46.450Z","categories":[{"id":"astronomy","name":"Астрономия","folder":"Astonomia","icon":"🪐","items":[{"title":"Солнечная система","description":"Рассматривайте планеты, ставьте свои объекты и запускайте кометы","url":"Simulations/Astronomia/solar_system.html","image":"Simulations/Astronomia/solar_system.png"}]},{"id":"chemistry","name":"Химия","folder":"Himia","icon":"⚗️","items":[{"title":"Атомная лаборатория","description":"Смотрите как работает атом и регулируйте его протоны, нейтроны, электроны, а также занимайтесь синтезом и делением","url":"Simulations/Himia/atomnaya_laboratoriya.html","image":"Simulations/Himia/atomnaya_laboratoriya.png"}]},{"id":"physics","name":"Физика","folder":"Physics","icon":"⚛️","items":[{"title":"Электрическая лаборатория","description":"Стройте свои электронные схемы и смотрите что получилось","url":"Simulations/Physics/elektricheskaya_laboratoriya.html","image":"Simulations/Physics/elektricheskaya_laboratoriya.png"},{"title":"Оптическая лаборатория","description":"Изучайте свет, дисперсию, построения изображений и создавайте свои собственные эксперименты со светом","url":"Simulations/Physics/opticheskaya_laboratoriya.html","image":"Simulations/Physics/opticheskaya_laboratoriya.png"}]},{"id":"informatics","name":"Информатика","folder":"Informatics","icon":"💻","items":[]},{"id":"biology","name":"Биология","folder":"Biology","icon":"🧬","items":[{"title":"Живая клетка","description":"Изучите строение растительной и животной клетки","url":"Simulations/Biology/zhivaya_kletka.html","image":"Simulations/Biology/zhivaya_kletka.png"}]},{"id":"geography","name":"География","folder":"Geography","icon":"🌍","items":[]}]}</script><!--CATALOG:END-->
   <script>
     (() => {
       'use strict';
@@ -480,26 +481,42 @@
       });
       $('#year').textContent = new Date().getFullYear();
 
-      fetch('./catalog.json', { cache: 'no-store' })
-        .then(response => {
-          if (!response.ok) throw new Error(`catalog.json: HTTP ${response.status}`);
-          return response.json();
-        })
-        .then(data => {
-          catalogVersion = String(data.generatedAt || '');
-          catalog = Array.isArray(data.categories) ? data.categories : [];
-          catalog = catalog.filter(category => Array.isArray(category.items));
-          $('#total-count').textContent = totalSimulations();
-          $('#category-count').textContent = catalog.length;
-          renderNavigation();
-          render();
-          if (!catalog.length) groupsEl.innerHTML = '<div class="empty">Категории пока не найдены. Проверь папку <b>Simulations</b> и настройки сборки Netlify.</div>';
-        })
-        .catch(error => {
-          console.error('Catalog loading error:', error);
-          navEl.innerHTML = '<div class="empty">Не удалось загрузить предметы.</div>';
-          groupsEl.innerHTML = '<div class="error">Не удалось загрузить каталог. Проверь, что рядом с index.html лежит актуальный <b>catalog.json</b>, а Netlify выполнил команду сборки.</div>';
-        });
+      function applyCatalog(data) {
+        catalogVersion = String(data.generatedAt || '');
+        catalog = Array.isArray(data.categories) ? data.categories : [];
+        catalog = catalog.filter(category => Array.isArray(category.items));
+        $('#total-count').textContent = totalSimulations();
+        $('#category-count').textContent = catalog.length;
+        renderNavigation();
+        render();
+        if (!catalog.length) groupsEl.innerHTML = '<div class="empty">Категории пока не найдены. Проверь папку <b>Simulations</b> и настройки сборки Netlify.</div>';
+      }
+
+      function showLoadError(error) {
+        console.error('Catalog loading error:', error);
+        navEl.innerHTML = '<div class="empty">Не удалось загрузить предметы.</div>';
+        groupsEl.innerHTML = '<div class="error">Не удалось загрузить каталог. Обнови страницу. Если не помогает — проверь, что рядом с index.html лежит актуальный <b>catalog.json</b>, а Netlify выполнил команду сборки.</div>';
+      }
+
+      // Основной путь: каталог уже встроен в страницу (build-catalog.mjs), сеть не нужна.
+      let embedded = null;
+      try {
+        const node = document.getElementById('catalog-data');
+        embedded = node ? JSON.parse(node.textContent) : null;
+      } catch (error) { console.warn('Embedded catalog is broken:', error); }
+
+      if (embedded && Array.isArray(embedded.categories) && embedded.categories.length) {
+        applyCatalog(embedded);
+      } else {
+        // Запасной путь (например, если сборку не запускали): читаем catalog.json, 2 попытки.
+        const load = attempt => fetch('./catalog.json', { cache: 'no-store' })
+          .then(response => {
+            if (!response.ok) throw new Error(`catalog.json: HTTP ${response.status}`);
+            return response.json();
+          })
+          .catch(error => attempt < 2 ? new Promise(r => setTimeout(r, 800)).then(() => load(attempt + 1)) : Promise.reject(error));
+        load(1).then(applyCatalog).catch(showLoadError);
+      }
     })();
   </script>
 </body>
