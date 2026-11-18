@@ -42,7 +42,7 @@ body{background:radial-gradient(900px 620px at 12% 18%,rgba(120,70,200,.24),tran
 <aside id="panel"></aside>
 <div id="dock" class="glass">
 <button class="tg tool" data-tool="wire">Провод</button><button class="tg tool" data-tool="erase">Ластик</button><button class="tg primary" id="add">＋ Элементы</button><span class="sep"></span>
-<button class="tg" id="rot">↻ Повернуть</button><button class="tg" id="home" title="К центру">⌖</button><button class="tg" id="ts">Время: 1×</button><button class="tg" id="flow">Ток: условный</button><button class="tg" id="grid">Сетка</button><button class="tg" id="level">Режим: кратко</button>
+<button class="tg" id="rot" title="Повернуть выбранный элемент (R)">↻ Повернуть</button><button class="tg" id="home" title="К центру">⌖</button><button class="tg" id="ts">Время: 1×</button><button class="tg" id="flow">Ток: условный</button><button class="tg" id="grid">Сетка</button><button class="tg" id="level">Режим: кратко</button>
 </div>
 <div id="menu" class="glass"></div>
 <div id="toast"></div>
@@ -168,6 +168,12 @@ function zoomAt(sx,sy,k){const z=Math.max(.35,Math.min(3,cam.z*k)),r=z/cam.z;cam
 function hit(ev){const[X,Y]=toW(ev);let best=null,bd=c*.5;for(const e of els){const[ax,ay]=px(e.a),[bx,by]=px(e.b),dx=bx-ax,dy=by-ay,t=Math.max(0,Math.min(1,((X-ax)*dx+(Y-ay)*dy)/(dx*dx+dy*dy))),d=Math.hypot(X-ax-t*dx,Y-ay-t*dy);if(d<bd||(d<c*.5&&e.t!=='wire'&&best?.t==='wire')){bd=d;best=e}}return best}
 function termAt(ev){const[X,Y]=toW(ev);for(const e of els)for(const p of[e.a,e.b]){const[x,y]=px(p);if(Math.hypot(X-x,Y-y)<c*.4)return p}return null}
 function erase(ev){const e=hit(ev);if(e){els=els.filter(x=>x!==e);if(sel===e){sel=null;panel()}dirty=true}}
+function turn(k){const e=sel;if(!e||(D[tool]&&tool!=='wire')){rot=(rot+k+4)%4;return}
+if(e.t==='wire'){toast('Провод повернуть нельзя — удалите его и проведите заново');return}
+const dx=(e.b[0]-e.a[0])/2,dy=(e.b[1]-e.a[1])/2,mx=e.a[0]+dx,my=e.a[1]+dy,nx=k>0?-dy:dy,ny=k>0?dx:-dx,g=grab&&grab.el===e,sh=g?[e.a[0]-grab.a0[0],e.a[1]-grab.a0[1]]:[0,0];
+e.a=[mx-nx,my-ny];e.b=[mx+nx,my+ny];
+if(g){grab.a0=[e.a[0]-sh[0],e.a[1]-sh[1]];grab.b0=[e.b[0]-sh[0],e.b[1]-sh[1]]}else els=els.filter(x=>x===e||!(onSeg(x.a,e.a,e.b)&&onSeg(x.b,e.a,e.b)));
+dirty=true}
 function setTool(t){tool=t;document.querySelectorAll('.tool').forEach(x=>x.classList.toggle('on',x.dataset.tool===t));const el=!!D[t]&&t!=='wire',a=$('#add');a.textContent=el?'＋ '+D[t].n+' ✕':'＋ Элементы';a.classList.toggle('primary',!el);a.classList.toggle('on',el);$('#menu').classList.remove('on');cv.style.cursor=t?'crosshair':'grab'}
 cv.addEventListener('pointerdown',ev=>{$('#menu').classList.remove('on');cv.setPointerCapture(ev.pointerId);ptrs.set(ev.pointerId,[ev.clientX,ev.clientY]);
 if(ptrs.size===2){drag=pend=panning=null;const[a,b]=[...ptrs.values()];pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1]),mx:(a[0]+b[0])/2,my:(a[1]+b[1])/2};return}
@@ -193,7 +199,7 @@ if(panning?.auto&&!panning.moved){sel=null;panel()}
 els.forEach(e=>{if(e.t==='btn'&&e.on){e.on=false}});dirty=true;drag=pend=panning=null});
 cv.addEventListener('pointerleave',()=>{hover=null});cv.addEventListener('contextmenu',e=>e.preventDefault());
 cv.addEventListener('wheel',ev=>{ev.preventDefault();zoomAt(ev.clientX,ev.clientY,Math.exp(-ev.deltaY*(ev.ctrlKey?.01:.0015)))},{passive:false});
-addEventListener('keydown',ev=>{if(ev.key==='r'||ev.key==='к')rot=(rot+1)%4;if(ev.key==='Escape'){setTool(null);sel=null;panel()}if(ev.key===' '){space=true;ev.preventDefault()}if((ev.key==='Delete'||ev.key==='Backspace')&&sel){els=els.filter(e=>e!==sel);sel=null;panel();dirty=true}});
+addEventListener('keydown',ev=>{if(!ev.ctrlKey&&!ev.metaKey&&!ev.altKey&&(ev.code==='KeyR'||ev.key==='r'||ev.key==='R'||ev.key==='к'||ev.key==='К')){turn(ev.shiftKey?-1:1);ev.preventDefault()}if(ev.key==='Escape'){setTool(null);sel=null;panel()}if(ev.key===' '){space=true;ev.preventDefault()}if((ev.key==='Delete'||ev.key==='Backspace')&&sel){els=els.filter(e=>e!==sel);sel=null;panel();dirty=true}});
 addEventListener('keyup',ev=>{if(ev.key===' ')space=false});
 document.querySelectorAll('.tool').forEach(b=>b.onclick=()=>setTool(tool===b.dataset.tool?null:b.dataset.tool));
 $('#menu').innerHTML=['bat','bulb','led','res','cap','ind','fuse','sw','btn','vm','am'].map(t=>`<button data-t="${t}"><i style="color:${D[t].col};background:${D[t].col}"></i>${D[t].n}</button>`).join('');
@@ -201,7 +207,7 @@ $('#menu').onclick=e=>{const b=e.target.closest('button');if(b)setTool(b.dataset
 $('#add').onclick=()=>{if(D[tool]&&tool!=='wire')setTool(null);else $('#menu').classList.toggle('on')};$('#ts').onclick=e=>{ts=ts===1?.2:ts===.2?.05:1;e.target.textContent='Время: '+ts+'×';e.target.classList.toggle('on',ts!==1)};
 $('#home').onclick=()=>center();
 document.querySelectorAll('#nav .chip').forEach(b=>b.onclick=()=>load(b.dataset.p));
-$('#rot').onclick=()=>{rot=(rot+1)%4};
+$('#rot').onclick=()=>turn(1);
 $('#flow').onclick=e=>{electrons=!electrons;e.target.textContent='Ток: '+(electrons?'электроны':'условный');e.target.classList.toggle('on',electrons)};
 $('#grid').onclick=e=>{showGrid=!showGrid;e.target.classList.toggle('on',showGrid)};
 $('#level').onclick=e=>{detail=!detail;e.target.textContent='Режим: '+(detail?'подробно':'кратко');e.target.classList.toggle('on',detail);panel();dirty=true};
@@ -249,7 +255,7 @@ if(st==='short'){h+=`<b class="t">Где выделяется тепло?</b>`+[
 `<div class="note" style="margin-top:6px">${detail?`R≈${f2(Rx)} Ом ≪ r, поэтому I = E/(R+r) ≈ ${f2(Id)} А. Мощность тепла P = I²·R растёт как квадрат тока и выделяется там, где сопротивление есть: больше всего — внутри батареи (r = ${b.r} Ом), и немного во всех проводах.`:'Греется там, где ток встречает сопротивление: сильнее всего — внутри самой батареи, и чуть-чуть в проводах.'}</div>`}
 const dead=els.filter(e=>e.dead);if(dead.length)h+=`<div class="verdict no">💥 Вышел из строя: ${[...new Set(dead.map(e=>D[e.t].n))].join(', ')}. Замените в панели элемента.</div>`;if(hot.length&&st!=='short')h+=`<div class="verdict warn">🔥 Перегрев: ${[...new Set(hot.map(e=>D[e.t].n))].join(', ')}</div>`}
 else h+=`<div class="verdict warn">Поставьте батарею («＋ Элементы» снизу) или выберите готовый пример сверху.</div>`;
-h+=`<div class="lg"><i style="background:${electrons?'#7fd3ff':'#ffd27a'}"></i>${electrons?'Электроны движутся от «−» к «+»':'Условный ток: от «+» к «−»'}</div><div class="note" style="margin-top:6px">Двигать поле — тяните мышью, масштаб — колесо или щипок. Провод — кнопка «Провод» или тяните от конца провода. Элементы — «＋ Элементы»; Esc — отмена, R — поворот.</div>`;
+h+=`<div class="lg"><i style="background:${electrons?'#7fd3ff':'#ffd27a'}"></i>${electrons?'Электроны движутся от «−» к «+»':'Условный ток: от «+» к «−»'}</div><div class="note" style="margin-top:6px">Двигать поле — тяните мышью, масштаб — колесо или щипок. Провод — кнопка «Провод» или тяните от конца провода. Элементы — «＋ Элементы»; Esc — отмена, R — повернуть выбранный элемент (Shift+R — в обратную сторону).</div>`;
 $('#hud').innerHTML='<b class="t">Анализ цепи</b>'+h;$('#readout').textContent='⚡ '+rd}
 let fr=0,ts=1,st=0;
 function loop(t){requestAnimationFrame(loop);const dt=Math.max(.001,Math.min(.05,(t-last)/1000||.016));last=t;T=t/1000;const dd=dirty;dirty=false;
