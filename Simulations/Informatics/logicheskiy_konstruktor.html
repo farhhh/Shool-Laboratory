@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Логический конструктор — вентили и сумматоры</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#0b0912;--s1:#1d1a24;--s2:#272330;--s3:#322d3d;--on:#e8e0ee;--on2:#cbc3d4;--ol:#4b4556;--pr:#d0bcff;--acc:#d0bcff;--ok:#8cf5a6;box-sizing:border-box}
+*{box-sizing:border-box;margin:0}html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--on);font:400 14px/1.45 "Roboto Flex",Roboto,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:radial-gradient(900px 620px at 12% 18%,rgba(120,70,200,.24),transparent 62%),radial-gradient(800px 600px at 92% 88%,rgba(40,150,210,.15),transparent 60%),var(--bg)}
+#scene{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:block}button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+.glass{background:rgba(29,26,36,.94);border:1px solid rgba(255,255,255,.09);box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#top{position:fixed;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:10px;padding:9px 12px 9px 18px;border-radius:28px;z-index:5}
+#top h1{font:900 19px/1 "Roboto Flex";letter-spacing:-.4px;flex:1;white-space:nowrap;background:linear-gradient(90deg,#9be3a8,#8edcff,var(--pr));-webkit-background-clip:text;background-clip:text;color:transparent}
+.pill{padding:8px 13px;border-radius:16px;background:var(--s2);font-weight:500;white-space:nowrap;font-variant-numeric:tabular-nums}
+#nav{position:fixed;left:12px;right:12px;top:calc(70px + env(safe-area-inset-top,0px));display:flex;gap:8px;overflow-x:auto;padding:2px;z-index:4;scrollbar-width:none}#nav::-webkit-scrollbar{display:none}
+.chip{height:34px;padding:0 14px;border-radius:10px;border:1px solid var(--ol);background:rgba(29,26,36,.7);white-space:nowrap;font-weight:500}.chip:hover{background:var(--s3)}
+#dock{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:30px;z-index:5;max-width:calc(100% - 16px);flex-wrap:wrap;justify-content:center}
+.tg{height:40px;padding:0 13px;border-radius:12px;border:1px solid var(--ol);font-weight:500;white-space:nowrap}.tg.on{background:var(--pr);color:#27154d;font-weight:700;border-color:transparent}.tg.primary{background:var(--pr);color:#27154d;border-color:transparent;font-weight:700}.sep{width:1px;height:26px;background:var(--ol)}
+#hud{position:fixed;left:12px;top:116px;width:276px;max-height:calc(100% - 240px);overflow:auto;z-index:4;padding:14px;border-radius:20px;font-size:12px;color:var(--on2);scrollbar-width:thin}
+#hud b.t{display:block;color:var(--on);font-size:14px;margin-bottom:6px}.verdict{padding:10px 12px;border-radius:14px;line-height:1.5;background:var(--s2);margin-bottom:8px}
+.fm{display:block;padding:8px 10px;margin:5px 0 8px;border-radius:10px;background:rgba(140,245,166,.1);color:var(--ok);font-size:15px;font-weight:700;letter-spacing:1px}
+.grow{display:flex;align-items:center;gap:8px;margin:5px 0}.gl{width:62px;flex:none}.bar2{flex:1;height:7px;border-radius:4px;background:var(--s3);overflow:hidden}.bar2 i{display:block;height:100%;transition:width .12s}.grow b{width:18px;text-align:right;color:var(--on);font-weight:700}
+#panel{position:fixed;z-index:6;background:var(--s1);border-radius:28px;overflow:auto;right:12px;top:116px;bottom:12px;width:340px;transform:translateX(120%);padding:20px;transition:transform .45s cubic-bezier(.2,0,0,1);box-shadow:0 20px 60px #000a}body.panel-open #panel{transform:none}
+.x{position:absolute;right:12px;top:12px;width:38px;height:38px;border-radius:50%;background:var(--s2)}
+.hero{display:flex;gap:14px;align-items:center;padding-right:35px}.orb{width:56px;height:56px;flex:none;border-radius:50%;box-shadow:0 0 30px var(--acc),inset -12px -9px 18px #000a;background:radial-gradient(circle at 32% 30%,#fff9,var(--acc) 38%,#000 130%)}.kind{color:var(--acc);font-weight:700}h2{font:900 24px/1.05 "Roboto Flex";letter-spacing:-.6px}
+.fact{margin:15px 0;padding:13px 15px;border-radius:20px 20px 20px 6px;background:var(--s2);color:var(--on2)}
+.tt{width:100%;border-collapse:separate;border-spacing:0 4px;text-align:center;font-variant-numeric:tabular-nums}.tt th{color:var(--on2);font-weight:500}.tt td{padding:6px;background:var(--s2);font-weight:700}.tt td:last-child{color:var(--ok)}.tt tr.cur td{background:#1f4d2c;color:#d8ffe0}
+.btn{width:100%;height:44px;border-radius:24px;background:var(--acc);color:#171020;font-weight:700;margin-top:12px}.btn.secondary{background:var(--s3);color:var(--on)}
+#menu{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:7;padding:12px;border-radius:24px;display:none;grid-template-columns:repeat(4,1fr);gap:8px;width:min(620px,calc(100% - 16px))}#menu.on{display:grid}
+#menu button{padding:11px;border-radius:14px;border:1px solid var(--ol);background:rgba(255,255,255,.035);display:flex;align-items:center;gap:8px;font-weight:500;text-align:left;font-size:13px}#menu button:hover{background:var(--s3)}#menu i{width:10px;height:10px;border-radius:50%;flex:none;box-shadow:0 0 8px currentColor;background:currentColor}
+#toast{position:fixed;left:50%;bottom:120px;transform:translate(-50%,35px);opacity:0;background:#e8e0ee;color:#322f35;padding:12px 18px;border-radius:14px;z-index:10;transition:.3s;pointer-events:none;text-align:center;max-width:90%;font-weight:500}#toast.on{opacity:1;transform:translate(-50%,0)}
+@media(max-width:840px){#menu{grid-template-columns:repeat(2,1fr);bottom:calc(120px + env(safe-area-inset-bottom,0px));max-height:45vh;overflow:auto}#panel{left:8px;right:8px;width:auto;top:auto;bottom:8px;max-height:57vh;transform:translateY(120%)}body.panel-open #dock{transform:translate(-50%,160%)}#top h1{font-size:16px}#hud{width:calc(100% - 24px);max-height:24vh;padding:10px}#dock{gap:6px;padding:8px}.tg{height:36px;padding:0 10px;font-size:12px}}
+</style></head>
+<body>
+<canvas id="scene" aria-label="Поле конструктора логических схем"></canvas>
+<header id="top" class="glass"><h1>Логический конструктор</h1><span class="pill" id="readout">Такт 0</span></header>
+<nav id="nav"><button class="chip" data-p="gates">Базовые вентили</button><button class="chip" data-p="half">Полусумматор</button><button class="chip" data-p="full">Полный сумматор</button><button class="chip" data-p="latch">SR‑защёлка (память)</button><button class="chip" data-p="mux">Мультиплексор</button><button class="chip" data-p="blink">Мигалка</button><button class="chip" data-p="clear">Пустое поле</button></nav>
+<div id="hud" class="glass"></div>
+<aside id="panel"></aside>
+<div id="dock" class="glass">
+<button class="tg" id="erase">Ластик</button><button class="tg primary" id="add">＋ Элементы</button><span class="sep"></span>
+<button class="tg" id="pause">Пауза</button><button class="tg" id="step">Шаг</button><button class="tg" id="spd">Скорость: 1×</button><button class="tg on" id="dig">Цифры</button><button class="tg on" id="grid">Сетка</button><button class="tg" id="home" title="Вписать схему">⌖</button>
+</div>
+<div id="menu" class="glass"></div>
+<div id="toast"></div>
+<script>
+(()=>{
+const $=q=>document.querySelector(q),cv=$('#scene'),ctx=cv.getContext('2d');
+let W,H,DPR,s=44,cx=0,cy=0,tool=null,grid=true,dig=true,paused=false,si=1,nodes=[],wires=[],nid=0,sel=null,drag=null,pend=null,grab=null,mouse=[0,0],T=0,tc=0,acc=0,last=0,info={t:'',h:''},hudS='',pk='',pinch=null;
+const SP=[.4,1,3],ptrs=new Map(),ON='#8cf5a6',OFF='#5a5367';
+const F={and:(a,b)=>a&b,or:(a,b)=>a|b,xor:(a,b)=>a^b,nand:(a,b)=>1-(a&b),nor:(a,b)=>1-(a|b),xnor:(a,b)=>1-(a^b),not:a=>1-a};
+const D={
+sw:{n:'Тумблер',k:'Источник сигнала',col:'#9be3a8',d:'Постоянный сигнал, который вы переключаете сами. Нажмите на него: 0 → 1 → 0.',f:'Так в компьютере задают входные данные: каждый бит — это «выключено» (0) или «включено» (1).'},
+btn:{n:'Кнопка',k:'Источник сигнала',col:'#9be3a8',d:'Подаёт 1, пока вы держите её нажатой, и 0, когда отпустили.',f:'Удобно проверять, как схема реагирует на короткий импульс.'},
+c1:{n:'Константа 1',k:'Источник сигнала',col:'#9be3a8',d:'Всегда подаёт логическую единицу — «питание» схемы.',f:'Если вход вентиля не подключён, он считается нулём. Чтобы подать на него 1 постоянно, возьмите константу.'},
+c0:{n:'Константа 0',k:'Источник сигнала',col:'#9a92a6',d:'Всегда подаёт логический ноль — «земля».',f:'Подать 0 и оставить вход пустым — то же самое.'},
+clk:{n:'Тактовый генератор',k:'Источник сигнала',col:'#ffb86b',d:'Сам переключается 0 → 1 → 0 → … с постоянным периодом.',f:'Тактовый сигнал задаёт ритм работы процессора. Частота в гигагерцах — миллиарды переключений в секунду.'},
+lamp:{n:'Лампочка',k:'Индикатор',col:'#ffd27a',d:'Горит, когда на входе 1, и гаснет при 0.',f:'Лампочка ничего не вычисляет — она только показывает значение провода.'},
+and:{n:'И (AND)',en:'AND',s:'&',k:'Логический вентиль',col:'#8edcff',d:'Выдаёт 1 только тогда, когда на обоих входах 1. Это логическое умножение.',f:'Q = A · B. «Пойду гулять, если есть время И хорошая погода».'},
+or:{n:'ИЛИ (OR)',en:'OR',s:'≥1',k:'Логический вентиль',col:'#8edcff',d:'Выдаёт 1, если хотя бы на одном входе 1. Это логическое сложение.',f:'Q = A + B. Ноль получается только при 0 и 0.'},
+not:{n:'НЕ (NOT)',en:'NOT',s:'1',inv:1,k:'Логический вентиль',col:'#ffb0c8',d:'Инвертор: меняет 0 на 1, а 1 на 0. Единственный вентиль с одним входом.',f:'Кружок на выходе в схемах означает инверсию.'},
+xor:{n:'Исключающее ИЛИ (XOR)',en:'XOR',s:'=1',k:'Логический вентиль',col:'#d0bcff',d:'Выдаёт 1, когда входы РАЗНЫЕ. Если одинаковые — 0.',f:'Это сложение по модулю 2: 1 + 1 = 0 (с переносом). Поэтому XOR — основа сумматора.'},
+nand:{n:'И‑НЕ (NAND)',en:'NAND',s:'&',inv:1,k:'Логический вентиль',col:'#8edcff',d:'Это И, а потом НЕ. Ноль только при 1 и 1.',f:'Из одних NAND можно собрать любую логическую схему — он «универсальный».'},
+nor:{n:'ИЛИ‑НЕ (NOR)',en:'NOR',s:'≥1',inv:1,k:'Логический вентиль',col:'#8edcff',d:'Это ИЛИ, а потом НЕ. Единица только при 0 и 0.',f:'Два NOR с обратной связью дают триггер — ячейку памяти (см. SR‑защёлку).'},
+xnor:{n:'Равенство (XNOR)',en:'XNOR',s:'=1',inv:1,k:'Логический вентиль',col:'#d0bcff',d:'Выдаёт 1, когда входы ОДИНАКОВЫЕ. Это XOR наоборот.',f:'Используется в компараторах — схемах сравнения чисел.'}};
+const byId=i=>nodes.find(n=>n.id==i);
+function mk(t,x,y,o={}){const n={id:++nid,t,x,y,v:0,on:0,lab:'',...o};n.w=t=='not'||!F[t]?2:3;n.h=2;n.ni=t=='not'||t=='lamp'?1:F[t]?2:0;
+if(!n.lab){if(t=='sw'||t=='btn')n.lab=String.fromCharCode(65+nodes.filter(m=>m.t=='sw'||m.t=='btn').length);if(t=='lamp')n.lab='Q'+(nodes.filter(m=>m.t=='lamp').length+1);if(t=='clk')n.lab='CLK'}return n}
+const pin=(n,i,o)=>o?[n.x+n.w,n.y+1]:[n.x,n.y+(n.ni==1?1:.5+i)];
+const ins=n=>Array.from({length:n.ni},(_,i)=>{const w=wires.find(w=>w.b==n.id&&w.i==i);return w?byId(w.a).v:0});
+function tick(advance=false){const clock=tc;if(advance)tc++;const e=new Map(),wm={};wires.forEach(w=>wm[w.b+'.'+w.i]=byId(w.a));
+for(const n of nodes){let v=n.v;if(n.t=='sw'||n.t=='btn')v=n.on;else if(n.t=='c1')v=1;else if(n.t=='c0')v=0;else if(n.t=='clk')v=(clock/5|0)&1;
+else{const a=Array.from({length:n.ni},(_,i)=>wm[n.id+'.'+i]?wm[n.id+'.'+i].v:0);v=n.t=='lamp'?a[0]:F[n.t](a[0],a[1])}e.set(n,v)}
+e.forEach((v,n)=>n.v=v);$('#readout').textContent='Такт '+tc;
+if(sel&&F[sel.t]&&pk!=ins(sel).join(''))panel(sel)}
+const route=w=>{const a=byId(w.a),b=byId(w.b),p=pin(a,0,1),q=pin(b,w.i,0);
+if(q[0]-p[0]>=1.6){const m=q[0]-.7-.5*w.i;return[p,[m,p[1]],[m,q[1]],q]}
+const ym=(p[1]+q[1])/2+(p[1]<=q[1]?-.5:.5);return[p,[p[0]+.6,p[1]],[p[0]+.6,ym],[q[0]-.6,ym],[q[0]-.6,q[1]],q]};
+const sc=p=>[p[0]*s+cx,p[1]*s+cy];
+function path(pts){ctx.beginPath();pts.forEach((p,i)=>{const q=sc(p);ctx[i?'lineTo':'moveTo'](q[0],q[1])})}
+function draw(){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);ctx.lineJoin='round';ctx.lineCap='round';
+if(grid){ctx.fillStyle='rgba(255,255,255,.13)';const st=s<24?2:1;for(let gx=Math.floor(-cx/s);gx*s+cx<W;gx+=st)for(let gy=Math.floor(-cy/s);gy*s+cy<H;gy+=st)ctx.fillRect(gx*s+cx-1,gy*s+cy-1,2,2)}
+for(const w of wires){const pts=route(w),v=byId(w.a).v;path(pts);
+if(v){ctx.strokeStyle=ON;ctx.lineWidth=4;ctx.shadowColor=ON;ctx.shadowBlur=14;ctx.stroke();ctx.shadowBlur=0;ctx.setLineDash([5,11]);ctx.lineDashOffset=-T*45;ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.setLineDash([])}else{ctx.strokeStyle=OFF;ctx.lineWidth=3;ctx.stroke()}
+if(dig){const k=pts.length/2-1,m=sc([(pts[k][0]+pts[k+1][0])/2,(pts[k][1]+pts[k+1][1])/2]);ctx.font='700 11px "Roboto Flex"';ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=4;ctx.strokeStyle='#0b0912';ctx.strokeText(v,m[0],m[1]);ctx.fillStyle=v?ON:'#9a92a6';ctx.fillText(v,m[0],m[1])}}
+nodes.forEach(node);
+if(drag&&drag.k=='w'){const o=drag.pin,p=pin(o.n,o.i,o.out),m=[(mouse[0]-cx)/s,(mouse[1]-cy)/s],mx=(p[0]+m[0])/2;path(o.out?[p,[mx,p[1]],[mx,m[1]],m]:[m,[mx,m[1]],[mx,p[1]],p]);ctx.setLineDash([6,6]);ctx.strokeStyle='#d0bcff';ctx.lineWidth=3;ctx.stroke();ctx.setLineDash([])}
+const ring=grab?{x:mouse[0],y:mouse[1],p:1}:pend&&pend.t0?{x:pend.x,y:pend.y,p:Math.min(1,(performance.now()-pend.t0)/380)}:null;
+if(ring){const rx=ring.x+26,ry=ring.y-26;ctx.lineWidth=4;ctx.strokeStyle='rgba(255,255,255,.2)';ctx.beginPath();ctx.arc(rx,ry,12,0,7);ctx.stroke();ctx.strokeStyle='#d0bcff';ctx.beginPath();ctx.arc(rx,ry,12,-Math.PI/2,-Math.PI/2+ring.p*Math.PI*2);ctx.stroke();if(grab){ctx.fillStyle='#d0bcff';ctx.beginPath();ctx.arc(rx,ry,5,0,7);ctx.fill()}}}
+function node(n){const x=n.x*s+cx,y=n.y*s+cy,w=n.w*s,h=n.h*s,g=D[n.t],v=n.v,a=ins(n),isL=n.t=='lamp',px=x+w*.62,py=y+h/2;
+ctx.textAlign='center';ctx.textBaseline='middle';
+if(isL){const r=s*.55;ctx.strokeStyle=a[0]?ON:OFF;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,py);ctx.lineTo(px-r,py);ctx.stroke();
+ctx.beginPath();ctx.arc(px,py,r,0,7);if(v){ctx.shadowColor='#ffd27a';ctx.shadowBlur=s*1.2;ctx.fillStyle='#ffd27a'}else ctx.fillStyle='#2a2533';ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle=sel==n?'#d0bcff':v?'#fff3c4':'#4b4556';ctx.lineWidth=2;ctx.stroke();
+const k=r*.5;ctx.strokeStyle=v?'#8a5a00':'#4b4556';ctx.beginPath();ctx.moveTo(px-k,py-k);ctx.lineTo(px+k,py+k);ctx.moveTo(px+k,py-k);ctx.lineTo(px-k,py+k);ctx.stroke()}
+else{ctx.beginPath();ctx.roundRect(x,y,w,h,s*.28);ctx.fillStyle='#1d1a24';ctx.fill();ctx.strokeStyle=sel==n?'#d0bcff':v?ON:'#4b4556';ctx.lineWidth=2;if(v&&sel!=n){ctx.shadowColor=ON;ctx.shadowBlur=10}ctx.stroke();ctx.shadowBlur=0;
+const dg=(t,yy,sz)=>{ctx.fillStyle=v?ON:'#9a92a6';ctx.font=`900 ${s*sz}px "Roboto Flex"`;ctx.fillText(t,x+w/2,yy)},sm=(t)=>{ctx.fillStyle='#cbc3d4';ctx.font=`500 ${s*.26}px "Roboto Flex"`;ctx.fillText(t,x+w/2,y+h*.82)};
+if(F[n.t]){ctx.fillStyle=v?ON:'#e8e0ee';ctx.font=`700 ${s*.62}px "Roboto Flex"`;ctx.fillText(g.s,x+w/2-(g.inv?s*.12:0),y+h*.42);sm(g.en);
+if(g.inv){ctx.beginPath();ctx.arc(x+w-s*.2,y+h/2,s*.13,0,7);ctx.strokeStyle=v?ON:'#e8e0ee';ctx.lineWidth=2;ctx.stroke()}}
+else if(n.t=='sw'){dg(n.on,y+h*.34,.8);const tx=x+w*.2,tw=w*.6,ty=y+h*.68,th=h*.2;ctx.beginPath();ctx.roundRect(tx,ty,tw,th,th/2);ctx.fillStyle=n.on?'rgba(140,245,166,.35)':'#322d3d';ctx.fill();ctx.beginPath();ctx.arc(n.on?tx+tw-th/2:tx+th/2,ty+th/2,th*.42,0,7);ctx.fillStyle=n.on?ON:'#9a92a6';ctx.fill()}
+else if(n.t=='btn'){ctx.beginPath();ctx.arc(x+w/2,py,s*.62,0,7);ctx.fillStyle=n.on?ON:'#322d3d';ctx.fill();ctx.fillStyle=n.on?'#06210f':'#cbc3d4';ctx.font=`900 ${s*.7}px "Roboto Flex"`;ctx.fillText(n.on,x+w/2,py)}
+else{dg(v,y+h*.38,.8);sm(n.t=='clk'?'∿ ТАКТ':'const')}}
+ctx.font='700 12px "Roboto Flex"';ctx.fillStyle='#cbc3d4';if(n.lab)ctx.fillText(n.lab,isL?px:x+w/2,isL?py-s*.55-10:y-10);
+ctx.lineWidth=2;const dot=(p,val)=>{const q=sc(p);ctx.beginPath();ctx.arc(q[0],q[1],s*.12,0,7);ctx.fillStyle=val?ON:'#3a3445';ctx.fill();ctx.strokeStyle='#0b0912';ctx.stroke()};
+a.forEach((val,i)=>dot(pin(n,i,0),val));if(!isL)dot(pin(n,0,1),v)}
+function hitPin(p){const r=Math.max(15,s*.32);for(const n of nodes){for(let i=0;i<n.ni;i++){const q=sc(pin(n,i,0));if(Math.hypot(q[0]-p[0],q[1]-p[1])<r)return{n,i,out:0}}if(n.t!='lamp'){const q=sc(pin(n,0,1));if(Math.hypot(q[0]-p[0],q[1]-p[1])<r)return{n,i:0,out:1}}}}
+const hitNode=p=>[...nodes].reverse().find(n=>p[0]>=n.x*s+cx&&p[0]<=(n.x+n.w)*s+cx&&p[1]>=n.y*s+cy&&p[1]<=(n.y+n.h)*s+cy);
+function dseg(p,a,b){const dx=b[0]-a[0],dy=b[1]-a[1],l=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/l));return Math.hypot(p[0]-a[0]-t*dx,p[1]-a[1]-t*dy)}
+const hitWire=p=>wires.find(w=>{const q=route(w).map(sc);return q.some((a,i)=>i&&dseg(p,q[i-1],a)<9)});
+function connect(a,b){if(a.out==b.out||a.n==b.n)return;const o=a.out?a:b,i=a.out?b:a;wires=wires.filter(w=>!(w.b==i.n.id&&w.i==i.i));wires.push({a:o.n.id,b:i.n.id,i:i.i});tick()}
+function del(n){nodes=nodes.filter(m=>m!=n);wires=wires.filter(w=>w.a!=n.id&&w.b!=n.id);if(sel==n)closeP();tick()}
+function eraseAt(p){const n=hitNode(p);if(n){del(n);return true}const w=hitWire(p);if(w){wires=wires.filter(x=>x!==w);tick();return true}return false}
+function panel(n){sel=n;const g=D[n.t];pk=ins(n).join('');let h=`<button class="x" id="px">✕</button><div class="hero"><div class="orb"></div><div><div class="kind">${g.k}</div><h2>${g.n}</h2></div></div><div class="fact">${g.d}</div>`;
+if(F[n.t]){const k=n.ni;h+=`<table class="tt"><tr>${k==1?'<th>A':'<th>A<th>B'}<th>Q</th></tr>`;for(let r=0;r<1<<k;r++){const b=k==1?[r]:[r>>1&1,r&1];h+=`<tr class="${b.join('')==pk?'cur':''}">${b.map(x=>`<td>${x}`).join('')}<td>${F[n.t](...b)}</tr>`}h+='</table>'}
+if(n.t=='sw')h+=`<div class="fact">Состояние сигнала: <b>${n.on?1:0}</b></div><button class="btn secondary" id="ptoggle">Переключить сигнал</button>`;
+else if(n.t=='btn')h+=`<div class="fact">Состояние сигнала: <b>${n.on?1:0}</b><br>Удерживайте кнопку на поле, чтобы подать 1. После отпускания вернётся 0.</div>`;
+h+=`<div class="fact">${g.f}</div><button class="btn secondary" id="pdel">Удалить элемент</button>`;const p=$('#panel');p.innerHTML=h;p.style.setProperty('--acc',g.col);document.body.classList.add('panel-open')}
+function closeP(){sel=null;document.body.classList.remove('panel-open')}
+$('#panel').onclick=e=>{if(e.target.id=='px')closeP();if(e.target.id=='pdel'&&sel)del(sel);if(e.target.id=='ptoggle'&&sel&&sel.t=='sw'){sel.on=sel.v=1-sel.on;tick();panel(sel)}};
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),3000)}
+function startGrab(){if(!pend)return;const n=pend.n;grab={n,dx:(pend.x-cx)/s-n.x,dy:(pend.y-cy)/s-n.y};pend=null}
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,[e.clientX,e.clientY]);
+if(ptrs.size==2){if(pend&&pend.n.t=='btn'){pend.n.on=0;tick()}drag=null;pend=null;grab=null;const[a,b]=[...ptrs.values()],m=[(a[0]+b[0])/2,(a[1]+b[1])/2];pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1]),s,w:[(m[0]-cx)/s,(m[1]-cy)/s]};return}
+const p=[e.clientX,e.clientY];mouse=p;$('#menu').classList.remove('on');
+if(tool=='erase'){drag={k:'erase'};eraseAt(p);return}
+const pn=hitPin(p);
+if(pn){if(!pn.out){const w=wires.find(w=>w.b==pn.n.id&&w.i==pn.i);if(w){wires=wires.filter(x=>x!=w);drag={k:'w',pin:{n:byId(w.a),i:0,out:1}};return}}drag={k:'w',pin:pn};return}
+const n=hitNode(p);
+if(n){if(n.t=='btn'){n.on=1;tick()}const pd=pend={n,x:p[0],y:p[1],p0:p};if(n===sel){pd.t0=performance.now();setTimeout(()=>{if(pend===pd)startGrab()},380)}}
+else drag={k:'p',l:p}});
+cv.addEventListener('pointermove',e=>{const p=[e.clientX,e.clientY];if(ptrs.has(e.pointerId))ptrs.set(e.pointerId,p);mouse=p;
+if(pinch&&ptrs.size==2){const[a,b]=[...ptrs.values()],m=[(a[0]+b[0])/2,(a[1]+b[1])/2];s=Math.max(18,Math.min(90,pinch.s*Math.hypot(a[0]-b[0],a[1]-b[1])/pinch.d));cx=m[0]-pinch.w[0]*s;cy=m[1]-pinch.w[1]*s;return}
+if(grab){grab.n.x=Math.round((p[0]-cx)/s-grab.dx);grab.n.y=Math.round((p[1]-cy)/s-grab.dy);return}
+if(drag&&drag.k=='erase'){eraseAt(p);return}
+if(pend&&Math.hypot(p[0]-pend.p0[0],p[1]-pend.p0[1])>6){drag={k:'p',l:pend.p0};pend=null}
+if(!drag)return;
+if(drag.k=='p'){cx+=p[0]-drag.l[0];cy+=p[1]-drag.l[1];drag.l=p}});
+function up(e){ptrs.delete(e.pointerId);if(pinch){if(ptrs.size<2)pinch=null;drag=null;pend=null;grab=null;return}
+if(grab){if(grab.n.t=='btn'){grab.n.on=0;tick();panel(grab.n)}grab=null;drag=null;pend=null;return}
+if(drag&&drag.k=='w'){const p=[e.clientX,e.clientY],pn=hitPin(p);if(pn)connect(drag.pin,pn)}
+else if(pend){const n=pend.n;if(n.t=='sw')n.on=1-n.on;if(n.t=='btn')n.on=0;sel=n;tick();panel(n)}
+drag=null;pend=null}
+cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+cv.addEventListener('wheel',e=>{e.preventDefault();const w=[(e.clientX-cx)/s,(e.clientY-cy)/s];s=Math.max(18,Math.min(90,s*(e.deltaY<0?1.1:.91)));cx=e.clientX-w[0]*s;cy=e.clientY-w[1]*s},{passive:false});
+addEventListener('keydown',e=>{if((e.key=='Delete'||e.key=='Backspace')&&sel)del(sel);if(e.key=='Escape'){tool=null;$('#erase').classList.remove('on');$('#menu').classList.remove('on');closeP();drag=pend=grab=null}});
+const M=['sw','btn','c1','c0','clk','lamp','and','or','not','xor','nand','nor','xnor'];
+$('#menu').innerHTML=M.map(t=>`<button data-t="${t}"><i style="color:${D[t].col}"></i>${D[t].n}</button>`).join('');
+$('#menu').onclick=e=>{const b=e.target.closest('button');if(!b)return;const t=b.dataset.t;let x=Math.round((W/2-cx)/s-1),y=Math.round((H/2-cy)/s-1);const n=mk(t,x,y);while(nodes.some(m=>Math.abs(m.x-n.x)<n.w&&Math.abs(m.y-n.y)<3))n.y+=3;nodes.push(n);$('#menu').classList.remove('on');toast('Кликните элемент для выбора. Чтобы переместить, зажмите его до появления кружка. Для соединения потяните от выходного кружка к входному')};
+$('#add').onclick=()=>$('#menu').classList.toggle('on');
+$('#erase').onclick=e=>{tool=tool?null:'erase';e.currentTarget.classList.toggle('on',!!tool);if(tool){closeP();toast('Проведите ластиком по элементам и проводам — можно удалить сразу несколько')}};
+$('#pause').onclick=e=>{paused=!paused;acc=0;e.currentTarget.textContent=paused?'Пуск':'Пауза';e.currentTarget.classList.toggle('on',paused)};
+$('#step').onclick=()=>{if(!paused){paused=true;acc=0;$('#pause').textContent='Пуск';$('#pause').classList.add('on')}tick(true)};
+$('#spd').onclick=e=>{si=(si+1)%3;e.currentTarget.textContent='Скорость: '+SP[si]+'×'};
+$('#dig').onclick=e=>{dig=!dig;e.currentTarget.classList.toggle('on',dig)};$('#grid').onclick=e=>{grid=!grid;e.currentTarget.classList.toggle('on',grid)};
+$('#home').onclick=()=>fit();
+function fit(){const m=W<=840,l=m?10:300,t=m?116+.24*H:120,r=W-10,b=H-(m?120:100);if(!nodes.length){s=44;cx=(l+r)/2;cy=(t+b)/2;return}
+const x0=Math.min(...nodes.map(n=>n.x)),x1=Math.max(...nodes.map(n=>n.x+n.w)),y0=Math.min(...nodes.map(n=>n.y)),y1=Math.max(...nodes.map(n=>n.y+n.h));
+s=Math.max(22,Math.min(60,(r-l)/(x1-x0+3),(b-t)/(y1-y0+3)));cx=(l+r)/2-(x0+x1)/2*s;cy=(t+b)/2-(y0+y1)/2*s}
+const N=(t,x,y,o)=>{const n=mk(t,x,y,o);nodes.push(n);return n},Wr=(a,b,i=0)=>wires.push({a:a.id,b:b.id,i});
+const P={
+clear:()=>({t:'Пустое поле',h:'Откройте «＋ Элементы» и поставьте тумблер, вентиль и лампочку. Чтобы соединить, потяните от кружка‑выхода (справа) к кружку‑входу (слева). Провод можно перетащить, схватив за вход.'}),
+gates:()=>{const A=N('sw',-10,-3),B=N('sw',-10,0);[['and',-6],['or',-3],['xor',0],['nand',3]].forEach(([t,y])=>{const g=N(t,-3,y),l=N('lamp',3,y,{lab:D[t].en});Wr(A,g,0);Wr(B,g,1);Wr(g,l)});return{t:'Базовые вентили',h:'Переключайте A и B (клик по тумблеру) и сравнивайте лампочки. Нажмите на вентиль — увидите его таблицу истинности.'}},
+half:()=>{const A=N('sw',-9,-3),B=N('sw',-9,1),X=N('xor',-2,-4),An=N('and',-2,1),S=N('lamp',4,-4,{lab:'S'}),C=N('lamp',4,1,{lab:'C'});Wr(A,X,0);Wr(B,X,1);Wr(A,An,0);Wr(B,An,1);Wr(X,S);Wr(An,C);
+return{t:'Полусумматор',h:'Складывает два бита. S — сумма (XOR), C — перенос в следующий разряд (AND). Проверьте все 4 комбинации.',calc:L=>`${L.A} + ${L.B} = ${L.C}${L.S}`}},
+full:()=>{const A=N('sw',-12,-5),B=N('sw',-12,-1),Ci=N('sw',-12,4,{lab:'Cin'}),X1=N('xor',-7,-6),A1=N('and',-7,-2),X2=N('xor',-1,-4),A2=N('and',-1,1),O=N('or',4,-1),S=N('lamp',5,-5,{lab:'S'}),Co=N('lamp',9,-1,{lab:'Cout'});
+Wr(A,X1,0);Wr(B,X1,1);Wr(A,A1,0);Wr(B,A1,1);Wr(X1,X2,0);Wr(Ci,X2,1);Wr(X1,A2,0);Wr(Ci,A2,1);Wr(A1,O,0);Wr(A2,O,1);Wr(X2,S);Wr(O,Co);
+return{t:'Полный сумматор',h:'Складывает три бита: A, B и перенос Cin из прошлого разряда. Это два полусумматора плюс ИЛИ. Цепочка таких блоков складывает целые числа.',calc:L=>`${L.A} + ${L.B} + ${L.Cin} = ${L.Cout}${L.S}`}},
+latch:()=>{const R=N('sw',-9,-5,{lab:'R'}),S=N('sw',-9,3,{lab:'S'}),N1=N('nor',-3,-4,{v:1}),N2=N('nor',-3,1),Q=N('lamp',4,-4,{lab:'Q'}),Qn=N('lamp',4,1,{lab:'Q̄'});
+Wr(R,N1,0);Wr(N2,N1,1);Wr(S,N2,0);Wr(N1,N2,1);Wr(N1,Q);Wr(N2,Qn);
+return{t:'SR‑защёлка',h:'Ячейка памяти из двух NOR. S=1 → Q включается и ОСТАЁТСЯ включённым после выключения S. R=1 → сброс. Попробуйте S=R=1 и отпустить оба сразу — схема «заметается» в колебания!'}},
+mux:()=>{const A=N('sw',-10,-6),S=N('sw',-10,-1,{lab:'S'}),B=N('sw',-10,3),Nt=N('not',-6,-3),A1=N('and',-2,-4),A2=N('and',-2,1),O=N('or',3,-1),Q=N('lamp',7,-1,{lab:'Q'});
+Wr(A,A1,0);Wr(S,Nt);Wr(Nt,A1,1);Wr(B,A2,0);Wr(S,A2,1);Wr(A1,O,0);Wr(A2,O,1);Wr(O,Q);
+return{t:'Мультиплексор 2→1',h:'Переключатель данных. При S=0 лампочка Q повторяет A, при S=1 — B. Так процессор выбирает, откуда взять число.'}},
+blink:()=>{const C=N('clk',-9,-2),Nt=N('not',-4,0),L1=N('lamp',2,-4,{lab:'Q1'}),L2=N('lamp',2,0,{lab:'Q2'});Wr(C,L1);Wr(C,Nt);Wr(Nt,L2);
+return{t:'Мигалка',h:'Тактовый генератор сам переключает сигнал. НЕ делает вторую лампочку противоположной: когда одна горит, другая гаснет. Попробуйте менять скорость.'}}};
+function load(k){nodes=[];wires=[];nid=0;tc=0;acc=0;drag=pend=grab=null;closeP();info=P[k]();fit()}
+$('#nav').onclick=e=>{const b=e.target.closest('.chip');if(b)load(b.dataset.p)};
+function hud(){const L={};nodes.forEach(n=>{if(n.lab)L[n.lab]=n.v});let h=`<b class="t">${info.t}</b><div class="verdict">${info.h}</div>`;
+if(info.calc)h+=`<div class="fm">${info.calc(L)}</div>`;
+nodes.filter(n=>n.lab&&n.t!='clk').slice(0,10).forEach(n=>h+=`<div class="grow"><span class="gl">${n.lab}</span><div class="bar2"><i style="width:${n.v?100:0}%;background:${n.v?ON:'#4b4556'}"></i></div><b>${n.v}</b></div>`);
+if(h!=hudS){hudS=h;$('#hud').innerHTML=h}}
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR}
+addEventListener('resize',()=>{resize();if(!nodes.length)fit()});
+function frame(ts){const dt=Math.min(ts-last,100);last=ts;T=ts/1000;if(!paused){acc+=dt;const ms=160/SP[si];while(acc>=ms){acc-=ms;tick(true)}}draw();hud();requestAnimationFrame(frame)}
+resize();load('gates');requestAnimationFrame(frame);
+})();
+</script>
+</body></html>
