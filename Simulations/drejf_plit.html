@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Дрейф плит — живая модель литосферы</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#0b0912;--s1:#1d1a24;--s2:#272330;--s3:#322d3d;--on:#e8e0ee;--on2:#cbc3d4;--ol:#4b4556;--pr:#d0bcff;--acc:#d0bcff;--ok:#9be3a8;--er:#ffb4ab;box-sizing:border-box}
+*{box-sizing:border-box;margin:0}html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--on);font:400 14px/1.45 "Roboto Flex",Roboto,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:radial-gradient(900px 620px at 12% 18%,rgba(120,70,200,.24),transparent 62%),radial-gradient(800px 600px at 92% 88%,rgba(40,150,210,.15),transparent 60%),var(--bg)}
+#scene{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:block;cursor:grab}button,input{font:inherit;color:inherit}button{border:0;background:none;cursor:pointer}
+.glass{background:rgba(29,26,36,.94);border:1px solid rgba(255,255,255,.09);box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#top{position:fixed;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:10px;padding:9px 12px 9px 18px;border-radius:28px;z-index:5}
+#top h1{font:900 19px/1 "Roboto Flex";letter-spacing:-.4px;flex:1;white-space:nowrap;background:linear-gradient(90deg,#ffe29a,#ffb0c8,var(--pr));-webkit-background-clip:text;background-clip:text;color:transparent}
+.pill{padding:8px 13px;border-radius:16px;background:var(--s2);font-weight:500;white-space:nowrap}
+#nav{position:fixed;left:12px;right:12px;top:calc(70px + env(safe-area-inset-top,0px));display:flex;gap:8px;overflow-x:auto;padding:2px;z-index:4;scrollbar-width:none}#nav::-webkit-scrollbar{display:none}
+.chip{height:34px;padding:0 14px;border-radius:10px;border:1px solid var(--ol);background:rgba(29,26,36,.7);white-space:nowrap;font-weight:500}.chip:hover{background:var(--s3)}
+#dock{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:30px;z-index:5;max-width:calc(100% - 16px);flex-wrap:wrap;justify-content:center}
+.tg{height:40px;padding:0 13px;border-radius:12px;border:1px solid var(--ol);font-weight:500;white-space:nowrap}.tg.on{background:#4a4458;color:#eaddff;border-color:transparent}.tg.primary{background:var(--pr);color:#27154d;border-color:transparent;font-weight:700}.sep{width:1px;height:26px;background:var(--ol);flex:none}
+.sl{color:var(--on2);font-size:12px;white-space:nowrap}.seg{display:flex;border:1px solid var(--ol);border-radius:12px;overflow:hidden}.seg button{height:38px;padding:0 11px;font-weight:500}.seg button.on{background:var(--pr);color:#27154d;font-weight:700}
+#side{position:fixed;left:12px;top:calc(116px + env(safe-area-inset-top,0px));width:292px;max-height:calc(100% - 222px);overflow:auto;z-index:4;padding:14px;border-radius:20px;font-size:12px;color:var(--on2);scrollbar-width:thin}
+#side b.t{display:block;color:var(--on);font-size:14px;margin:8px 0 6px}
+.verdict{padding:10px 12px;border-radius:14px;line-height:1.5;background:var(--s2);margin-bottom:8px}.verdict.ok{background:#1f4d2c;color:#d8ffe0}.verdict.warn{background:#5a4a1a;color:#ffefc2}
+.fm{display:block;padding:7px 10px;margin:5px 0;border-radius:10px;background:rgba(255,255,255,.05);color:var(--on);font-size:12.5px;font-variant-numeric:tabular-nums}.fm small{display:block;color:var(--on2);font-size:10.5px}
+.lg{display:flex;flex-direction:column;gap:5px;margin:4px 0 2px;font-size:11.5px}.lg span{display:flex;align-items:center;gap:7px}.lg i{width:18px;height:5px;border-radius:3px;flex:none}.note{margin-top:10px;font-size:10.5px;opacity:.75}
+#panel{position:fixed;z-index:6;background:var(--s1);border-radius:28px;overflow:auto;right:12px;top:116px;bottom:12px;width:340px;transform:translateX(120%);padding:20px;transition:transform .45s cubic-bezier(.2,0,0,1);box-shadow:0 20px 60px #000a}body.panel-open #panel{transform:none}
+.x{position:absolute;right:12px;top:12px;width:38px;height:38px;border-radius:50%;background:var(--s2)}
+.hero{display:flex;gap:14px;align-items:center;padding-right:35px}.orb{width:56px;height:56px;flex:none;border-radius:50%;box-shadow:0 0 30px var(--acc),inset -12px -9px 18px #000a;background:radial-gradient(circle at 32% 30%,#fff9,var(--acc) 45%,#000 140%)}.kind{color:var(--acc);font-weight:700}h2{font:900 24px/1.05 "Roboto Flex";letter-spacing:-.6px}
+.fact{margin:15px 0;padding:13px 15px;border-radius:20px 20px 20px 6px;background:var(--s2);color:var(--on2)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.tile{padding:10px 13px;border-radius:15px;background:var(--s2)}.tile small{display:block;color:var(--on2);font-size:12px}.tile b{font-weight:500}.tile.w{grid-column:1/3}
+.field{margin:14px 0 4px;color:var(--on2);display:flex;justify-content:space-between}.field b{color:var(--on);font-weight:500}input[type=range]{width:100%;accent-color:var(--pr)}
+.btn{width:100%;height:44px;border-radius:24px;background:var(--acc);color:#171020;font-weight:700;margin-top:10px}.btn.secondary{background:var(--s3);color:var(--on)}
+#menu{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:7;padding:12px;border-radius:24px;display:none;grid-template-columns:repeat(4,1fr);gap:8px;width:min(620px,calc(100% - 16px))}#menu.on{display:grid}
+#menu button{padding:11px;border-radius:14px;border:1px solid var(--ol);background:rgba(255,255,255,.035);font-weight:500;text-align:left}#menu button:hover{background:var(--s3)}
+#toast{position:fixed;left:50%;bottom:120px;transform:translate(-50%,35px);opacity:0;background:#e8e0ee;color:#322f35;padding:12px 18px;border-radius:14px;z-index:10;transition:.3s;pointer-events:none;text-align:center;max-width:90%;font-weight:500}#toast.on{opacity:1;transform:translate(-50%,0)}
+#xs{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(760px,calc(100% - 16px));max-height:calc(100% - 20px);overflow:auto;z-index:9;padding:16px;border-radius:24px;display:none;background:var(--s1)}#xs.on{display:block}#xc{width:100%;aspect-ratio:2/1;border-radius:16px;display:block;margin:10px 0}#xt{font:900 20px/1.1 "Roboto Flex";padding-right:44px}#xd{color:var(--on2);font-size:13px;line-height:1.5}#xd b{color:var(--on)}
+@media(max-width:840px){#menu{grid-template-columns:repeat(2,1fr)}
+#panel{left:8px;right:8px;width:auto;top:auto;bottom:8px;max-height:57vh;transform:translateY(120%)}body.panel-open #dock{transform:translate(-50%,160%)}#top h1{font-size:15px}
+#side{left:8px;right:8px;width:auto;top:auto;bottom:calc(66px + env(safe-area-inset-bottom,0px));max-height:34vh;padding:10px}
+#dock{left:8px;right:8px;transform:none;max-width:none;flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;padding:8px;gap:6px;scrollbar-width:none}.tg{height:36px;padding:0 10px;font-size:12px}}
+</style></head>
+<body>
+<canvas id="scene" aria-label="Модель литосферных плит: глобус или карта, границы, скорости, вулканы и землетрясения"></canvas>
+<header id="top" class="glass"><h1>Дрейф плит</h1><button class="pill" id="vb">🌍 Глобус</button><span class="pill" id="readout">⏱ сегодня</span></header>
+<nav id="nav"></nav>
+<div id="side" class="glass"></div>
+<aside id="panel"></aside>
+<div id="dock" class="glass">
+<button class="tg primary" id="pau">▶ Пуск</button><span class="sl">Время, млн лет/с</span><div class="seg" id="tsg"><button data-v="1">1</button><button data-v="5" class="on">5</button><button data-v="20">20</button><button data-v="50">50</button></div><span class="sep"></span>
+<button class="tg on" id="arr">Стрелки: да</button><button class="tg on" id="bnd">Границы: да</button><button class="tg" id="pins">📍 Места</button><button class="tg" id="lite">Графика: красиво</button><button class="tg on" id="fxb">🌋 События: да</button><button class="tg" id="level">Режим: кратко</button>
+</div>
+<div id="menu" class="glass"></div>
+<div id="toast"></div>
+<div id="xs" class="glass"><button class="x" id="xx" aria-label="Закрыть">✕</button><div id="xt"></div><canvas id="xc" aria-label="Анимированный разрез границы литосферных плит"></canvas><div id="xd"></div></div>
+<script>
+(()=>{
+const $=s=>document.querySelector(s),cv=$('#scene'),ctx=cv.getContext('2d'),cl=(v,a,b)=>v<a?a:v>b?b:v;
+const R2D=Math.PI/180,RE=6371,K=.0015696,f1=x=>x.toFixed(1).replace('.',','),nb=n=>String(Math.round(n)).replace(/\B(?=(\d{3})+$)/g,'\u00a0');
+const v3=(a,o)=>{a*=R2D;o*=R2D;const c=Math.cos(a);return[c*Math.cos(o),c*Math.sin(o),Math.sin(a)]};
+const crs=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],nrm=a=>{const l=Math.hypot(a[0],a[1],a[2])||1;return[a[0]/l,a[1]/l,a[2]/l]};
+const ID=[1,0,0,0,1,0,0,0,1],ap=(M,v)=>[M[0]*v[0]+M[1]*v[1]+M[2]*v[2],M[3]*v[0]+M[4]*v[1]+M[5]*v[2],M[6]*v[0]+M[7]*v[1]+M[8]*v[2]];
+function rot(a,g){const c=Math.cos(g),s=Math.sin(g),t=1-c,x=a[0],y=a[1],z=a[2];return[t*x*x+c,t*x*y-s*z,t*x*z+s*y,t*x*y+s*z,t*y*y+c,t*y*z-s*x,t*x*z-s*y,t*y*z+s*x,t*z*z+c]}
+const mm=(A,B)=>{const C=new Array(9);for(let i=0;i<3;i++)for(let j=0;j<3;j++)C[i*3+j]=A[i*3]*B[j]+A[i*3+1]*B[3+j]+A[i*3+2]*B[6+j];return C};
+/* ===== ДАННЫЕ: плита = [название, цвет, широта и долгота «центра», скорость см/год, азимут (°), тип, точки-«семена» границ] ===== */
+/* Скорости и направления — округлённые учебные значения (относительно «среднего» недр Земли). Точные данные — GPS/модели MORVEL; позже сверим. */
+const PL=[
+['Тихоокеанская','#4f8cff',0,-160,7.5,310,'океаническая',[[0,-160],[30,-150],[28,-135],[-30,-140],[-20,-130],[15,170],[40,165],[-15,-175],[-45,-150],[50,-165],[-5,175]]],
+['Северо-Американская','#f2b84b',45,-100,2.2,245,'материк + половина Атлантики',[[55,-100],[40,-100],[70,-100],[65,-45],[50,-70],[25,-105],[20,-96],[25,-78],[62,-150],[45,-115],[35,-85]]],
+['Южно-Американская','#5fd18b',-15,-60,2.2,275,'материк + половина Атлантики',[[-10,-55],[-30,-55],[5,-62],[-45,-65],[-20,-62]]],
+['Наска','#b58cff',-20,-90,5.5,85,'океаническая',[[-20,-95],[-35,-90],[-8,-88],[-42,-84],[-28,-100]]],
+['Кокос','#ff8fb1',8,-98,7.5,40,'океаническая',[[8,-98],[4,-88]]],
+['Карибская','#ffe27a',15,-72,1.2,95,'океаническая',[[14,-78],[14,-68],[13,-86]]],
+['Евразийская','#7fd6d6',55,80,.8,110,'материк (Европа и Азия)',[[55,40],[60,90],[50,120],[40,85],[40,10],[50,0],[65,15],[30,110],[10,105],[0,110],[38,50],[40,138],[45,75],[60,150]]],
+['Аравийская','#e6a07a',22,45,3,25,'материковая',[[22,45],[26,52]]],
+['Африканская','#d9b36c',5,20,1.8,40,'материк + половина Атлантики',[[0,15],[15,-5],[25,15],[-15,25],[-30,25],[5,35],[35,5]]],
+['Индостанская','#9bd45a',20,78,5.4,25,'материковая',[[20,78],[8,76],[10,85]]],
+['Австралийская','#ff9f6e',-25,135,6.2,20,'материк + океан',[[-25,135],[-20,120],[-35,145],[-8,145]]],
+['Филиппинская','#7aa2ff',20,135,6,310,'океаническая',[[22,135],[12,127]]],
+['Хуан-де-Фука','#a0e0ff',46,-127,3,55,'океаническая (маленькая)',[[46,-127]]],
+['Скотия','#cfa0ff',-57,-40,1,90,'океаническая (маленькая)',[[-57,-40]]],
+['Антарктическая','#dfe7f2',-80,0,1,60,'материк Антарктида',[[-80,0],[-80,60],[-80,120],[-80,180],[-80,-120],[-80,-60],[-72,40],[-70,-65]]]];
+const FACT=[
+['Самая большая плита, почти вся — дно океана. Вокруг неё «Тихоокеанское огненное кольцо»: там большинство вулканов и землетрясений.','Едет на северо-запад ≈ 7 см в год. Гавайи — цепочка вулканов: плита ползёт над почти неподвижной «горячей точкой», и острова оказываются всё дальше.'],
+['Несёт Северную Америку и половину Атлантики. В Исландии расходится с Евразией.','На западе скользит вдоль Тихоокеанской плиты — это разлом Сан-Андреас в Калифорнии.'],
+['Несёт Южную Америку. С запада в неё упирается плита Наска — поэтому поднялись Анды.','Расходится с Африкой: Атлантический океан растёт на 2–3 см в год — примерно как ногти.'],
+['Плита Наска уходит под Южную Америку — отсюда сильные землетрясения Чили и высокие Анды.','Тяжёлая океаническая кора ныряет вниз (субдукция), образуя Перуанско-Чилийский жёлоб глубиной до 8 км.'],
+['Небольшая океаническая плита у Центральной Америки. Ныряет под неё очень быстро.','Скорость сближения с Карибской плитой ≈ 8 см в год — одна из самых быстрых субдукций на Земле.'],
+['Небольшая плита вокруг Карибского моря. Рядом цепочка вулканов Малых Антильских островов.','В 1902 году извержение вулкана Мон-Пеле уничтожило город Сен-Пьер на Мартинике.'],
+['Почти вся Европа и Азия. Движется медленно, но на её южном краю растут Гималаи.','Скорость ≈ 1 см в год. Здесь разные куски коры «спаяны» в огромный устойчивый материк.'],
+['Аравийская плита отходит от Африки — так раскрывается Красное море.','Расхождение ≈ 1–2 см в год: это молодой океан. С Евразией плита сталкивается — отсюда горы Загрос.'],
+['Африка движется медленно. Но внутри неё есть трещина — Восточно-Африканский рифт.','Через десятки млн лет там может появиться новое море, а Восточная Африка станет отдельным островом.'],
+['Индия мчится на север и врезается в Евразию — так растут Гималаи, самые высокие горы мира.','Скорость ≈ 5 см в год. Гималаи растут и сейчас — на несколько миллиметров в год.'],
+['Австралия — один из самых быстрых материков: уходит на северо-восток.','За несколько десятилетий координатные сетки приходится обновлять: Австралия сместилась уже больше чем на метр.'],
+['Океаническая плита, которая уходит под Японию и Филиппины.','Рядом самый глубокий жёлоб — Марианский (около 11 км).'],
+['Маленький остаток древней огромной плиты. Ныряет под Северную Америку.','Здесь ждут редкого, но очень сильного землетрясения «Каскадия».'],
+['Небольшая плита между Южной Америкой и Антарктидой.','Её границы — одни из самых «разломанных» на планете.'],
+['Окружена океаническими хребтами, поэтому от неё во все стороны «расползается» новое дно.','Движется очень медленно, ≈ 1 см в год. Под льдом скрыты горы и вулканы.']];
+/* континенты — упрощённые контуры (широта, долгота, …); каждый едет вместе со своей плитой */
+const LAND=[
+[1,[66,-168,71,-156,69,-135,69,-115,68,-95,72,-90,64,-86,58,-93,57,-80,62,-75,60,-65,53,-56,47,-53,45,-62,42,-70,35,-76,30,-81,25,-80,25,-82,30,-88,29,-94,25,-97,20,-97,18,-93,21,-87,16,-88,15,-84,9,-83,8,-78,8,-82,14,-92,20,-105,23,-110,31,-115,32,-117,40,-124,48,-124,55,-131,58,-137,60,-147,58,-153,55,-163,60,-166]],
+[1,[83,-35,82,-60,76,-70,70,-55,62,-48,60,-44,66,-36,72,-22,80,-18]],[1,[64,-24,66,-16,64,-14,63,-20]],
+[2,[12,-72,10,-62,6,-55,0,-50,-5,-35,-13,-38,-23,-42,-35,-55,-41,-62,-52,-68,-55,-68,-50,-75,-40,-73,-30,-71,-18,-70,-5,-81,1,-80,8,-77,11,-75]],
+[6,[36,-9,43,-9,48,-5,51,2,54,8,57,8,58,6,62,5,70,20,71,28,69,33,67,41,68,45,69,60,73,70,77,105,73,113,72,130,70,160,67,175,65,178,60,163,59,155,59,143,54,138,48,140,43,132,40,129,35,129,38,122,31,122,22,114,21,108,10,107,8,105,13,100,2,104,8,98,16,94,22,91,22,89,27,89,30,80,32,75,25,67,25,61,27,57,30,48,34,36,37,36,36,28,38,24,40,20,45,13,44,9,43,3,41,0,37,-2,36,-6]],
+[6,[41,141,36,141,34,136,33,132,35,131,38,137]],[6,[50,-5,52,-4,55,-5,58,-5,58,-3,53,0,51,1]],
+[8,[37,10,33,22,31,32,22,37,12,44,11,51,0,42,-10,40,-25,35,-34,26,-34,18,-22,14,-12,13,-5,12,4,9,5,-4,4,-8,8,-13,15,-17,21,-17,28,-12,35,-6,36,-2]],[8,[-12,49,-16,50,-25,47,-24,44,-17,44]],
+[7,[30,35,28,34,16,41,12,44,16,52,22,59,25,56,26,51,30,48]],
+[9,[24,68,22,70,21,73,15,74,8,77,10,80,16,82,21,87,22,89,27,89,30,80,32,75,28,70]],
+[10,[-11,131,-12,136,-17,141,-11,142,-19,147,-25,153,-33,152,-38,146,-39,144,-35,138,-32,134,-32,125,-35,117,-26,113,-22,114,-17,122,-14,127]],
+[0,[-35,174,-37,178,-41,175,-46,171,-46,167,-41,172]],
+[14,(()=>{const a=[];for(let o=-180;o<180;o+=20)a.push(o>-70&&o<-40?-64:-72,o);return a})()]];
+const PINS=[['Гималаи',28,85,6,'Гималаи: Индия врезается в Евразию. Горы растут и сегодня.'],['Сан-Андреас',36,-120,1,'Разлом Сан-Андреас: Тихоокеанская плита скользит вдоль Северо-Американской.'],['Исландия',65,-19,1,'Исландия: здесь Атлантика раскалывается — остров растёт в ширину ≈ 2 см в год.'],['Красное море',20,38,8,'Красное море — молодой океан: Аравия отходит от Африки.'],['Анды',-15,-72,2,'Анды: плита Наска ныряет под Южную Америку и вздымает горы.'],['Японские острова',38,138,6,'Япония: рядом сходятся сразу несколько плит — отсюда частые землетрясения.'],['Гавайи',20,-156,-1,'Гавайи: горячая точка стоит на месте, а Тихоокеанская плита ползёт над ней.'],['Марианский жёлоб',11,142,11,'Марианский жёлоб — самое глубокое место океана, около 11 км.']];
+const NP=PL.length;
+/* ===== СОСТОЯНИЕ ===== */
+let detail=false,lite=false,qual=1,map2=false,fx=true,evA=0,evs=[],SEG=[],volc=[],MS=1,E,N,C,TN=0,paused=true,ts=5,showA=true,showB=true,t=0,target=null,sel=-1,zoom=1,la0=.35,lo0=.35,vt=null,drag=null,dirty=3,uiDirty=true,uc=0,last=0,fa=.016,fc=0;
+let W,H,DPR,cx,cy,Rg,oc=document.createElement('canvas'),octx=oc.getContext('2d'),imd=null,OD=0;
+const Rm=[],mul=[],turn=[],Pax=[],W0=[],OM=new Float64Array(NP*3),C0=[],COL=[];
+let ns=0;const SBx=[],SP=[];PL.forEach((q,i)=>{C0[i]=v3(q[2],q[3]);const h=q[1];COL[i]=[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];q[7].forEach(s=>{SBx.push(v3(s[0],s[1]));SP.push(i)})});
+ns=SP.length;const SB=new Float64Array(ns*3),S=new Float64Array(ns*3);SBx.forEach((v,i)=>SB.set(v,i*3));
+function setAxis(p){const q=PL[p],c=C0[p],la=q[2]*R2D,lo=q[3]*R2D,e=[-Math.sin(lo),Math.cos(lo),0],n=[-Math.sin(la)*Math.cos(lo),-Math.sin(la)*Math.sin(lo),Math.cos(la)],a=(q[5]+turn[p])*R2D;
+ Pax[p]=nrm(crs(c,[Math.cos(a)*n[0]+Math.sin(a)*e[0],Math.cos(a)*n[1]+Math.sin(a)*e[1],Math.cos(a)*n[2]+Math.sin(a)*e[2]]));W0[p]=q[4]*K}
+function seeds(){for(let i=0;i<ns;i++){const M=Rm[SP[i]],x=SB[i*3],y=SB[i*3+1],z=SB[i*3+2];S[i*3]=M[0]*x+M[1]*y+M[2]*z;S[i*3+1]=M[3]*x+M[4]*y+M[5]*z;S[i*3+2]=M[6]*x+M[7]*y+M[8]*z}}
+function resetAll(){for(let p=0;p<NP;p++){Rm[p]=ID.slice();mul[p]=1;turn[p]=0;setAxis(p)}t=0;target=null;seeds();dirty=3;uiDirty=true}
+resetAll();
+/* контуры: плотные точки на сфере */
+const POLY=LAND.map(([p,f])=>{const o=[];for(let i=0;i<f.length;i+=2){const a=v3(f[i],f[i+1]),b=v3(f[(i+2)%f.length],f[(i+3)%f.length]);o.push(a);const g=Math.acos(cl(dot(a,b),-1,1)),m=Math.ceil(g/(5*R2D));for(let k=1;k<m;k++){const u=k/m,w=nrm([a[0]*(1-u)+b[0]*u,a[1]*(1-u)+b[1]*u,a[2]*(1-u)+b[2]*u]);o.push(w)}}let rf=[0,0,0];for(const v of o){rf[0]+=v[0];rf[1]+=v[1];rf[2]+=v[2]}if(Math.hypot(rf[0],rf[1],rf[2])<.2)rf=[0,0,f[0]<0?-1:1];rf=nrm(rf);let sm=0;for(let i=0;i<o.length;i++)sm+=dot(crs(o[i],o[(i+1)%o.length]),rf);return[p,o,sm>=0?1:-1]});
+/* ===== ВИД ===== */
+const lay=()=>{const d=W>840,l=d?316:8,r=12,tp=d?116:104,bt=d?110:H*.38+70;cx=((l+W-r)/2)*DPR;cy=((tp+H-bt)/2)*DPR;const aw=W-r-l,ah=H-bt-tp;Rg=Math.max(70,Math.min(aw/2,ah/2)-4)*zoom*DPR;MS=Math.max(40,Math.min((aw-8)/6.2832,(ah-8)/3.1416))*DPR};
+function resize(){DPR=lite?1:Math.min(devicePixelRatio||1,qual===2?3:2);W=innerWidth;H=innerHeight;cv.width=W*DPR|0;cv.height=H*DPR|0;oc.width=cv.width;oc.height=cv.height;lay();dirty=3}
+addEventListener('resize',resize);
+function vw(){const a=Math.cos(la0),b=Math.sin(la0),c=Math.cos(lo0),d=Math.sin(lo0);return{E:[-d,c,0],N:[-b*c,-b*d,a],C:[a*c,a*d,b]}}
+const wd=a=>((a+9.4248)%6.2832)-3.1416,tp=(M,v)=>[M[0]*v[0]+M[3]*v[1]+M[6]*v[2],M[1]*v[0]+M[4]*v[1]+M[7]*v[2],M[2]*v[0]+M[5]*v[1]+M[8]*v[2]];
+/* тип коры: 0 океан, 1 смешанная, 2 материк */
+const CT=PL.map(q=>{const t=q[6];return/океан/.test(t)&&!/материк/.test(t)?0:(t==='материковая'||/Европа/.test(t))?2:1});
+/* проекция точки на единичной сфере: [x, y, видимость>0] */
+function P(v){if(!map2)return[cx+dot(v,E)*Rg,cy-dot(v,N)*Rg,dot(v,C)];return[cx+wd(Math.atan2(v[1],v[0])-lo0)*MS,cy-Math.asin(cl(v[2],-1,1))*MS,1]}
+/* сферический многоугольник → путь. Глобус: честная обрезка по горизонту + дуга по краю (никакой «белой дичи»). Карта: разворот долгот, полюса, копии ±360° */
+function poly(g,pts,ori){const n=pts.length;
+ if(map2){let L=[];for(let i=0;i<n;i++){const v=pts[i];if(Math.abs(v[2])>.99999){const a=pts[(i+n-1)%n],b=pts[(i+1)%n],pl=v[2]>0?1.5708:-1.5708;L.push([Math.atan2(a[1],a[0]),pl],[Math.atan2(b[1],b[0]),pl])}else L.push([Math.atan2(v[1],v[0]),Math.asin(cl(v[2],-1,1))])}const nn=L.length,u=[wd(L[0][0]-lo0)];for(let i=1;i<nn;i++)u.push(u[i-1]+wd(L[i][0]-L[i-1][0]));
+  const tot=u[nn-1]+wd(L[0][0]-L[nn-1][0])-u[0],A=u.map((x,i)=>[x,L[i][1]]);
+  if(Math.abs(tot)>3){let sz=0;for(const v of pts)sz+=v[2];const pl=sz>0?1.5708:-1.5708;A.push([u[0]+tot,L[0][1]],[u[0]+tot,pl],[u[0],pl])}
+  for(let k=-1;k<=1;k++){A.forEach((a,i)=>{const x=cx+(a[0]+k*6.2832)*MS,y=cy-a[1]*MS;i?g.lineTo(x,y):g.moveTo(x,y)});g.closePath()}return}
+ const q=pts.map(v=>[dot(v,E),dot(v,N),dot(v,C)]),o=[];
+ for(let i=0;i<n;i++){const a=q[i],b=q[(i+1)%n];if(a[2]>=0)o.push([a[0],a[1],0]);
+  if((a[2]>=0)!==(b[2]>=0)){const t=a[2]/(a[2]-b[2]),x=a[0]+(b[0]-a[0])*t,y=a[1]+(b[1]-a[1])*t,l=Math.hypot(x,y)||1;o.push([x/l,y/l,a[2]>=0?1:2])}}
+ const m=o.length;if(m<3)return;let s0=0;while(s0<m-1&&o[s0][2]===2)s0++;
+ for(let k=0;k<m;k++){const p=o[(s0+k)%m];
+  if(p[2]===2){const pr=o[(s0+k-1+m)%m],a0=Math.atan2(pr[1],pr[0]);let d=Math.atan2(p[1],p[0])-a0;if(ori>0){while(d<0)d+=6.2832}else{while(d>0)d-=6.2832}
+   const st=Math.max(1,Math.ceil(Math.abs(d)/.1));for(let j=1;j<st;j++){const a=a0+d*j/st;g.lineTo(cx+Math.cos(a)*Rg,cy-Math.sin(a)*Rg)}}
+  const x=cx+p[0]*Rg,y=cy-p[1]*Rg;k?g.lineTo(x,y):g.moveTo(x,y)}
+ g.closePath()}
+/* ===== ГЕОМЕТРИЯ ПЛИТ: сферическая диаграмма Вороного, считается векторно ===== */
+function cls(i,j,p){const pa=SP[i],pb=SP[j],va=crs([OM[pa*3],OM[pa*3+1],OM[pa*3+2]],p),vb=crs([OM[pb*3],OM[pb*3+1],OM[pb*3+2]],p),rl=[va[0]-vb[0],va[1]-vb[1],va[2]-vb[2]],dd=[S[j*3]-S[i*3],S[j*3+1]-S[i*3+1],S[j*3+2]-S[i*3+2]],pd=dot(dd,p),tt=nrm([dd[0]-p[0]*pd,dd[1]-p[1]*pd,dd[2]-p[2]*pd]),mg=Math.hypot(rl[0],rl[1],rl[2]),cm=mg*RE/10,s=dot(rl,tt)/(mg||1);return[cm<.3?0:s>.35?1:s<-.35?2:3,cm,tt]}
+let CELLS=[];
+function build(){
+ for(let p=0;p<NP;p++){OM[p*3]=Pax[p][0]*W0[p]*mul[p];OM[p*3+1]=Pax[p][1]*W0[p]*mul[p];OM[p*3+2]=Pax[p][2]*W0[p]*mul[p]}
+ CELLS=[];SEG.length=0;volc.length=0;const sa=lite?.05:qual===2?.011:.026,vm=Math.max(1,Math.round(.09/sa));let vc=0;
+ for(let i=0;i<ns;i++){const s=[S[i*3],S[i*3+1],S[i*3+2]],u=nrm(crs(Math.abs(s[2])<.9?[0,0,1]:[1,0,0],s)),w=crs(s,u);let pl=[[-30,-30,-1],[30,-30,-1],[30,30,-1],[-30,30,-1]];
+  for(let j=0;j<ns&&pl.length>2;j++){if(j===i)continue;const dx=s[0]-S[j*3],dy=s[1]-S[j*3+1],dz=s[2]-S[j*3+2],a=u[0]*dx+u[1]*dy+u[2]*dz,b=w[0]*dx+w[1]*dy+w[2]*dz,c=(dx*dx+dy*dy+dz*dz)/2,r=[];
+   for(let k=0;k<pl.length;k++){const A=pl[k],B=pl[(k+1)%pl.length],fa=c+a*A[0]+b*A[1],fb=c+a*B[0]+b*B[1];if(fa>=0)r.push(A);if((fa>=0)!==(fb>=0)){const t=fa/(fa-fb);r.push([A[0]+(B[0]-A[0])*t,A[1]+(B[1]-A[1])*t,fa>=0?j:A[2]])}}
+   pl=r}
+  CELLS.push({i,v:pl.map(q=>nrm([s[0]+u[0]*q[0]+w[0]*q[1],s[1]+u[1]*q[0]+w[1]*q[1],s[2]+u[2]*q[0]+w[2]*q[1]])),t:pl.map(q=>q[2])})}
+ for(const c of CELLS){const i=c.i,pa=SP[i],n=c.v.length;for(let k=0;k<n;k++){const j=c.t[k];if(j<=i||SP[j]===pa)continue;const A=c.v[k],B=c.v[(k+1)%n],m=Math.max(1,Math.ceil(Math.acos(cl(dot(A,B),-1,1))/sa)),pb=SP[j];let pr=A;
+  for(let q=1;q<=m;q++){const f=q/m,cu=q===m?B:nrm([A[0]+(B[0]-A[0])*f,A[1]+(B[1]-A[1])*f,A[2]+(B[2]-A[2])*f]),md=nrm([pr[0]+cu[0],pr[1]+cu[1],pr[2]+cu[2]]),r=cls(i,j,md);
+   SEG.push({a:pr,b:cu,m:md,k:r[0],cm:r[1],pa,pb});
+   if(r[0]===1&&r[1]>1.5&&!(CT[pa]&&CT[pb])&&vc++%vm===0){const sg=CT[pa]>=CT[pb]?-1:1;volc.push({p:nrm([md[0]+r[2][0]*sg*.05,md[1]+r[2][1]*sg*.05,md[2]+r[2][2]*sg*.05]),id:vc})}
+   pr=cu}}}}
+const BC=['150,150,150','255,107,94','94,200,255','255,210,77'];
+function render(){const u=DPR;({E,N,C}=vw());build();ctx.clearRect(0,0,cv.width,cv.height);
+ const mx0=cx-3.1416*MS,my0=cy-1.5708*MS,mw=6.2832*MS,mh=3.1416*MS;
+ if(map2){const g=ctx.createLinearGradient(0,my0,0,my0+mh);g.addColorStop(0,'#16487c');g.addColorStop(1,'#0a1c36');ctx.fillStyle=lite?'#0e2a4a':g;ctx.fillRect(mx0,my0,mw,mh)}
+ else{if(qual===2){const a=ctx.createRadialGradient(cx,cy,Rg*.96,cx,cy,Rg*1.13);a.addColorStop(0,'rgba(110,170,255,.5)');a.addColorStop(1,'rgba(110,170,255,0)');ctx.fillStyle=a;ctx.beginPath();ctx.arc(cx,cy,Rg*1.13,0,7);ctx.fill()}
+  if(lite)ctx.fillStyle='#0e2a4a';else{const g=ctx.createRadialGradient(cx-Rg*.3,cy-Rg*.35,Rg*.1,cx,cy,Rg);g.addColorStop(0,'#1b4f86');g.addColorStop(1,'#0a1c36');ctx.fillStyle=g}
+  ctx.beginPath();ctx.arc(cx,cy,Rg,0,7);ctx.fill()}
+ ctx.save();ctx.beginPath();if(map2)ctx.rect(mx0,my0,mw,mh);else ctx.arc(cx,cy,Rg,0,7);ctx.clip();
+ /* плиты: сначала слой на запасном холсте (без швов), потом наложение */
+ const layer=(sl,al)=>{octx.clearRect(0,0,oc.width,oc.height);octx.save();octx.beginPath();if(map2)octx.rect(mx0,my0,mw,mh);else octx.arc(cx,cy,Rg,0,7);octx.clip();octx.lineJoin='round';octx.lineWidth=1.5*u;
+  for(const c of CELLS){const p=SP[c.i];if(sl?p!==sel:p===sel)continue;const k=COL[p],f=sl?.18:0;octx.fillStyle=octx.strokeStyle=`rgb(${k[0]+(255-k[0])*f|0},${k[1]+(255-k[1])*f|0},${k[2]+(255-k[2])*f|0})`;octx.beginPath();poly(octx,c.v,1);octx.fill();octx.stroke()}
+  octx.restore();ctx.globalAlpha=al;ctx.drawImage(oc,0,0);ctx.globalAlpha=1};
+ layer(false,.6);if(sel>=0)layer(true,.92);
+ if(!lite){ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=u;ctx.beginPath();for(let la=-60;la<=60;la+=30)ln(la,null);for(let lo=-180;lo<180;lo+=30)ln(null,lo);ctx.stroke()}
+ function ln(la,lo){let pen=false,px=0;for(let k=0;k<=72;k++){const p=P(la!==null?v3(la,k*5-180):v3(k*5-90,lo));if(p[2]<=0||(pen&&map2&&Math.abs(p[0]-px)>MS*3))pen=false;pen?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);pen=true;px=p[0]}}
+ ctx.fillStyle='rgba(246,240,255,.78)';ctx.strokeStyle='rgba(20,10,40,.6)';ctx.lineWidth=u;
+ for(const[p,pts,o]of POLY){const M=Rm[p];ctx.beginPath();poly(ctx,pts.map(v=>ap(M,v)),o);ctx.fill();if(!lite)ctx.stroke()}
+ if(!map2){const g=ctx.createRadialGradient(cx-Rg*.35,cy-Rg*.4,Rg*.1,cx,cy,Rg);g.addColorStop(0,'rgba(255,255,255,.12)');g.addColorStop(.6,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.5)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,Rg,0,7);ctx.fill()}
+ /* границы — гладкие векторные линии */
+ if(showB){const bl=(w,al,cap)=>{ctx.lineWidth=w;ctx.lineCap=cap;ctx.lineJoin='round';for(let k=0;k<4;k++){ctx.beginPath();for(const s of SEG){if(s.k!==k)continue;const p=P(s.a),q=P(s.b);if(map2){if(Math.abs(p[0]-q[0])>MS*3)continue}else if(p[2]<0||q[2]<0)continue;ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1])}ctx.strokeStyle=`rgba(${BC[k]},${al})`;ctx.stroke()}};
+  if(qual===2)bl(9*u,.2,'butt');bl((lite?2.2:3)*u,1,'round')}
+ ctx.restore();
+ /* вулканы (с извержениями) и землетрясения */
+ if(showB){for(const v of volc){const p=P(v.p);if(p[2]<.15)continue;const x=p[0],y=p[1],ph=(TN/2800+v.id*.37)%1;
+   ctx.fillStyle='#c2410c';ctx.strokeStyle='#fff';ctx.lineWidth=1.2*u;ctx.beginPath();ctx.moveTo(x,y-6*u);ctx.lineTo(x+5*u,y+3*u);ctx.lineTo(x-5*u,y+3*u);ctx.closePath();ctx.fill();ctx.stroke();
+   if(fx&&ph<.4){const e=ph/.4;ctx.fillStyle=`rgba(200,200,200,${(1-e)*.35})`;ctx.beginPath();ctx.arc(x+e*8*u,y-10*u-e*20*u,(3+e*7)*u,0,7);ctx.fill();ctx.fillStyle=`rgba(255,${120+e*80|0},40,${(1-e)*.8})`;ctx.beginPath();ctx.arc(x,y-6*u-e*8*u,(3+e*8)*u,0,7);ctx.fill()}}
+  if(fx)for(const e of evs){const p=P(ap(Rm[e.pa],e.p));if(p[2]<.1)continue;const a=(TN-e.b)/2200,col=e.k===2?'140,220,255':'255,150,60';
+   for(let r=0;r<(qual===2?2:1);r++){const aa=a-r*.2;if(aa<0)continue;ctx.strokeStyle=`rgba(${col},${1-aa})`;ctx.lineWidth=2*u;ctx.beginPath();ctx.arc(p[0],p[1],(3+e.m*5*aa)*u,0,7);ctx.stroke()}
+   if(a<.15){ctx.fillStyle=`rgba(255,245,210,${1-a/.15})`;ctx.beginPath();ctx.arc(p[0],p[1],e.m*1.2*u,0,7);ctx.fill()}}}
+ /* стрелки скоростей */
+ if(showA)for(let p=0;p<NP;p++){const c=ap(Rm[p],C0[p]),pc=P(c);if(pc[2]<.12)continue;const om=[OM[p*3],OM[p*3+1],OM[p*3+2]],ve=crs(om,c),vm=Math.hypot(ve[0],ve[1],ve[2]);if(vm<1e-9)continue;
+  const cm=vm*RE/10,Ls=Math.min(.5,cm*.014),q=nrm([c[0]+ve[0]/vm*Ls,c[1]+ve[1]/vm*Ls,c[2]+ve[2]/vm*Ls]),pq=P(q),x0=pc[0],y0=pc[1],x1=pq[0],y1=pq[1];if(map2&&Math.abs(x1-x0)>MS*3)continue;const an=Math.atan2(y1-y0,x1-x0),hs=(p===sel?11:8)*u;
+  ctx.lineCap='round';ctx.strokeStyle='#120a1e';ctx.lineWidth=(p===sel?7:5)*u;ln2();ctx.strokeStyle='#fff';ctx.lineWidth=(p===sel?4:2.4)*u;ln2();
+  ctx.fillStyle='#fff';ctx.strokeStyle='#120a1e';ctx.lineWidth=u;ctx.beginPath();ctx.moveTo(x1+Math.cos(an)*hs*.6,y1+Math.sin(an)*hs*.6);ctx.lineTo(x1+Math.cos(an+2.5)*hs,y1+Math.sin(an+2.5)*hs);ctx.lineTo(x1+Math.cos(an-2.5)*hs,y1+Math.sin(an-2.5)*hs);ctx.closePath();ctx.fill();ctx.stroke();
+  if(detail&&cm>=.05){ctx.font='700 '+12*u+'px "Roboto Flex",sans-serif';ctx.fillStyle='#fff';ctx.strokeStyle='#120a1e';ctx.lineWidth=3*u;const tx=f1(cm)+' см/год';ctx.strokeText(tx,x1+6*u,y1-6*u);ctx.fillText(tx,x1+6*u,y1-6*u)}
+  function ln2(){ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke()}}
+ for(const[nm,la,lo,p]of PINS){let v=v3(la,lo);if(p>=0)v=ap(Rm[p],v);const q=P(v);if(q[2]<.1)continue;const x=q[0],y=q[1];ctx.fillStyle='#ffe29a';ctx.strokeStyle='#120a1e';ctx.lineWidth=1.5*u;ctx.beginPath();ctx.arc(x,y,4*u,0,7);ctx.fill();ctx.stroke();
+  if(detail){ctx.font='500 '+11*u+'px "Roboto Flex",sans-serif';ctx.fillStyle='#fff';ctx.strokeStyle='#120a1e';ctx.lineWidth=3*u;ctx.strokeText(nm,x+7*u,y+4*u);ctx.fillText(nm,x+7*u,y+4*u)}}
+ ctx.strokeStyle='rgba(255,255,255,.14)';ctx.lineWidth=u;ctx.beginPath();if(map2)ctx.rect(mx0,my0,mw,mh);else ctx.arc(cx,cy,Rg,0,7);ctx.stroke()}
+function spawnEv(dt){evA+=(lite?1.5:qual===2?7:4)*dt;while(evA>=1){evA--;if(!SEG.length)break;
+  for(let a=0;a<8;a++){const s=SEG[Math.random()*SEG.length|0];if(!s.k||Math.random()>[0,1,.35,.7][s.k]*Math.min(1,.4+s.cm/6))continue;evs.push({pa:s.pa,p:tp(Rm[s.pa],s.m),b:TN,k:s.k,m:s.k===1?4+Math.random()*3.5:s.k===3?3.5+Math.random()*3:2.5+Math.random()*1.5});break}}
+ evs=evs.filter(e=>TN-e.b<2200)}
+/* ===== МОДЕЛЬ ===== */
+function stepSim(dm){for(let p=0;p<NP;p++){const a=W0[p]*mul[p]*dm;if(a)Rm[p]=mm(rot(Pax[p],a),Rm[p])}seeds()}
+function info(p){const c=ap(Rm[p],C0[p]),ve=crs([Pax[p][0]*W0[p]*mul[p],Pax[p][1]*W0[p]*mul[p],Pax[p][2]*W0[p]*mul[p]],c),cm=Math.hypot(ve[0],ve[1],ve[2])*RE/10,la=Math.asin(c[2]),lo=Math.atan2(c[1],c[0]),e=[-Math.sin(lo),Math.cos(lo),0],n=[-Math.sin(la)*Math.cos(lo),-Math.sin(la)*Math.sin(lo),Math.cos(la)],az=Math.atan2(dot(ve,e),dot(ve,n))/R2D,CP=['С','СВ','В','ЮВ','Ю','ЮЗ','З','СЗ'];
+ return{cm,dir:cm<.05?'стоит':CP[Math.round((az+360)%360/45)%8],km:Math.acos(cl(dot(c,C0[p]),-1,1))*RE}}
+const dist=cm=>cm<100?f1(cm)+' см':cm<1e5?f1(cm/100)+' м':nb(cm/1e5)+' км';
+function ui(){uiDirty=false;const T=t===0?'сегодня':(t>0?'+':'−')+(Math.abs(t)<10?f1(Math.abs(t)):Math.round(Math.abs(t)))+' млн лет';$('#readout').textContent='⏱ '+T;
+ let h=`<div class="verdict ${t===0?'ok':'warn'}">${t===0?'Сейчас: стрелки показывают, куда плиты едут на самом деле.':'Модель: '+T+'. Так плиты сместились бы, если бы их скорость не менялась.'}</div>
+ <b class="t">Границы плит</b><div class="lg"><span><i style="background:#ff6b5e"></i>Сближаются — горы, вулканы, землетрясения</span><span><i style="background:#5ec8ff"></i>Расходятся — рождается новое дно</span><span><i style="background:#ffd24d"></i>Скользят — разломы${detail?' (как Сан-Андреас)':''}</span>${detail?'<span><i style="background:#969696"></i>Почти не движутся друг относительно друга</span>':''}<span>▲ вулкан &nbsp;◎ землетрясение</span></div>`;
+ if(sel>=0){const q=PL[sel],s=info(sel),cm=s.cm;h+=`<b class="t">${q[0]} плита</b><span class="fm"><small>Скорость сейчас</small>${f1(cm)} см/год, ${s.dir}</span>`+
+  [[1,'год'],[100,'лет'],[1e3,'лет'],[1e4,'лет'],[1e6,'лет']].filter(r=>detail||r[0]===100||r[0]===1e6).map(r=>`<span class="fm"><small>За ${nb(r[0])} ${r[1]}</small>${dist(cm*r[0])}</span>`).join('')+(detail?'<div class="note">Для сравнения: ногти растут ≈ 3–4 см в год.</div>':'')}
+ else h+='<b class="t">Что делать</b><div>Нажмите на плиту — расскажем о ней и дадим подвигать. Нажмите на цветную границу — покажем, что там происходит под землёй. Вращайте глобус пальцем или мышью.</div>';
+ h+='<div class="note">Учебная модель: плиты твёрдые, скорости постоянны, вулканы и землетрясения показаны схематично.</div>';$('#side').innerHTML=h}
+function pv(){if(sel<0)return;const s=info(sel),a=$('#pv');if(!a)return;a.textContent=f1(s.cm)+' см/год';$('#pd').textContent=s.dir;$('#ps').textContent=nb(s.km)+' км';$('#rmv').textContent='×'+mul[sel];const r=$('#rtv');if(r)r.textContent=turn[sel]+'°'}
+function panel(){const pn=$('#panel');if(sel<0){document.body.classList.remove('panel-open');return}const q=PL[sel];
+ pn.innerHTML=`<button class="x" id="px" aria-label="Закрыть">✕</button><div class="hero"><div class="orb" style="--acc:${q[1]}"></div><div><div class="kind">${q[6]}</div><h2>${q[0]}</h2></div></div><div class="fact">${FACT[sel][0]}${detail?'<br><br>'+FACT[sel][1]:''}</div>
+ <div class="grid"><div class="tile"><small>Скорость</small><b id="pv"></b></div><div class="tile"><small>Куда едет</small><b id="pd"></b></div><div class="tile w"><small>Сдвиг с начала опыта</small><b id="ps"></b></div></div>
+ <div class="field"><span>Разгон плиты</span><b id="rmv"></b></div><input type="range" id="rm" min="0" max="30" step=".5" value="${mul[sel]}">
+ ${detail?`<div class="field"><span>Поворот направления</span><b id="rtv"></b></div><input type="range" id="rt" min="-180" max="180" step="5" value="${turn[sel]}">`:''}
+ <button class="btn secondary" id="rstop">⏹ Остановить плиту</button><button class="btn secondary" id="rrev">⇄ Развернуть</button><button class="btn" id="rres">↺ Как было</button>`;
+ document.body.classList.add('panel-open');const s=sel;
+ $('#px').onclick=()=>{sel=-1;panel();uiDirty=dirty=3};
+ $('#rm').oninput=e=>{mul[s]=+e.target.value;pv();dirty=3;uiDirty=true};
+ if($('#rt'))$('#rt').oninput=e=>{turn[s]=+e.target.value;setAxis(s);pv();dirty=3;uiDirty=true};
+ $('#rstop').onclick=()=>{mul[s]=0;panel()};$('#rrev').onclick=()=>{turn[s]=((turn[s]+180+180)%360)-180;setAxis(s);panel()};$('#rres').onclick=()=>{mul[s]=1;turn[s]=0;setAxis(s);panel()};
+ pv();dirty=3;uiDirty=true}
+/* ===== УПРАВЛЕНИЕ ===== */
+let tt=0;function toast(s){const e=$('#toast');e.textContent=s;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),3600)}
+function setPaused(v){paused=v;const b=$('#pau');b.textContent=paused?'▶ Пуск':'⏸ Пауза';b.classList.toggle('primary',paused)}
+const PRE={now:()=>{resetAll();setPaused(true);toast('Сегодняшняя картина. Нажмите «Пуск», чтобы посмотреть будущее.')},
+f50:()=>{resetAll();target=50;setPaused(false)},f250:()=>{resetAll();target=250;setPaused(false);toast('Так могло бы выглядеть через 250 млн лет, если скорости не изменятся.')},
+b250:()=>{resetAll();target=-250;setPaused(false);toast('Перемотка назад при сегодняшних скоростях. Реальная история сложнее: скорости менялись.')},
+chaos:()=>{resetAll();for(let p=0;p<NP;p++){mul[p]=3+Math.random()*22|0;turn[p]=(Math.random()*360|0)-180;setAxis(p)}setPaused(false);toast('Хаос! Все плиты разогнаны в случайные стороны.')},
+stop:()=>{for(let p=0;p<NP;p++)mul[p]=0;setPaused(true);toast('Плиты остановлены. Выберите плиту и разгоните её сами.')}};
+[['Сегодня','now'],['+50 млн лет','f50'],['+250 млн лет','f250'],['⏪ −250 млн лет','b250'],['💥 Хаос','chaos'],['⏹ Всё остановить','stop']].forEach(([n,k])=>{const b=document.createElement('button');b.className='chip';b.textContent=n;b.onclick=()=>{PRE[k]();if(sel>=0)panel();uiDirty=true;dirty=3};$('#nav').appendChild(b)});
+PINS.forEach(([n,la,lo,p,tx])=>{const b=document.createElement('button');b.textContent='📍 '+n;b.onclick=()=>{let v=v3(la,lo);if(p>=0)v=ap(Rm[p],v);vt=[Math.asin(v[2]),Math.atan2(v[1],v[0])];toast(tx);$('#menu').classList.remove('on')};$('#menu').appendChild(b)});
+$('#vb').onclick=e=>{map2=!map2;e.target.textContent=map2?'🗺 Карта':'🌍 Глобус';lay();dirty=3;toast(map2?'Плоская карта. Тяните влево-вправо, чтобы сдвинуть.':'Глобус. Тяните, чтобы вращать.')};
+$('#fxb').onclick=e=>{fx=!fx;e.target.textContent='🌋 События: '+(fx?'да':'нет');e.target.classList.toggle('on',fx);dirty=3};
+$('#pins').onclick=()=>$('#menu').classList.toggle('on');
+$('#pau').onclick=()=>{if(target!==null&&Math.abs(target-t)<1e-6)target=null;setPaused(!paused)};
+$('#tsg').onclick=e=>{const b=e.target.closest('button');if(!b)return;ts=+b.dataset.v;[...$('#tsg').children].forEach(x=>x.classList.toggle('on',x===b))};
+$('#arr').onclick=e=>{showA=!showA;e.target.textContent='Стрелки: '+(showA?'да':'нет');e.target.classList.toggle('on',showA);dirty=3};
+$('#bnd').onclick=e=>{showB=!showB;e.target.textContent='Границы: '+(showB?'да':'нет');e.target.classList.toggle('on',showB);dirty=3};
+function setQ(n,auto){qual=n;lite=n===0;const b=$('#lite');b.textContent='Графика: '+['лёгкая','красиво','ультра'][n];b.classList.toggle('on',n>0);resize();if(auto)toast('Графика упрощена, чтобы всё работало плавно.')}
+$('#lite').onclick=()=>setQ((qual+1)%3);
+$('#level').onclick=e=>{detail=!detail;e.target.textContent='Режим: '+(detail?'подробно':'кратко');e.target.classList.toggle('on',detail);panel();uiDirty=true;dirty=3};
+/* вращение, клик по границе (разрез) и по плите */
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,mv:0};vt=null;cv.style.cursor='grabbing'});
+cv.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag.x=e.clientX;drag.y=e.clientY;drag.mv+=Math.abs(dx)+Math.abs(dy);const k=1/((map2?MS:Rg)/DPR);lo0-=dx*k;if(!map2)la0=cl(la0+dy*k,-1.45,1.45);dirty=2});
+cv.addEventListener('pointerup',e=>{cv.style.cursor='grab';if(drag&&drag.mv<6){const mx=e.clientX*DPR,my=e.clientY*DPR;let hs=null,hd=(12*DPR)**2;
+ for(const s of SEG){if(!s.k)continue;const p=P(s.m);if(p[2]<.1)continue;const d=(p[0]-mx)**2+(p[1]-my)**2;if(d<hd){hd=d;hs=s}}
+ if(hs)openX(hs);else{let v=null;
+  if(map2){const lo=lo0+(mx-cx)/MS,la=(cy-my)/MS;if(Math.abs(la)<=1.5708&&Math.abs(lo-lo0)<=3.1416)v=v3(la/R2D,lo/R2D)}
+  else{const sx=(mx-cx)/Rg,sy=-(my-cy)/Rg,r2=sx*sx+sy*sy;if(r2<=1){const a=vw(),z=Math.sqrt(1-r2);v=[sx*a.E[0]+sy*a.N[0]+z*a.C[0],sx*a.E[1]+sy*a.N[1]+z*a.C[1],sx*a.E[2]+sy*a.N[2]+z*a.C[2]]}}
+  if(v){let b=-2,bi=0;for(let k=0;k<ns;k++){const d=v[0]*S[k*3]+v[1]*S[k*3+1]+v[2]*S[k*3+2];if(d>b){b=d;bi=k}}sel=SP[bi]}else sel=-1;panel()}
+ uiDirty=true;dirty=3}drag=null});
+cv.addEventListener('wheel',e=>{e.preventDefault();zoom=cl(zoom*(e.deltaY<0?1.1:.91),.8,1.8);lay();dirty=3},{passive:false});
+/* ===== РАЗРЕЗ ГРАНИЦЫ: анимация того, что происходит под землёй ===== */
+const xc=$('#xc'),xx=xc.getContext('2d');xc.width=1080;xc.height=540;
+const XI={sub:['Субдукция: океан ныряет под материк','Тяжёлая океаническая плита погружается в мантию. Её давит и ломает: каждое кольцо — землетрясение, и чем глубже плита, тем дальше очаги от жёлоба (цвет — глубина). Вода из плиты плавит породу, магма всплывает, и вулкан извергается. Так выросли Анды.'],
+arc:['Океан под океаном: цепочка вулканических островов','Одна океаническая плита уходит под другую. Над ней из воды вырастает дуга вулканов — острова, как Япония, Курилы или Марианы. Рядом глубочайший жёлоб.'],
+coll:['Столкновение материков: растут горы','Лёгкая материковая кора не тонет — плиты сминают друг друга, и земля растёт вверх и вниз (у гор есть «корни»). Так выросли Гималаи. Вулканов почти нет, зато землетрясения сильные.'],
+ridge:['Срединно-океанический хребет: рождение дна','Плиты расходятся, снизу поднимается магма и застывает — рождается новая кора. Полоски — «запись» магнитного поля Земли: по ним учёные доказали, что дно растёт. Так растёт Атлантика.'],
+rift:['Рифт: материк раскалывается','Материк растягивается, середина проваливается, появляются вулканы. Когда рифт достигнет моря, он заполнится водой — так рождается океан. Красное море — молодой океан.'],
+trans:['Трансформный разлом: плиты скользят вдоль','Плиты не сходятся и не расходятся — они трутся друг о друга. Породы сцепились, напряжение копится (смотрите, как изгибается дорога), потом срывается рывком — это землетрясение. Так устроен разлом Сан-Андреас.']};
+let xk=null,xT=0,xq=[],xpa=[],xsp=20,xn=0,xnm=['',''];
+const xr=(r,dt)=>Math.random()<r*dt;
+function openX(s){const a=CT[s.pa],b=CT[s.pb];xk=s.k===1?(a+b===0?'arc':a&&b?'coll':'sub'):s.k===2?(s.pa===7||s.pb===7?'rift':'ridge'):'trans';xT=0;xn=0;xq=[];xpa=[];xsp=14+Math.min(30,s.cm*4);
+ const lo=a<=b?s.pa:s.pb,hi=lo===s.pa?s.pb:s.pa;xnm=[PL[s.pa][0],PL[s.pb][0]];
+ const who=(xk==='sub'||xk==='arc')?`<b>${PL[lo][0]}</b> ныряет под <b>${PL[hi][0]}</b>`:`<b>${xnm[0]}</b> и <b>${xnm[1]}</b>`;
+ $('#xt').textContent=XI[xk][0];$('#xd').innerHTML=`${who} · скорость плит относительно друг друга ≈ ${f1(s.cm)} см/год<br><br>${XI[xk][1]}<div class="note">Схема: время ускорено в миллионы раз, масштаб условный.</div>`;$('#xs').classList.add('on')}
+function closeX(){$('#xs').classList.remove('on');xk=null}
+$('#xx').onclick=closeX;addEventListener('keydown',e=>{if(e.key==='Escape')closeX()});
+const xP=(pts,c)=>{xx.fillStyle=c;xx.beginPath();pts.forEach((p,i)=>i?xx.lineTo(p[0],p[1]):xx.moveTo(p[0],p[1]));xx.closePath();xx.fill()};
+const xTx=(s,x,y,al)=>{xx.font='700 12px "Roboto Flex",sans-serif';xx.textAlign=al||'left';xx.lineWidth=3;xx.lineJoin='round';xx.strokeStyle='#120a1e';xx.strokeText(s,x,y);xx.fillStyle='#fff';xx.fillText(s,x,y)};
+const xDash=(pts,off,c)=>{xx.setLineDash([10,14]);xx.lineDashOffset=-off;xx.strokeStyle=c;xx.lineWidth=3;xx.beginPath();pts.forEach((p,i)=>i?xx.lineTo(p[0],p[1]):xx.moveTo(p[0],p[1]));xx.stroke();xx.setLineDash([])};
+const xQ=(x,y,c,m)=>xq.push({x,y,t:xT,c,m}),xS=(x,y,vx,vy,l,c,r,gr)=>xpa.push({x,y,vx,vy,l,t:0,c,r,gr:gr===undefined?90:gr});
+const xMan=y=>{const g=xx.createLinearGradient(0,y,0,360);g.addColorStop(0,'#e8641f');g.addColorStop(1,'#7a1a0a');xx.fillStyle=g;xx.fillRect(0,y,720,360-y)};
+const xSky=(h,c1)=>{const g=xx.createLinearGradient(0,0,0,h);g.addColorStop(0,c1||'#1c3a6b');g.addColorStop(1,'#7fb8ea');xx.fillStyle=g;xx.fillRect(0,0,720,h)};
+function xdraw(dt){if(!xk)return;xT+=dt;const T=xT,g=xx,sp=xsp;g.setTransform(1.5,0,0,1.5,0,0);g.fillStyle='#0a0612';g.fillRect(0,0,720,360);
+ let sh=0;for(const q of xq){const a=T-q.t;if(q.m>5&&a<.5)sh=Math.max(sh,(.5-a)*(q.m-4)*3)}
+ g.save();if(sh)g.translate((Math.random()-.5)*sh,(Math.random()-.5)*sh);
+ if(xk==='sub'||xk==='arc'){const arc=xk==='arc',tx=300,Lx=200,k=.78,sl=x=>y0+(x-tx)*k,y0=150,sea=96,yc=86,vx=tx+150,cy2=arc?sea-30:yc-42;
+  xSky(sea);g.fillStyle='#1f6fb4';g.fillRect(0,sea,720,y0-sea);xMan(y0);
+  xP(arc?[[tx-30,y0],[tx+40,y0-4],[720,y0-4],[720,y0+60],[tx+77,y0+60],[tx,y0]]:[[tx-30,y0],[tx+30,yc+8],[tx+50,yc],[720,yc],[720,y0+70],[tx+90,y0+70],[tx,y0]],arc?'#5a6a86':'#8a7456');
+  xP([[0,y0],[tx,y0],[tx+Lx,sl(tx+Lx)],[tx+Lx,sl(tx+Lx)+27],[tx+14,y0+27],[0,y0+27]],'#3d4f6e');
+  xDash([[0,y0+13],[tx+6,y0+13],[tx+Lx,sl(tx+Lx)+13]],T*sp,'rgba(255,255,255,.55)');
+  xP(arc?[[vx-70,y0-4],[vx,cy2],[vx+70,y0-4]]:[[vx-46,yc],[vx,cy2],[vx+46,yc]],'#6e4b3a');
+  const mp=[[tx+92,sl(tx+92)+3],[vx-14,y0+36],[vx,cy2+4]];g.fillStyle='rgba(255,80,20,.9)';g.beginPath();g.ellipse(vx-8,y0+36,28,12,0,0,7);g.fill();
+  for(let i=0;i<6;i++){const f=(T*.28+i/6)%1,a=f<.5?mp[0]:mp[1],b=f<.5?mp[1]:mp[2],h=f<.5?f*2:(f-.5)*2;g.fillStyle='#ffb347';g.beginPath();g.arc(a[0]+(b[0]-a[0])*h,a[1]+(b[1]-a[1])*h,3.2,0,7);g.fill()}
+  if(T%7<2.6&&xr(60,dt))xS(vx+(Math.random()-.5)*8,cy2,(Math.random()-.5)*60,-70-Math.random()*60,1.4,Math.random()<.5?'255,150,40':'110,110,110',3+Math.random()*3);
+  if(xr(1.1,dt)){const x=tx+Math.pow(Math.random(),1.4)*(Lx-30),d=(x-tx)/Lx;xQ(x,x>tx?sl(x)+13:y0+13,`hsl(${8+Math.max(0,d)*270},95%,62%)`,3.5+(1-d)*3.5+Math.random())}
+  xTx('Океаническая плита',12,y0+20);xTx('Жёлоб',tx-50,y0-8);xTx(arc?'Вулканический остров':'Вулкан',vx-30,cy2-8);xTx('Магма',vx+30,y0+40);xTx('Мантия',12,340);xTx('кольцо = землетрясение, цвет = глубина',708,350,'right')}
+ else if(xk==='coll'){const yb=100,th=58,m=360,Pg=Math.min(1,(T%30)/22);xSky(yb,'#2a3f6b');xMan(yb+th);
+  xP([[m-90,yb+th],[m,yb+th+70*Pg],[m+90,yb+th]],'#6b5a40');xP([[0,yb],[720,yb],[720,yb+th],[0,yb+th]],'#8a7456');
+  xP([[m-100,yb],[m,yb-115*Pg],[m+100,yb]],'#8f8c88');xP([[m-24*Pg,yb-82*Pg],[m,yb-115*Pg],[m+24*Pg,yb-82*Pg]],'#fff');
+  g.strokeStyle='rgba(40,25,10,.5)';g.lineWidth=2;for(let i=0;i<3;i++){g.beginPath();for(let x=m-80;x<=m+80;x+=6){const y=yb+12+i*14+Math.sin((x-m)/12+i)*7*Pg;x>m-80?g.lineTo(x,y):g.moveTo(x,y)}g.stroke()}
+  xDash([[0,yb+th/2],[m-70,yb+th/2]],T*sp,'rgba(255,255,255,.55)');xDash([[720,yb+th/2],[m+70,yb+th/2]],T*sp,'rgba(255,255,255,.55)');
+  if(xr(1.3,dt))xQ(m+(Math.random()-.5)*190,yb+Math.random()*(th+60*Pg),'hsl(25,95%,60%)',4+Math.random()*3.5);
+  xTx(xnm[0],12,yb+th/2+4);xTx(xnm[1],708,yb+th/2+4,'right');xTx('Горный хребет растёт',m,yb-125*Pg-8,'center');xTx('«Корень» гор',m,yb+th+90*Pg+14,'center');xTx('Мантия',12,340)}
+ else if(xk==='ridge'||xk==='rift'){const rf=xk==='rift',m=360,yb=rf?100:170;
+  if(rf){xSky(yb,'#2a3f6b');xMan(146);const ph=T%30,gap=30+ph*3.4,D=Math.min(46,ph*2.4);
+   xP([[0,yb],[m-gap/2,yb],[m-gap/2,146],[0,146]],'#a8895a');xP([[m+gap/2,yb],[720,yb],[720,146],[m+gap/2,146]],'#a8895a');
+   xP([[m-gap/2,yb],[m-gap/2+10,yb+D],[m+gap/2-10,yb+D],[m+gap/2,yb],[m+gap/2,146],[m-gap/2,146]],'#8a6e48');
+   g.fillStyle='rgba(255,80,20,.9)';g.beginPath();g.ellipse(m,152,Math.max(14,gap/2-8),16,0,0,7);g.fill();
+   xP([[m-22,yb+D],[m,yb+D-26],[m+22,yb+D]],'#6e4b3a');if(ph>16){g.fillStyle='rgba(40,120,200,.8)';g.fillRect(m-gap/2+10,yb+D*.6,gap-20,D*.4)}
+   if(xr(14,dt))xS(m+(Math.random()-.5)*10,yb+D-26,(Math.random()-.5)*50,-60-Math.random()*40,1.2,Math.random()<.5?'255,150,40':'110,110,110',2.5+Math.random()*2.5);
+   xDash([[m-gap/2-10,yb-8],[10,yb-8]],T*sp,'rgba(255,255,255,.5)');xDash([[m+gap/2+10,yb-8],[710,yb-8]],T*sp,'rgba(255,255,255,.5)');
+   xTx('Провал — рифтовая долина',m,yb-24,'center');xTx('Магма',m,172,'center');xTx(xnm[0],12,yb+30);xTx(xnm[1],708,yb+30,'right')}
+  else{xSky(90);g.fillStyle='#1f6fb4';g.fillRect(0,90,720,yb-90);xMan(240);g.fillStyle='#6d5a4e';g.fillRect(0,yb+24,720,46);
+   const o=(T*sp)%34,id=Math.floor(T*sp/34);
+   for(let k=0;k<12;k++){const d0=Math.max(0,(k-1)*34+o),d1=k*34+o;if(d1<=0)continue;g.fillStyle=(((k-id)%2)+2)%2?'#56688c':'#2f3b55';g.fillRect(m-d1,yb,d1-d0,24);g.fillRect(m+d0,yb,d1-d0,24)}
+   xP([[m-22,240],[m-4,yb-4],[m+4,yb-4],[m+22,240]],'#ff5a1e');g.fillStyle='rgba(255,80,20,.9)';g.beginPath();g.ellipse(m,248,46,16,0,0,7);g.fill();
+   xDash([[m,252],[m-90,254],[m-200,248],[m-330,262]],-T*sp,'rgba(255,230,170,.6)');xDash([[m,252],[m+90,254],[m+200,248],[m+330,262]],-T*sp,'rgba(255,230,170,.6)');
+   if(xr(10,dt))xS(m+(Math.random()-.5)*10,yb-6,(Math.random()-.5)*12,-45,1.8,'50,50,50',2.5+Math.random()*2.5,-12);
+   xTx('Новая кора рождается здесь',m,yb-34,'center');xTx('Магма',m+54,252);xTx(xnm[0],12,yb+44);xTx(xnm[1],708,yb+44,'right');xTx('Полоски: «запись» магнитного поля',m,350,'center')}
+  if(xr(1,dt))xQ(m+(Math.random()-.5)*100,yb+Math.random()*60,'hsl(200,90%,65%)',3+Math.random()*1.5)}
+ else{const fy=180,Tm=T%28,n=Math.floor(Tm/7),ph=(Tm%7)/7,A=26;
+  g.fillStyle='#8a7456';g.fillRect(0,0,720,fy);g.fillStyle='#7a6a4c';g.fillRect(0,fy,720,180);
+  for(let y=30;y<fy;y+=50)xDash([[0,y],[720,y]],T*sp,'rgba(0,0,0,.18)');for(let y=fy+30;y<360;y+=50)xDash([[720,y],[0,y]],T*sp,'rgba(0,0,0,.18)');
+  g.strokeStyle='#2a1810';g.lineWidth=4;g.beginPath();g.moveTo(0,fy);g.lineTo(720,fy);g.stroke();
+  for(const sg of[1,-1]){g.strokeStyle='#ffe27a';g.lineWidth=5;g.beginPath();for(let y=sg>0?6:fy+2;y<=(sg>0?fy-2:354);y+=6){const x=360+sg*(A*n+A*ph*(1-Math.exp(-Math.abs(fy-y)/55)));y>(sg>0?6:fy+2)?g.lineTo(x,y):g.moveTo(x,y)}g.stroke()}
+  if(n!==xn){xn=n;for(let i=0;i<4;i++)xQ(300+i*40+Math.random()*20,fy,'hsl(20,95%,60%)',6+Math.random()*1.5)}
+  if(xr(.5+ph*2,dt))xQ(260+Math.random()*200,fy,'hsl(40,95%,60%)',3+Math.random()*1.5);
+  g.fillStyle='#120a1e';g.fillRect(18,322,204,14);g.fillStyle=`hsl(${120-ph*120},80%,50%)`;g.fillRect(20,324,200*ph,10);xTx('Напряжение в породах',230,334);
+  xTx(xnm[0]+' →',12,30);xTx('← '+xnm[1],708,350,'right');xTx('Дорога (вид сверху) изгибается и рвётся',m0(),fy-10,'center')}
+ for(const p of xpa){p.t+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=p.gr*dt;const a=1-p.t/p.l;if(a>0){g.fillStyle=`rgba(${p.c},${a})`;g.beginPath();g.arc(p.x,p.y,p.r,0,7);g.fill()}}xpa=xpa.filter(p=>p.t<p.l);
+ for(const q of xq){const a=(T-q.t)/1.6;if(a<1){g.strokeStyle=q.c;g.globalAlpha=1-a;g.lineWidth=2.4;g.beginPath();g.arc(q.x,q.y,3+a*q.m*6,0,7);g.stroke();g.globalAlpha=1;if(a<.12){g.fillStyle='#fff';g.beginPath();g.arc(q.x,q.y,4,0,7);g.fill()}}}xq=xq.filter(q=>T-q.t<1.6);
+ g.restore()}
+const m0=()=>360;
+/* ===== ЦИКЛ ===== */
+function loop(now){requestAnimationFrame(loop);TN=now;const dt=Math.min(.05,Math.max(.001,(now-last)/1000||.016));last=now;fa+=(dt-fa)*.05;
+ if(qual>0&&++fc>150&&fa>.034){fc=0;setQ(qual-1,true)}
+ if(vt){const d=((vt[1]-lo0+Math.PI*3)%(2*Math.PI))-Math.PI;lo0+=d*.12;la0+=(vt[0]-la0)*.12;dirty=2;if(Math.abs(d)<.003&&Math.abs(vt[0]-la0)<.003)vt=null}
+ if(!paused){let dm=ts*dt;if(target!==null){const r=target-t;dm=Math.min(Math.abs(r),dm)*Math.sign(r)}stepSim(dm);t+=dm;uiDirty=true;dirty=2;
+  if(target!==null&&Math.abs(target-t)<1e-6){t=target;target=null;setPaused(true);toast('Готово: '+(t>0?'+':'−')+Math.abs(t)+' млн лет.')}}
+ if(fx){spawnEv(dt);dirty=Math.max(dirty,1)}
+ if(dirty>0){dirty--;render()}
+ if(xk)xdraw(dt);
+ if(uiDirty&&++uc%6===0){ui();pv()}}
+resize();ui();setTimeout(()=>toast('Нажмите на плиту, а на цветную границу — увидите, что происходит под землёй.'),700);requestAnimationFrame(loop);
+})();
+</script>
+</body></html>
+
