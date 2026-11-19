@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ионариум — собери вещество</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0912;--s1:#1d1a24;--s2:#272330;--s3:#322d3d;--on:#e8e0ee;--on2:#cbc3d4;--ol:#4b4556;--pr:#d0bcff;--acc:#d0bcff;--ok:#9be3a8;--er:#ffb4ab;box-sizing:border-box}
+*{box-sizing:border-box;margin:0}html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--on);font:400 14px/1.45 "Roboto Flex",Roboto,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:block}button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}button:focus-visible{outline:2px solid var(--pr);outline-offset:2px}button:disabled{opacity:.35;cursor:default}
+.glass{background:rgba(29,26,36,.94);border:1px solid rgba(255,255,255,.09);box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#top{position:fixed;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:8px;padding:9px 12px 9px 18px;border-radius:28px;z-index:5}
+#top h1{font:900 19px/1 "Roboto Flex",system-ui;letter-spacing:-.4px;flex:1;white-space:nowrap;background:linear-gradient(90deg,#9be3a8,#8ecbff,var(--pr));-webkit-background-clip:text;background-clip:text;color:transparent}
+.pill{padding:8px 13px;border-radius:16px;background:var(--s2);font-weight:500;white-space:nowrap}.pill.ok{background:#1f4a2e;color:var(--ok)}
+.nav{position:fixed;left:12px;right:12px;display:flex;gap:8px;overflow-x:auto;padding:2px;z-index:4;scrollbar-width:none;align-items:center}.nav::-webkit-scrollbar{display:none}
+#n1{top:70px}#n2{top:111px}.lab{color:var(--on2);font-weight:700;font-size:12px;min-width:62px;text-transform:uppercase;letter-spacing:.5px}
+.chip{display:flex;align-items:center;gap:8px;height:34px;padding:0 14px 0 10px;border-radius:10px;border:1px solid var(--ol);background:rgba(29,26,36,.8);white-space:nowrap;font-weight:600}.chip i{width:14px;height:14px;border-radius:50%;box-shadow:0 0 8px currentColor}.chip.on{background:var(--pr);color:#14101c;border-color:transparent}
+#dock{position:fixed;left:calc(50% - 186px);bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;gap:8px;padding:10px 12px;border-radius:30px;z-index:5;max-width:calc(100% - 16px);flex-wrap:wrap;justify-content:center}
+.tg{height:40px;padding:0 14px;border-radius:12px;border:1px solid var(--ol);font-weight:500}.tg.primary{background:var(--pr);color:#27154d;border-color:transparent;font-weight:700}
+#panel{position:fixed;z-index:6;background:var(--s1);border-radius:28px;overflow:auto;right:12px;top:152px;bottom:12px;width:360px;transform:translateX(120%);padding:20px;transition:transform .45s cubic-bezier(.2,0,0,1);box-shadow:0 20px 60px #000a}
+body.po #panel{transform:none}#panel:before{content:"";position:absolute;inset:0 0 auto;height:180px;background:radial-gradient(circle at 20% 0,var(--acc),transparent 70%);opacity:.2;pointer-events:none}
+.x{position:absolute;right:12px;top:12px;width:38px;height:38px;border-radius:50%;background:var(--s2);z-index:2}
+.hero{display:flex;gap:14px;align-items:center;position:relative;padding-right:35px}.orb{width:66px;height:66px;flex:none;border-radius:50%;box-shadow:0 0 34px var(--acc),inset -14px -10px 22px #000a}
+.kind{color:var(--acc);font-weight:700}h2{font:900 30px/1.05 "Roboto Flex",system-ui;letter-spacing:-.8px}.nm{color:var(--on2);font-size:13px}
+.fact{margin:17px 0;padding:13px 15px;border-radius:20px 20px 20px 6px;background:var(--s2);color:var(--on2);position:relative}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.tile{padding:11px 13px;border-radius:15px;background:var(--s2)}.tile small{display:block;color:var(--on2);font-size:12px}.tile b{font-weight:500}
+.section{margin-top:18px;position:relative}.section h3{font-size:15px;margin-bottom:9px}.note{font-size:12.5px;color:var(--on2);line-height:1.55}.note b{color:var(--on)}
+.gauge{height:14px;border-radius:8px;background:var(--s3);overflow:hidden;margin-bottom:8px}.gauge b{display:block;height:100%;width:0;border-radius:8px;background:linear-gradient(90deg,#ffe29a,#ff9a5c,#ff4d4d);transition:width 1.2s cubic-bezier(.2,0,0,1)}
+.eq{margin:6px 0;padding:9px 12px;border-radius:12px;background:var(--s2);font-size:15px;font-weight:500;overflow-x:auto;white-space:nowrap;color:var(--on)}
+details{margin-top:16px;color:var(--on2)}summary{cursor:pointer;font-weight:700;color:var(--on);margin-bottom:6px}
+.l2,.l3{display:none}body.v2 .l2,body.v3 .l2,body.v3 .l3{display:block}body.v3 span.l3,body.v2 span.l2,body.v3 span.l2{display:inline}
+@media(max-width:760px){#panel{left:12px;right:12px;width:auto;top:auto;height:55%;transform:translateY(120%)}body.po #panel{transform:none}#dock{left:50%}}
+.pill{flex:none}#ms{max-width:34vw;overflow:hidden;text-overflow:ellipsis}#top h1{min-width:0}
+#tbl{position:fixed;left:12px;right:12px;top:70px;bottom:12px;overflow:auto;z-index:3;display:none;padding:2px}
+body.m1 #tbl{display:block}body.m1 .nav,body.m1 #dock,body.m1 #c,body.m1 #ms,body.m2 #ms,body.m1 #pc,body.m2 #pc,body.m0 #ap,body.m2 #ap,body.m0 #xp,body.m1 #xp,body.m2 #bDis{display:none}
+#tg{display:grid;grid-template-columns:repeat(18,minmax(40px,1fr));grid-template-rows:repeat(7,auto) 12px auto auto;gap:3px;min-width:760px}
+.el{aspect-ratio:1;border-radius:9px;border:1px solid color-mix(in srgb,var(--k) 50%,transparent);background:color-mix(in srgb,var(--k) 15%,var(--s1));display:flex;align-items:center;justify-content:center;position:relative;padding:0;transition:transform .15s}
+.el:hover{transform:scale(1.12);z-index:2}.el small{position:absolute;left:4px;top:2px;font-size:9px;color:var(--on2)}.el b{font-size:clamp(13px,1.6vw,19px);color:var(--k);font-weight:700}.el u{position:absolute;right:4px;bottom:4px;width:6px;height:6px;border-radius:50%;background:var(--ok)}
+.el.on{background:var(--k);transform:scale(1.12);z-index:2}.el.on b,.el.on small{color:#14101c}
+#leg{grid-row:1/4;grid-column:3/13;display:flex;flex-wrap:wrap;gap:6px 14px;align-content:center;color:var(--on2);font-size:12px}#leg span{display:flex;align-items:center;gap:6px}#leg i{width:11px;height:11px;border-radius:3px}
+#ac{position:static;width:100%;height:250px;margin-top:12px;border-radius:20px;background:#13101a;touch-action:manipulation}
+#ap .grid .tg{height:auto;min-height:40px;padding:8px 10px}
+@media(min-width:761px){body.m1 #panel{top:70px}body.m1.po #tbl{right:384px}}
+.seg{display:flex;background:var(--s2);border-radius:16px;padding:3px;gap:2px;flex:none}.seg button{padding:6px 11px;border-radius:13px;font-weight:500;white-space:nowrap}.seg button.on{background:var(--pr);color:#27154d}
+.nav select{height:34px;border-radius:10px;border:1px solid var(--ol);background:var(--s2);padding:0 10px;font:inherit;font-weight:600;color:var(--on);flex:none}
+.st{border-collapse:separate;border-spacing:2px;font-size:10.5px;margin-top:6px}.st th{color:var(--on2);font-weight:500;padding:2px 0;white-space:nowrap;text-align:left}.st td{text-align:center;border-radius:5px;padding:4px 0;font-weight:700;min-width:24px}.st td.hl{outline:2px solid var(--pr)}.sr{background:#1f4a2e;color:#9be3a8}.sm{background:#4a4020;color:#ffe29a}.sn{background:#4a2323;color:#ffb4ab}.sg{background:#33303a;color:#cbc3d4}
+@media(max-width:760px){.seg span{display:none}}
+</style></head>
+<body class="v1 m0">
+<canvas id="c"></canvas>
+<div id="top" class="glass"><h1>Ионариум</h1><span class="pill" id="ms">🎯 Задание</span><div class="seg" id="md"><button data-m="0">⚗️<span> Соединение</span></button><button data-m="2">🧫<span> Обмен</span></button><button data-m="1">🔬<span> Таблица</span></button></div><button class="pill" id="lv"></button></div>
+<div class="nav" id="n1"></div><div class="nav" id="n2"></div>
+<div id="dock" class="glass"><button class="tg primary" id="bBond">🧲 Соединить</button><button class="tg" id="bDis" disabled>💧 Растворить</button><button class="tg" id="bRe">🔄 Заново</button><button class="tg" id="bInfo">ⓘ Данные</button></div>
+<div id="panel"><button class="x" id="px" aria-label="Закрыть">✕</button><div id="pc"></div>
+<div id="ap"><div class="hero"><div class="orb" id="aorb"></div><div><div class="kind" id="akind"></div><h2 id="asym"></h2><div class="nm" id="anm"></div></div></div>
+<canvas id="ac"></canvas>
+<div class="note" style="margin-top:8px">ℹ️ <b>Модель упрощена.</b> На внутренних слоях электронов бывает больше 8 (до 18 и 32) — мы рисуем их для полноты картины. Для химии важен <b>внешний слой</b>: он подсвечен, и все превращения происходят именно с ним.</div>
+<div class="grid" style="margin-top:10px"><button class="tg" id="aM">➖ Оторвать электрон</button><button class="tg" id="aP">➕ Добавить электрон</button><button class="tg" id="aT">✨ Типичный ион</button><button class="tg" id="aR">↺ Сбросить</button></div>
+<button class="tg primary" id="aX" style="width:100%;margin-top:8px">⚗️</button>
+<div class="fact" id="amsg"></div><div class="note" id="atip" style="min-height:18px;color:var(--er)"></div>
+<div class="grid" id="atl" style="margin-top:8px"></div>
+<div class="note l3" style="margin-top:12px"><b>Правило октета:</b> атомы главных групп стремятся иметь на внешнем слое 8 электронов (у первого слоя — 2). Заряд иона = число протонов − число электронов. Слои показаны упрощённо (модель Бора): у переходных металлов и f-элементов распределение приближённое.</div></div><div id="xp"></div></div>
+<div id="tbl"><div id="tg"></div></div>
+<script>
+const $=id=>document.getElementById(id);
+const SUP={1:'',2:'²',3:'³'},SB='₀₁₂₃₄₅₆₇₈₉';
+const sub=n=>n==1?'':String(n).replace(/\d/g,d=>SB[d]);
+// r — радиус иона, пм
+const cats=[{s:'H',z:1,r:40,c:'#ffffff',n:'водорода'},{s:'Na',z:1,r:102,c:'#ffb0c8',n:'натрия'},{s:'K',z:1,r:138,c:'#c58bff',n:'калия'},{s:'Mg',z:2,r:72,c:'#9be3a8',n:'магния'},{s:'Ca',z:2,r:100,c:'#8ecbff',n:'кальция'},{s:'Al',z:3,r:54,c:'#cbd5e1',n:'алюминия'},{s:'Fe',z:3,r:65,c:'#ff9a5c',n:'железа(III)'},{s:'NH₄',z:1,r:148,c:'#f0abfc',n:'аммония',p:1},{s:'Ag',z:1,r:115,c:'#e2e8f0',n:'серебра'},{s:'Ba',z:2,r:135,c:'#facc15',n:'бария'},{s:'Cu',z:2,r:73,c:'#22d3ee',n:'меди(II)'},{s:'Zn',z:2,r:74,c:'#a5b4fc',n:'цинка'},{s:'Pb',z:2,r:119,c:'#94a3b8',n:'свинца(II)'}];
+const ans=[{s:'F',z:1,r:133,c:'#c8f26b',n:'фторид'},{s:'Cl',z:1,r:181,c:'#5fd16f',n:'хлорид'},{s:'Br',z:1,r:196,c:'#b4725a',n:'бромид'},{s:'O',z:2,r:140,c:'#ff6b6b',n:'оксид'},{s:'S',z:2,r:184,c:'#ffe14d',n:'сульфид'},{s:'OH',z:1,r:137,c:'#6ec6ff',n:'гидроксид',p:1},{s:'SO₄',z:2,r:230,c:'#5eead4',n:'сульфат',p:1},{s:'I',z:1,r:220,c:'#9d7bd8',n:'иодид'},{s:'NO₃',z:1,r:179,c:'#fdba74',n:'нитрат',p:1},{s:'CO₃',z:2,r:178,c:'#d6d3d1',n:'карбонат',p:1}];
+const HN={F:'Фтороводород (плавиковая кислота)',Cl:'Хлороводород (соляная кислота)',Br:'Бромоводород',S:'Сероводород','SO₄':'Серная кислота',OH:'Вода',O:'Вода',I:'Иодоводород (иодоводородная кислота)','NO₃':'Азотная кислота','CO₃':'Угольная кислота (нестойкая)'};
+const HQ={F:61,Cl:75,Br:85,S:20,'SO₄':95,OH:57,O:114,I:80,'NO₃':33,'CO₃':20};
+const SOL={р:'растворим 💧',м:'малорастворим',н:'нерастворим (осадок)',х:'реагирует с водой',г:'нестойкое, разлагается'};
+const lab=(d,t)=>d.s+SUP[d.z]+(t=='c'?'⁺':'⁻');
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+function formula(c,a,nc,na){if(c.s=='H'&&a.s=='OH')return'H₂O';return(c.p&&nc>1?'('+c.s+')':c.s)+sub(nc)+(a.p&&na>1?'('+a.s+')':a.s)+sub(na)}
+function sol(c,a){const C=c.s,A=a.s;
+ if(C=='H')return A=='CO₃'?'г':'р';if(A=='NO₃')return'р';if(C=='Na'||C=='K')return A=='O'?'х':'р';if(C=='NH₄')return(A=='O'||A=='OH')?'г':'р';
+ if(A=='O')return(C=='Ca'||C=='Ba')?'х':'н';
+ if(A=='Cl'||A=='Br')return C=='Ag'?'н':C=='Pb'?'м':'р';
+ if(A=='I')return(C=='Cu'||C=='Fe')?'г':(C=='Ag'||C=='Pb')?'н':'р';
+ if(A=='F')return(C=='Ca'||C=='Mg')?'н':C=='Ag'?'р':'м';
+ if(A=='SO₄')return(C=='Ba'||C=='Pb')?'н':(C=='Ca'||C=='Ag')?'м':'р';
+ if(A=='OH')return C=='Ba'?'р':C=='Ca'?'м':'н';
+ if(A=='S')return C=='Ba'?'р':(C=='Mg'||C=='Al'||C=='Fe')?'г':C=='Ca'?'м':'н';
+ if(A=='CO₃')return(C=='Al'||C=='Fe')?'г':C=='Mg'?'м':'н';return'м'}
+function ph(c,a,s){const C=c.s,A=a.s;
+ if(C=='H')return{v:{Cl:1,Br:1,I:1,'NO₃':1,'SO₄':1,F:3,S:4,'CO₃':4,OH:7,O:7}[A],w:(A=='OH'||A=='O')?'Вода нейтральна: H⁺ и OH⁻ поровну.':'Кислота отдаёт воде ионы H⁺ — их много, среда кислая.'};
+ if(s=='г')return{v:7,w:'Такого вещества в воде не бывает: оно разлагается или его ионы реагируют друг с другом, поэтому pH не определить.'};
+ if(s=='н')return{v:7,w:'Вещество нерастворимо — в раствор почти ничего не переходит, среда не меняется.'};
+ if(A=='OH'||A=='O')return{v:C=='Ca'?12.4:13.5,w:'При растворении появляются ионы OH⁻ — это щёлочь.'};
+ const strong=['Na','K','Ca','Mg','Ba','Ag'].includes(C);
+ if(strong){const w={F:8.5,S:C=='Ca'?9:11,'CO₃':11.5}[A];return w?{v:w,w:'Анион слабой кислоты забирает H⁺ у воды (гидролиз по аниону) → остаются OH⁻ → щелочная среда.'}:{v:7,w:'Соль сильного основания и сильной кислоты не гидролизуется — среда нейтральна.'}}
+ if(C=='NH₄'){const w={F:6.2,S:9,'CO₃':8.8}[A];if(w)return{v:w,w:'И катион, и анион слабые и гидролизуются; среда зависит от того, кто «сильнее».'}}
+ const v={Al:3,Fe:2,Cu:4,Zn:5,Pb:5,'NH₄':5.5}[C]+(A=='F'?2:0);
+ return{v,w:'Катион слабого основания отнимает OH⁻ у воды (гидролиз по катиону) → накапливается H⁺ → кислая среда.'}}
+function calc(){const c=cats[ci],a=ans[ai],g=gcd(c.z,a.z),nc=a.z/g,na=c.z/g,rr=c.r+a.r;
+ const S={c,a,g,nc,na,rr,F:formula(c,a,nc,na)};
+ S.nm=c.s=='H'?HN[a.s]:(a.n+' '+c.n).replace(/^./,m=>m.toUpperCase());
+ S.kind=c.s=='H'?((a.s=='OH'||a.s=='O')?'вода':'кислота'):a.s=='OH'?'основание':a.s=='O'?'оксид':'соль';
+ if(c.s=='H'){S.q=HQ[a.s];S.qk='тепло реакции'}else{S.q=120250*(nc+na)*c.z*a.z/rr*(1-34.5/rr);S.qk='энергия решётки'}
+ S.heat=Math.min(1,Math.max(.12,Math.sqrt(S.q/16000)));S.so=sol(c,a);S.ph=ph(c,a,S.so);return S}
+const phHue=p=>p<=7?(p-1)/6*120:120+(p-7)/6*160;
+const phWord=p=>p<6.5?'кислая':p>7.5?'щелочная':'нейтральная';
+// ---- состояние
+let ci=1,ai=1,lvl=0,S,ions=[],sparks=[],stage=0,bonded=false,fr=0,glow=0,shake=0,wl=0,wlT=0,phCur=7,pops=[],drag=null,score=0,mis=null,W,H,dpr,st={};
+const LV=['Кратко','Средне','Подробно'];
+// ---- интерфейс
+function chips(){if(mode==2)return xChips();[['n1','Катион +',cats,'c'],['n2','Анион −',ans,'a']].forEach(([id,t,arr,k])=>{$(id).innerHTML='<span class="lab">'+t+'</span>'+arr.map((d,i)=>`<button class="chip${(k=='c'?ci:ai)==i?' on':''}" data-k="${k}" data-i="${i}"><i style="color:${d.c};background:${d.c}"></i>${lab(d,k)}</button>`).join('')})}
+document.addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;b.dataset.k=='c'?ci=+b.dataset.i:ai=+b.dataset.i;chips();build()});
+$('lv').onclick=()=>{lvl=(lvl+1)%3;setLv()};function setLv(){const b=document.body.classList;b.remove('v1','v2','v3');b.add('v'+(lvl+1));$('lv').textContent='🎓 '+LV[lvl];panel();mtxt()}
+$('bRe').onclick=()=>mode==2?xBuild():build();$('bInfo').onclick=()=>{document.body.classList.toggle('po');layout()};$('px').onclick=$('bInfo').onclick;
+$('bBond').onclick=()=>{if(mode==2)return xMix();if(stage)return;stage=1;fr=0;targets(false);upd()};
+$('bDis').onclick=()=>{if(stage!=1||!bonded)return;stage=2;wlT=1;ions.forEach((i,k)=>i.m=(S.so=='н'||(S.so=='м'&&k%2==0))?'s':'d');targets(true);upd();panel();if(S.so=='х'||S.so=='г')for(let i=0;i<30;i++)pops.push({x:st.x+st.w/2+(Math.random()-.5)*st.w*.5,y:st.y+st.h*.85,v:1+Math.random()*2,l:90+Math.random()*60,r:2+Math.random()*4})};
+$('ms').onclick=()=>{let c,a;do{c=cats[Math.random()*cats.length|0];a=ans[Math.random()*ans.length|0]}while(c.s=='H'&&Math.random()<.6);mis={c,a,F:formula(c,a,a.z/gcd(c.z,a.z),c.z/gcd(c.z,a.z)),n:c.s=='H'?HN[a.s]:(a.n+' '+c.n)};$('ms').className='pill';mtxt()};
+function mtxt(){if(mis)$('ms').textContent='🎯 Собери: '+mis.F+(lvl==0?' ('+mis.n.toLowerCase()+')':'')+'  ★'+score}
+function upd(){$('bBond').disabled=!!stage;$('bDis').disabled=!(stage==1&&bonded)}
+// ---- панель
+function panel(){if(!S)return;const{c,a,nc,na,g}=S,e=(o,t)=>t;
+ const heatT=!bonded?'Соедини ионы — посмотрим, сколько тепла выделится!':(S.heat<.2?'🌡️ Чуть тёпленько':S.heat<.4?'🌡️ Тепло':S.heat<.65?'🔥 Горячо!':'🔥🔥 Жар! Много энергии!');
+ const p=S.ph,pc=stage==2?`<div class="fact" style="margin:0">${p.v<6.5?'🍋 Кислая среда — как лимон.':p.v>7.5?'🧼 Щелочная среда — как мыло.':'💧 Нейтральная — как чистая вода.'}<div class="l2 note" style="margin-top:6px">Индикатор окрасил воду: <b>${phWord(p.v)}</b> среда.</div><div class="l3 note" style="margin-top:6px"><b>pH ≈ ${p.v}.</b> ${p.w}</div></div>`:'<div class="note">Растворишь в воде — узнаем, кислая получилась среда или щелочная (pH).</div>';
+ $('pc').innerHTML=`<div style="--acc:${c.c}"><div class="hero"><div class="orb" style="background:radial-gradient(circle at 32% 30%,#fff9,${a.c} 40%,${c.c} 125%)"></div><div><div class="kind">${S.kind}</div><h2>${S.F}</h2><div class="nm">${S.nm}</div></div></div>
+ <div class="fact">${lab(c,'c')} — «плюс», ${lab(a,'a')} — «минус». Плюс притягивается к минусу, как два магнита, — так и рождается <b>${S.nm.toLowerCase()}</b>.${stage>=1&&bonded?' Ионы встали рядом — получилась «решётка»!':''}</div>
+ <div class="grid"><div class="tile"><small>Катион</small><b>${lab(c,'c')}</b></div><div class="tile"><small>Анион</small><b>${lab(a,'a')}</b></div>
+ <div class="tile l2"><small>Сколько нужно</small><b>${nc} катион : ${na} анион</b></div><div class="tile l2"><small>Растворимость</small><b>${SOL[S.so]}</b></div></div>
+ <div class="section l2"><h3>🧩 Как получить формулу</h3><div class="note">Заряды меняются местами и становятся индексами («крест-накрест»):</div>
+ <div class="eq">${c.s}<sup>${c.z}+</sup> ${a.s}<sup>${a.z}−</sup> → ${c.s}${sub(a.z)}${a.s}${sub(c.z)}${g>1?' → сократили на '+g+' → '+S.F:''}</div>
+ <div class="note">Проверка: ${nc}·(+${c.z}) + ${na}·(−${a.z}) = <b>0</b> ✓ — вещество электронейтрально.</div>
+ <div class="eq l3">${nc}${lab(c,'c')} + ${na}${lab(a,'a')} → ${S.F}</div></div>
+ <div class="section"><h3>🔥 Тепло</h3><div class="gauge"><b data-w="${bonded?S.heat*100:0}"></b></div><div class="note"><b>${heatT}</b></div>
+ ${bonded?`<div class="note l2" style="margin-top:5px">Выделилось ≈ <b>${Math.round(S.q).toLocaleString('ru')} кДж</b> на 1 моль (${S.qk}).</div>`:''}
+ <div class="note l3" style="margin-top:5px">${c.s=='H'?'Для кислот здесь показан тепловой эффект реакции в воде (справочное значение).':`Оценка по Капустинскому: U = K·ν·|z₊z₋|/(r₊+r₋)·(1 − d/(r₊+r₋)), где ν = ${nc+na}, |z₊z₋| = ${c.z*a.z}, r₊+r₋ = ${S.rr} пм, K = 120250 кДж·пм/моль, d = 34,5 пм. Чем больше заряды и меньше ионы — тем прочнее решётка и тем больше тепла.`}</div></div>
+ <div class="section"><h3>🧪 Среда (pH)</h3>${pc}</div>
+ <details class="l2"><summary>Термины</summary><div class="note"><b>Катион</b> — положительный ион (атом отдал электроны).<br><b>Анион</b> — отрицательный ион (атом принял электроны).<br><b>Ионная связь</b> — притяжение противоположных зарядов.<span class="l3"><br><b>Энергия решётки</b> — энергия, которая выделяется при сборке кристалла из газообразных ионов.<br><b>Гидролиз</b> — реакция иона с водой, из-за которой меняется pH.</span></div></details></div>`;
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{const b=document.querySelector('.gauge b');if(b)b.style.width=b.dataset.w+'%'}))}
+// ---- симуляция
+function layout(){const pw=(W>760&&document.body.classList.contains('po'))?384:12;st={x:12,y:152,w:W-12-pw,h:H-152-$('dock').offsetHeight-26};if(S)clampAll()}
+function clampAll(){ions.forEach(i=>{i.x=Math.min(st.x+st.w-i.R,Math.max(st.x+i.R,i.x));i.y=Math.min(st.y+st.h-i.R,Math.max(st.y+i.R,i.y))});if(stage&&mode==0)targets(stage==2&&S.so=='н')}
+function build(){S=calc();stage=0;bonded=false;wlT=0;wl=0;phCur=7;glow=0;sparks=[];pops=[];ions=[];
+ const n=Math.max(1,Math.floor(10/(S.nc+S.na))),sc=Math.max(.55,Math.min(1,Math.min(st.w,st.h)/500));
+ const add=(d,t)=>ions.push({d,t,R:Math.max(13,2.3*Math.sqrt(d.r))*sc,x:st.x+40+Math.random()*(st.w-80),y:st.y+st.h*.2+Math.random()*st.h*.6,vx:0,vy:0,tx:0,ty:0,m:'d'});
+ for(let i=0;i<n*S.nc;i++)add(S.c,'c');for(let i=0;i<n*S.na;i++)add(S.a,'a');upd();panel()}
+function targets(settle){const cs=ions.filter(i=>i.t=='c'),as=ions.filter(i=>i.t=='a'),tc=cs.length,ta=as.length,seq=[];let ic=0,ia=0;
+ while(ic<tc||ia<ta)(ic<tc&&(ia>=ta||(tc-ic)/tc>=(ta-ia)/ta))?seq.push(cs[ic++]):seq.push(as[ia++]);
+ const Rc=Math.max(...cs.map(i=>i.R)),Ra=Math.max(...as.map(i=>i.R)),cell=(Rc+Ra)*1.02,N=seq.length,cols=Math.ceil(Math.sqrt(N*1.2))|1,rows=Math.ceil(N/cols),cx=st.x+st.w/2,cy=settle?st.y+st.h-rows*cell/2-18:st.y+st.h/2;
+ seq.forEach((o,k)=>{o.tx=cx+((k%cols)-(cols-1)/2)*cell;o.ty=cy+(Math.floor(k/cols)-(rows-1)/2)*cell})}
+function burst(){bonded=true;glow=S.heat;shake=S.heat*12;const n=20+S.heat*160|0,cx=st.x+st.w/2,cy=st.y+st.h/2;
+ for(let i=0;i<n;i++){const a=Math.random()*6.28,v=(1+Math.random()*5)*(.5+S.heat*1.6);sparks.push({x:cx,y:cy,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:40+Math.random()*50,h:20+Math.random()*30})}
+ pops.push({t:'+'+Math.round(S.q).toLocaleString('ru')+' кДж/моль',x:cx,y:cy-80,l:120});
+ if(mis&&mis.F==S.F){score++;$('ms').className='pill ok';$('ms').textContent='✅ Верно! '+S.F+'  ★'+score}
+ upd();panel()}
+function step(){fr++;const bx=st.x,by=st.y,bw=st.w,bh=st.h,top=by+bh*(1-.85*wl);
+ ions.forEach((p,k)=>{if(p===drag){p.vx=p.vy=0;return}
+  const spring=stage==1||(stage==2&&p.m=='s');
+  if(spring){p.vx=(p.vx+(p.tx-p.x)*.035)*.82;p.vy=(p.vy+(p.ty-p.y)*.035)*.82;if(bonded&&glow>0){p.x+=(Math.random()-.5)*glow*3;p.y+=(Math.random()-.5)*glow*3}}
+  else{p.vx+=(Math.random()-.5)*.18;p.vy+=(Math.random()-.5)*.18;
+   ions.forEach((q,j)=>{if(j==k)return;const dx=q.x-p.x,dy=q.y-p.y,d=Math.hypot(dx,dy)||1,ov=p.R+q.R-d;
+    if(stage==0&&d<300){const f=(p.t!=q.t?1:-.5)*.012*p.d.z*q.d.z*80/(d+40);p.vx+=dx/d*f;p.vy+=dy/d*f}
+    if(ov>0){p.vx-=dx/d*ov*.04;p.vy-=dy/d*ov*.04}});
+   p.vx*=.985;p.vy*=.985}
+  p.x+=p.vx;p.y+=p.vy;const t=stage==2?Math.max(top+20,by):by;
+  if(p.x<bx+p.R){p.x=bx+p.R;p.vx=Math.abs(p.vx)}if(p.x>bx+bw-p.R){p.x=bx+bw-p.R;p.vx=-Math.abs(p.vx)}if(p.y<t+p.R){p.y=t+p.R;p.vy=Math.abs(p.vy)}if(p.y>by+bh-p.R){p.y=by+bh-p.R;p.vy=-Math.abs(p.vy)}});
+ if(stage==1&&!bonded&&(fr>200||ions.every(p=>Math.hypot(p.tx-p.x,p.ty-p.y)<4)))burst();
+ wl+=(wlT-wl)*.04;if(stage==2)phCur+=(S.ph.v-phCur)*.03;glow*=.997;
+ sparks.forEach(s=>{s.x+=s.vx;s.y+=s.vy;s.vx*=.96;s.vy=s.vy*.96+.05;s.l--});sparks=sparks.filter(s=>s.l>0);
+ pops.forEach(p=>{p.l--;if(p.t)p.y-=.4;else{p.y-=p.v;p.x+=Math.sin(p.l/8)*.5}});pops=pops.filter(p=>p.l>0&&(p.t||p.y>st.y))}
+function draw(){const g=cv.getContext('2d');g.clearRect(0,0,W,H);g.save();if(shake>.2){g.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);shake*=.9}
+ const{x,y,w,h}=st,top=y+h*(1-.85*wl);g.lineWidth=2;g.strokeStyle='rgba(255,255,255,.14)';g.beginPath();g.roundRect(x,y,w,h,26);g.stroke();
+ if(wl>.01){const hu=phHue(phCur);g.save();g.beginPath();g.roundRect(x,y,w,h,26);g.clip();const gr=g.createLinearGradient(0,top,0,y+h);gr.addColorStop(0,`hsla(${hu},70%,55%,.32)`);gr.addColorStop(1,`hsla(${hu},70%,40%,.5)`);g.fillStyle=gr;g.fillRect(x,top,w,y+h-top);
+  g.strokeStyle=`hsla(${hu},80%,70%,.6)`;g.beginPath();for(let i=0;i<=w;i+=8)g.lineTo(x+i,top+Math.sin(i/30+fr/20)*3);g.stroke();
+  g.fillStyle='rgba(255,255,255,.18)';for(let i=0;i<40;i++){const px=x+(i*97+fr*.3*(i%3+1))%w,py=top+20+(i*53+fr*.2)%(y+h-top-30);g.beginPath();g.arc(px,py,1.6,0,6.3);g.fill()}g.restore();
+  const bw=Math.min(300,w-60),bx=x+w/2-bw/2,by=y+14;g.globalAlpha=Math.min(1,wl*2);for(let i=0;i<bw;i++){g.fillStyle=`hsl(${phHue(1+i/bw*12)},75%,50%)`;g.fillRect(bx+i,by,1.5,12)}
+  const mx=bx+(phCur-1)/12*bw;g.fillStyle='#fff';g.beginPath();g.moveTo(mx,by+14);g.lineTo(mx-6,by+25);g.lineTo(mx+6,by+25);g.fill();g.font='12px system-ui';g.textAlign='center';g.fillStyle='#cbc3d4';g.fillText('кислая',bx+25,by+40);g.fillText('нейтр.',bx+bw/2,by+40);g.fillText('щёлочь',bx+bw-25,by+40);if(lvl==2){g.font='700 14px system-ui';g.fillStyle='#fff';g.fillText('pH '+phCur.toFixed(1),mx,by+58)}g.globalAlpha=1}
+ if(glow>.01){const cx=x+w/2,cy=stage==2&&S.so=='н'?y+h-80:y+h/2,r=120+glow*(Math.min(w,h)*.6),gr=g.createRadialGradient(cx,cy,0,cx,cy,r);gr.addColorStop(0,`rgba(255,${200-glow*150|0},60,${glow*.75})`);gr.addColorStop(1,'rgba(255,80,0,0)');g.fillStyle=gr;g.fillRect(x,y,w,h)}
+ if(stage==0)ions.forEach(p=>ions.forEach(q=>{if(p.t=='c'&&q.t=='a'){const d=Math.hypot(p.x-q.x,p.y-q.y);if(d<220){g.strokeStyle=`rgba(208,188,255,${(1-d/220)*.5})`;g.setLineDash([4,5]);g.beginPath();g.moveTo(p.x,p.y);g.lineTo(q.x,q.y);g.stroke();g.setLineDash([])}}}));
+ g.textAlign='center';g.textBaseline='middle';[...ions].sort((a,b)=>b.R-a.R).forEach(p=>{const d=p.d,gr=g.createRadialGradient(p.x-p.R*.3,p.y-p.R*.35,p.R*.1,p.x,p.y,p.R);gr.addColorStop(0,'#fff');gr.addColorStop(.35,d.c);gr.addColorStop(1,'rgba(0,0,0,.55)');
+  if(stage==2&&p.m=='d'){g.strokeStyle='rgba(255,255,255,.28)';g.setLineDash([3,4]);g.beginPath();g.arc(p.x,p.y,p.R+9,0,6.3);g.stroke();g.setLineDash([])}
+  g.shadowColor=d.c;g.shadowBlur=p===drag?26:10;g.fillStyle=gr;g.beginPath();g.arc(p.x,p.y,p.R,0,6.3);g.fill();g.shadowBlur=0;
+  const L=lab(d,p.t);g.fillStyle='#14101c';g.font=`700 ${Math.max(10,p.R*(L.length>3?.58:.78))}px system-ui`;g.fillText(L,p.x,p.y+1)});
+ g.globalCompositeOperation='lighter';sparks.forEach(s=>{g.fillStyle=`hsla(${s.h},100%,60%,${s.l/60})`;g.beginPath();g.arc(s.x,s.y,2.2,0,6.3);g.fill()});g.globalCompositeOperation='source-over';
+ pops.forEach(p=>{if(p.t){g.fillStyle=`rgba(255,226,154,${Math.min(1,p.l/40)})`;g.font='900 24px system-ui';g.fillText(p.t,p.x,p.y)}else{g.strokeStyle='rgba(255,255,255,.5)';g.beginPath();g.arc(p.x,p.y,p.r,0,6.3);g.stroke()}});
+ if(stage==0){g.fillStyle='rgba(203,195,212,'+(.55+.25*Math.sin(fr/25))+')';g.font='500 14px system-ui';g.fillText('Тяни ионы пальцем: плюс тянется к минусу. Потом жми «Соединить»',x+w/2,y+h-22)}
+ g.restore()}
+const cv=$('c');
+function rs(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;cv.getContext('2d').setTransform(dpr,0,0,dpr,0,0);layout()}
+addEventListener('resize',rs);
+const pt=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
+cv.addEventListener('pointerdown',e=>{const[x,y]=pt(e);let b=null,bd=1e9;ions.forEach(p=>{const d=Math.hypot(p.x-x,p.y-y);if(d<p.R+14&&d<bd){bd=d;b=p}});if(b){drag=b;cv.setPointerCapture(e.pointerId)}});
+cv.addEventListener('pointermove',e=>{if(drag){const[x,y]=pt(e);drag.x=Math.min(st.x+st.w-drag.R,Math.max(st.x+drag.R,x));drag.y=Math.min(st.y+st.h-drag.R,Math.max(st.y+drag.R,y))}});
+const rel=()=>{drag=null};cv.addEventListener('pointerup',rel);cv.addEventListener('pointercancel',rel);
+// ---- ТАБЛИЦА И АТОМ
+const SY='H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og'.split(' ');
+const NM='Водород,Гелий,Литий,Бериллий,Бор,Углерод,Азот,Кислород,Фтор,Неон,Натрий,Магний,Алюминий,Кремний,Фосфор,Сера,Хлор,Аргон,Калий,Кальций,Скандий,Титан,Ванадий,Хром,Марганец,Железо,Кобальт,Никель,Медь,Цинк,Галлий,Германий,Мышьяк,Селен,Бром,Криптон,Рубидий,Стронций,Иттрий,Цирконий,Ниобий,Молибден,Технеций,Рутений,Родий,Палладий,Серебро,Кадмий,Индий,Олово,Сурьма,Теллур,Иод,Ксенон,Цезий,Барий,Лантан,Церий,Празеодим,Неодим,Прометий,Самарий,Европий,Гадолиний,Тербий,Диспрозий,Гольмий,Эрбий,Тулий,Иттербий,Лютеций,Гафний,Тантал,Вольфрам,Рений,Осмий,Иридий,Платина,Золото,Ртуть,Таллий,Свинец,Висмут,Полоний,Астат,Радон,Франций,Радий,Актиний,Торий,Протактиний,Уран,Нептуний,Плутоний,Америций,Кюрий,Берклий,Калифорний,Эйнштейний,Фермий,Менделевий,Нобелий,Лоуренсий,Резерфордий,Дубний,Сиборгий,Борий,Хассий,Мейтнерий,Дармштадтий,Рентгений,Коперниций,Нихоний,Флеровий,Московий,Ливерморий,Теннессин,Оганесон'.split(',');
+const SUBS=[[1,2],[2,2],[2,6],[3,2],[3,6],[4,2],[3,10],[4,6],[5,2],[4,10],[5,6],[6,2],[4,14],[5,10],[6,6],[7,2],[5,14],[6,10],[7,6]];
+const EXC={24:1,29:1,41:1,42:1,44:1,45:1,46:2,47:1,78:1,79:1};
+const S_=s=>new Set(s.split(' ').map(Number));
+const KS={al:S_('3 11 19 37 55 87'),ae:S_('4 12 20 38 56 88'),ng:S_('2 10 18 36 54 86 118'),ha:S_('9 17 35 53 85 117'),md:S_('5 14 32 33 51 52'),nm:S_('1 6 7 8 15 16 34'),pt:S_('13 31 49 50 81 82 83 84 113 114 115 116')};
+const KN={al:['Щелочной металл','#ff9eb8'],ae:['Щёлочноземельный металл','#ffc27a'],tm:['Переходный металл','#8ecbff'],pt:['Постпереходный металл','#b7c9d9'],md:['Полуметалл','#9be3a8'],nm:['Неметалл','#7ee0c3'],ha:['Галоген','#e6e36b'],ng:['Благородный газ','#d0a0ff'],la:['Лантаноид','#f7a8e0'],ac:['Актиноид','#e8b4a0']};
+const NG={2:'He (гелий)',10:'Ne (неон)',18:'Ar (аргон)',36:'Kr (криптон)',54:'Xe (ксенон)',86:'Rn (радон)'};
+const SD='⁰¹²³⁴⁵⁶⁷⁸⁹';
+const chg=z=>{const n=Math.abs(z);return(n>1?String(n).replace(/\d/g,d=>SD[d]):'')+(z>0?'⁺':z<0?'⁻':'')};
+const ew=n=>n==1?'электрон':n<5?'электрона':'электронов';
+function kindOf(z){for(const k in KS)if(KS[k].has(z))return k;if(z>=57&&z<=71)return'la';if(z>=89&&z<=103)return'ac';return'tm'}
+function pos(z){if(z<3)return[1,z<2?1:18];if(z<11)return[2,z<5?z-2:z+8];if(z<19)return[3,z<13?z-10:z];if(z<37)return[4,z-18];if(z<55)return[5,z-36];if(z<57)return[6,z-54];if(z<72)return[9,z-54];if(z<87)return[6,z-68];if(z<89)return[7,z-86];if(z<104)return[10,z-86];return[7,z-100]}
+const ELS=SY.map((s,i)=>{const z=i+1,[r,c]=pos(z);return{z,s,n:NM[i],r,c,k:kindOf(z)}});
+const RX=new Set([...cats,...ans].map(d=>d.s));
+let mode=0,A=null,fx=[],epos=[],acW=250,acH=250,acR=100,tipT=0;
+function shellsOf(z){const s=[0,0,0,0,0,0,0];let r=z;for(const[n,c]of SUBS){const t=Math.min(r,c);s[n-1]+=t;r-=t;if(!r)break}
+ const x=EXC[z];if(x){let o=6;while(!s[o])o--;s[o]-=x;s[o-1]+=x}while(s.length&&!s[s.length-1])s.pop();return s}
+function curShells(){const s=shellsOf(A.z);let d=A.e-A.z;while(d<0&&s.length){s[s.length-1]--;d++;if(!s[s.length-1])s.pop()}
+ while(d>0){const o=s.length-1,cap=o>0?8:2;if(o>=0&&s[o]<cap)s[o]++;else s.push(1);d--}return s}
+function typ(el){const c=el.c;if(el.r>8)return 3;if(c==1||c==2||c==13)return c==13?3:c;if(c==15)return-3;if(c==16)return-2;if(c==17)return-1;if(c==18)return 0;if(c>2&&c<13)return 2;return null}
+function buildTable(){$('tg').innerHTML='<div id="leg">'+Object.values(KN).map(([n,c])=>`<span><i style="background:${c}"></i>${n}</span>`).join('')+'<span style="width:100%"><i style="background:var(--ok);border-radius:50%"></i>точка — есть в реакциях</span></div>'+ELS.map(e=>`<button class="el" data-z="${e.z}" style="grid-row:${e.r};grid-column:${e.c};--k:${KN[e.k][1]}" title="${e.n}"><small>${e.z}</small><b>${e.s}</b>${RX.has(e.s)?'<u></u>':''}</button>`).join('')}
+$('tg').onclick=e=>{const b=e.target.closest('.el');if(b){selEl(+b.dataset.z);document.body.classList.add('po');layout()}};
+function selEl(z){A={z,e:z};fx=[];document.querySelectorAll('.el.on').forEach(x=>x.classList.remove('on'));const b=document.querySelector(`.el[data-z="${z}"]`);if(b)b.classList.add('on');$('atip').textContent='';atomUI()}
+function tip(t){$('atip').textContent=t;clearTimeout(tipT);tipT=setTimeout(()=>$('atip').textContent='',3500)}
+function atomUI(){if(!A)return;const el=ELS[A.z-1],z=A.z-A.e,sh=curShells(),o=sh.length-1,n=sh[o]||0,t=typ(el),[kn,kc]=KN[el.k];
+ const full=sh.length&&((o==0&&n==2)||n==8||(n==18&&o>=2));
+ $('ap').style.setProperty('--acc',kc);$('aorb').style.background=`radial-gradient(circle at 32% 30%,#fff9,${kc} 40%,#000 135%)`;
+ $('akind').textContent=z==0?'Нейтральный атом':z>0?'Катион':'Анион';$('asym').textContent=el.s+chg(z);$('anm').textContent=el.n+' · '+kn;
+ let m;if(!sh.length)m='Электронов не осталось — одно голое ядро. В химии так не бывает.';
+ else if(el.c==18&&z==0)m='Благородный газ: внешний слой уже полный, электроны он не отдаёт и не берёт — поэтому почти ни с кем не реагирует.';
+ else if(z){const iso=NG[A.e];m=`${z>0?'Отдал':'Принял'} ${Math.abs(z)} ${ew(Math.abs(z))}. `+(full?`Внешний слой полный${iso?' — как у '+iso:''}: ион устойчив.`:'Внешний слой не полный — такой ион неустойчив и в природе почти не встречается.')}
+ else m=`На внешнем слое ${n} ${ew(n)}. `+(t>0?`Ему проще отдать ${t} ${ew(t)}: нажми на светящийся внешний электрон.`:t<0?`Ему проще принять ${-t} ${ew(-t)}: жми «Добавить электрон».`:'Обычно ионов не образует: делит электроны с другими атомами (ковалентная связь).');
+ $('amsg').textContent=m;
+ $('atl').innerHTML=[['Протоны в ядре','+'+A.z,''],['Электроны',A.e,''],['Заряд',z>0?'+'+z:z,''],['Слои',sh.join(' · ')||'—','l2'],['Группа / период',(el.r>8?'f-блок':el.c)+' / '+(el.r>8?el.r-3:el.r),'l2'],['Типичный ион',t?el.s+chg(t):'—','l2']].map(([a,b,c])=>`<div class="tile ${c}"><small>${a}</small><b>${b}</b></div>`).join('');
+ $('aM').disabled=!A.e;$('aT').disabled=!t;
+ const hit=z>0?cats.some(d=>d.s==el.s&&d.z==z):z<0?ans.some(d=>d.s==el.s&&d.z==-z):false;
+ $('aX').disabled=!hit;$('aX').textContent=hit?'⚗️ В реакции: '+el.s+chg(z):z?'⚗️ Этого иона пока нет в реакциях':'⚗️ Сначала сделай ион'}
+function out(q){const dx=q.x-acW/2,dy=q.y-acH/2,d=Math.hypot(dx,dy)||1;fx.push({x:q.x,y:q.y,vx:dx/d*3.5,vy:dy/d*3.5,l:50})}
+function removeEl(p){if(A.e<1)return;out(p||epos.find(x=>x.i==curShells().length-1)||{x:acW/2,y:acH/2});A.e--;atomUI()}
+function addEl(){const el=ELS[A.z-1],sh=curShells(),o=sh.length-1,cap=o>0?8:2;
+ if(el.r>8||(el.c>2&&el.c<13))return tip('Металлы этого типа анионов не образуют: они отдают электроны, а не берут.');
+ if(o>=0&&sh[o]>=cap)return tip('Внешний слой уже полный — новому электрону некуда встать. Так не бывает.');
+ A.e++;fx.push({r:1,l:45});atomUI()}
+$('aM').onclick=()=>removeEl();$('aP').onclick=addEl;$('aR').onclick=()=>{A.e=A.z;atomUI()};
+$('aT').onclick=()=>{const t=typ(ELS[A.z-1]);if(!t)return;const o=curShells().length-1;if(t>0)epos.filter(p=>p.i==o).slice(0,t).forEach(out);else fx.push({r:1,l:45});A.e=Math.max(0,A.z-t);atomUI()};
+$('aX').onclick=()=>{const el=ELS[A.z-1],z=A.z-A.e;let i;if(z>0&&(i=cats.findIndex(d=>d.s==el.s&&d.z==z))>=0)ci=i;else if(z<0&&(i=ans.findIndex(d=>d.s==el.s&&d.z==-z))>=0)ai=i;else return;setMode(0);chips();build()};
+$('ac').addEventListener('pointerdown',e=>{if(!A)return;const r=e.target.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;let b=null,bd=18;epos.forEach(p=>{const d=Math.hypot(p.x-x,p.y-y);if(d<bd){bd=d;b=p}});if(!b)return;if(b.i==curShells().length-1)removeEl(b);else tip('Внутренние электроны держатся у ядра крепко — сначала отрывай внешние.')});
+function setMode(m){mode=m;const b=document.body.classList;b.remove('m0','m1','m2');b.add('m'+m);document.querySelectorAll('#md button').forEach(x=>x.classList.toggle('on',+x.dataset.m==m));$('bBond').textContent=m==2?'🧫 Смешать растворы':'🧲 Соединить';
+ if(m==1){if(!$('tg').children.length)buildTable();if(!A)selEl(11);if(innerWidth>760)b.add('po')}
+ layout();if(m!=1)chips();if(m==0)build();if(m==2)xBuild()}
+$('md').onclick=e=>{const b=e.target.closest('button');if(b)setMode(+b.dataset.m)};
+function drawAtom(){if(!A)return;const c=$('ac'),w=c.clientWidth,h=c.clientHeight;if(!w)return;if(c.width!=(w*dpr|0)){c.width=w*dpr;c.height=h*dpr}
+ const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);acW=w;acH=h;
+ const el=ELS[A.z-1],col=KN[el.k][1],sh=curShells(),n=Math.max(sh.length,1),cx=w/2,cy=h/2,R0=26,stp=(Math.min(w,h)/2-12-R0)/n,t=performance.now()/1000,z=A.z-A.e;epos=[];acR=R0+n*stp;
+ sh.forEach((cnt,i)=>{const R=R0+(i+1)*stp,last=i==sh.length-1;g.strokeStyle=last?'rgba(255,255,255,.32)':'rgba(255,255,255,.12)';g.lineWidth=1.2;g.beginPath();g.arc(cx,cy,R,0,6.3);g.stroke();
+  const er=cnt>20?3:cnt>12?3.6:4.6,sp=(i%2?-1:1)*.9/Math.pow(i+1,.6);
+  for(let j=0;j<cnt;j++){const a=t*sp+j*6.2832/cnt+i*.9,x=cx+Math.cos(a)*R,y=cy+Math.sin(a)*R;epos.push({x,y,i});g.shadowColor='#8ecbff';g.shadowBlur=last?14:6;g.fillStyle=last?'#bfe3ff':'#8ecbff';g.beginPath();g.arc(x,y,er+(last?1.5+Math.sin(t*4+j)*.6:0),0,6.3);g.fill()}});g.shadowBlur=0;
+ const gr=g.createRadialGradient(cx,cy,2,cx,cy,R0);gr.addColorStop(0,'#fff');gr.addColorStop(.45,col);gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.beginPath();g.arc(cx,cy,R0*1.05,0,6.3);g.fill();
+ g.fillStyle='#14101c';g.font='800 11px system-ui';g.textAlign='center';g.textBaseline='middle';g.fillText('+'+A.z,cx,cy);
+ g.textAlign='left';g.fillStyle='#e8e0ee';g.font='900 22px system-ui';g.fillText(el.s+chg(z),12,24);
+ fx.forEach(f=>{if(f.r){const k=1-f.l/45;g.strokeStyle=`rgba(190,230,255,${1-k})`;g.lineWidth=2;g.beginPath();g.arc(cx,cy,acR+k*24,0,6.3);g.stroke();f.l--}else{f.x+=f.vx;f.y+=f.vy;f.l--;g.fillStyle=`rgba(190,230,255,${f.l/50})`;g.shadowColor='#8ecbff';g.shadowBlur=12;g.beginPath();g.arc(f.x,f.y,4,0,6.3);g.fill();g.shadowBlur=0}});fx=fx.filter(f=>f.l>0)}
+// ---- РЕАКЦИИ ОБМЕНА
+const iC=s=>cats.findIndex(d=>d.s==s),iA=s=>ans.findIndex(d=>d.s==s);
+const xs={c1:iC('Ag'),a1:iA('NO₃'),c2:iC('Na'),a2:iA('Cl')};
+let X=null,xst=0,xt=0,bub=[],xg=0;
+const VD={pp:'↓ Выпал осадок',gas:'↑ Выделился газ',wat:'💧 Образовалась вода',dec:'⚠️ Нестойкое вещество'};
+const PC={AgCl:'#f1f5f9',AgBr:'#fef3c7',AgI:'#fde047','PbI₂':'#fcd34d','PbCl₂':'#f1f5f9','BaSO₄':'#f8fafc','PbSO₄':'#f1f5f9','Cu(OH)₂':'#38bdf8','Fe(OH)₃':'#b45309','CuCO₃':'#2dd4bf','CaCO₃':'#f8fafc','BaCO₃':'#f8fafc','Ag₂S':'#3f3f46',CuS:'#27272a',PbS:'#27272a',ZnS:'#e5e7eb','Ag₂CO₃':'#fde68a','Ag₂SO₄':'#f1f5f9'};
+const cnt=(c,a)=>{const g=gcd(c.z,a.z);return[a.z/g,c.z/g]};
+const okSalt=(c,a)=>sol(c,a)=='р'&&!(c.s=='H'&&a.s=='OH');
+const hueOf=d=>d.s=='Cu'?190:d.s=='Fe'?32:0;
+function pr(c,a){const[p,q]=cnt(c,a),F=formula(c,a,p,q),s=sol(c,a);let t='aq',R=[F];
+ if(c.s=='H'&&a.s=='OH'){t='wat';R=['H₂O']}else if(c.s=='H'&&a.s=='CO₃'){t='gas';R=['CO₂↑','H₂O']}else if(c.s=='H'&&a.s=='S'){t='gas';R=['H₂S↑']}else if(c.s=='NH₄'&&a.s=='OH'){t='gas';R=['NH₃↑','H₂O']}
+ else if(s=='н'||s=='м'){t='pp';R=[F+'↓']}else if(s=='г'){t='dec';R=[F+' (разл.)']}
+ return{c,a,p,q,F,s,t,R}}
+function coef(S,P){let best=[1,1,1,1],bs=99;for(let a=1;a<=12;a++)for(let b=1;b<=12;b++)for(let c=1;c<=12;c++)for(let d=1;d<=12;d++)if(a+b+c+d<bs&&a*S[0].p==c*P[0].p&&a*S[0].q==d*P[1].q&&b*S[1].p==d*P[1].p&&b*S[1].q==c*P[0].q){bs=a+b+c+d;best=[a,b,c,d]}return best}
+function xChips(){const o=(arr,k,t,sk)=>`<select data-x="${k}" aria-label="${k}">`+arr.map((d,i)=>sk&&d.s=='O'?'':`<option value="${i}"${xs[k]==i?' selected':''}>${lab(d,t)}</option>`).join('')+'</select>';
+ $('n1').innerHTML='<span class="lab">Раствор 1</span>'+o(cats,'c1','c')+o(ans,'a1','a',1);$('n2').innerHTML='<span class="lab">Раствор 2</span>'+o(cats,'c2','c')+o(ans,'a2','a',1)}
+document.addEventListener('change',e=>{const k=e.target.dataset&&e.target.dataset.x;if(k){xs[k]=+e.target.value;xBuild()}});
+function xBuild(){const c1=cats[xs.c1],a1=ans[xs.a1],c2=cats[xs.c2],a2=ans[xs.a2],S=[pr(c1,a1),pr(c2,a2)],P=[pr(c1,a2),pr(c2,a1)],ok1=okSalt(c1,a1),ok2=okSalt(c2,a2);
+ X={S,P,ok1,ok2,ok:ok1&&ok2,k:coef(S,P),c1,c2};xst=0;xt=0;bub=[];xg=0;ions=[];drag=null;
+ X.vd=P.filter(x=>x.t!='aq').map(x=>VD[x.t]+(x.t=='pp'||x.t=='dec'?' '+x.F:'')).join(' · ')||'Реакции нет';
+ if(X.ok){const sc=Math.max(.55,Math.min(1,Math.min(st.w,st.h)/560));
+  S.forEach((s,hm)=>{const n=Math.max(2,Math.ceil(7/(s.p+s.q)));for(let u=0;u<n;u++)for(let i=0;i<s.p+s.q;i++){const t=i<s.p?'c':'a',d=t=='c'?s.c:s.a,R=Math.max(13,2.3*Math.sqrt(d.r))*sc;
+   ions.push({d,t,h:hm,R,x:st.x+hm*(st.w/2+6)+R+Math.random()*(st.w/2-6-2*R),y:st.y+st.h*.35+Math.random()*st.h*.5,vx:0,vy:0,tx:0,ty:0,r:-1,a:1})}})}
+ $('bBond').disabled=!X.ok;xPanel()}
+function xMix(){if(xst||!X.ok)return;xst=1;xt=0;
+ X.P.forEach((P,i)=>{if(P.t=='aq')return;const cs=ions.filter(p=>p.d===P.c&&p.r<0),as=ions.filter(p=>p.d===P.a&&p.r<0),u=Math.min(Math.floor(cs.length/P.p),Math.floor(as.length/P.q));for(let j=0;j<u;j++){cs.splice(0,P.p).forEach(p=>p.r=i);as.splice(0,P.q).forEach(p=>p.r=i)}});
+ const pp=[0,1].filter(i=>X.P[i].t=='pp'||X.P[i].t=='dec');
+ pp.forEach((i,j)=>{const m=ions.filter(p=>p.r==i),N=m.length;if(!N)return;const R=Math.max(...m.map(p=>p.R)),cell=R*1.75,cols=Math.ceil(Math.sqrt(N*1.3)),rows=Math.ceil(N/cols),cx=st.x+st.w*(j+1)/(pp.length+1),cy=st.y+st.h-rows*cell/2-14;m.forEach((p,n)=>{p.tx=cx+((n%cols)-(cols-1)/2)*cell;p.ty=cy+(Math.floor(n/cols)-(rows-1)/2)*cell})});
+ X.tm=ions.some(p=>p.r<0&&p.d.s=='Cu')?190:ions.some(p=>p.r<0&&p.d.s=='Fe')?32:0;if(X.P.some(P=>P.t=='wat'))xg=.5;
+ $('bBond').disabled=true;xPanel()}
+const isPP=t=>t=='pp'||t=='dec';
+function xStep(){if(!X)return;const bx=st.x,by=st.y,w=st.w,h=st.h,wt=by+h*.28;if(xst)xt++;
+ ions.forEach((p,k)=>{if(p===drag){p.vx=p.vy=0;return}const rl=xst&&p.r>=0?X.P[p.r].t:'',sp=isPP(rl);
+  if(sp){p.vx=(p.vx+(p.tx-p.x)*.03)*.82;p.vy=(p.vy+(p.ty-p.y)*.03)*.82}
+  else{p.vx+=(Math.random()-.5)*.2;p.vy+=(Math.random()-.5)*.2;ions.forEach((q,j)=>{if(j==k)return;const dx=q.x-p.x,dy=q.y-p.y,d=Math.hypot(dx,dy)||1,ov=p.R+q.R-d;if(ov>0){p.vx-=dx/d*ov*.04;p.vy-=dy/d*ov*.04}});p.vx*=.985;p.vy*=.985}
+  p.x+=p.vx;p.y+=p.vy;const lo=xst?bx:p.h?bx+w/2+6:bx,hi=xst?bx+w:p.h?bx+w:bx+w/2-6,tp=sp?by:wt;
+  if(p.x<lo+p.R){p.x=lo+p.R;p.vx=Math.abs(p.vx)}if(p.x>hi-p.R){p.x=hi-p.R;p.vx=-Math.abs(p.vx)}if(p.y<tp+p.R){p.y=tp+p.R;p.vy=Math.abs(p.vy)}if(p.y>by+h-p.R){p.y=by+h-p.R;p.vy=-Math.abs(p.vy)}
+  if((rl=='gas'||rl=='wat')&&xt>50){p.a=Math.max(0,p.a-.02);if(rl=='gas'&&p.a>0&&Math.random()<.1)bub.push({x:p.x,y:p.y,v:1+Math.random()*2,r:2+Math.random()*4,l:90})}});
+ if(xst&&!X.done){const m=ions.filter(p=>p.r>=0&&isPP(X.P[p.r].t));if(m.length&&m.every(p=>Math.hypot(p.tx-p.x,p.ty-p.y)<5))X.done=true}
+ bub.forEach(b=>{b.y-=b.v;b.x+=Math.sin(b.l/6)*.6;b.l--});bub=bub.filter(b=>b.l>0&&b.y>wt);xg*=.99}
+function ionDot(g,p,fc){if(p.a<=0)return;const d=p.d,c=fc||d.c,gr=g.createRadialGradient(p.x-p.R*.3,p.y-p.R*.35,p.R*.1,p.x,p.y,p.R);gr.addColorStop(0,'#fff');gr.addColorStop(.35,c);gr.addColorStop(1,'rgba(0,0,0,.55)');g.globalAlpha=p.a;
+ if(!fc){g.strokeStyle='rgba(255,255,255,.25)';g.setLineDash([3,4]);g.beginPath();g.arc(p.x,p.y,p.R+8,0,6.3);g.stroke();g.setLineDash([])}
+ g.shadowColor=c;g.shadowBlur=p===drag?26:10;g.fillStyle=gr;g.beginPath();g.arc(p.x,p.y,p.R,0,6.3);g.fill();g.shadowBlur=0;const L=lab(d,p.t);
+ g.fillStyle=(fc=='#3f3f46'||fc=='#27272a')?'#e8e0ee':'#14101c';g.font=`700 ${Math.max(10,p.R*(L.length>3?.58:.78))}px system-ui`;g.textAlign='center';g.textBaseline='middle';g.fillText(L,p.x,p.y+1);g.globalAlpha=1}
+function xDraw(){const g=cv.getContext('2d');g.clearRect(0,0,W,H);if(!X)return;const{x,y,w,h}=st,wt=y+h*.28,tw=performance.now()/600;
+ const hs=hu=>hu?`hsla(${hu},80%,55%,.34)`:'hsla(205,50%,65%,.16)';
+ const bk=(bx,bw,fill,label)=>{g.save();g.beginPath();g.roundRect(bx,y,bw,h,26);g.clip();g.fillStyle=fill;g.fillRect(bx,wt,bw,y+h-wt);g.strokeStyle='rgba(255,255,255,.35)';g.lineWidth=2;g.beginPath();for(let i=0;i<=bw;i+=8)g.lineTo(bx+i,wt+Math.sin(i/30+tw)*3);g.stroke();g.restore();g.strokeStyle='rgba(255,255,255,.14)';g.beginPath();g.roundRect(bx,y,bw,h,26);g.stroke();if(label){g.fillStyle='#cbc3d4';g.font='600 14px system-ui';g.textAlign='center';g.fillText(label,bx+bw/2,y+h*.16)}};
+ g.textBaseline='middle';
+ if(!xst){bk(x,w/2-6,hs(hueOf(X.c1)),X.S[0].F+' (раствор)');bk(x+w/2+6,w/2-6,hs(hueOf(X.c2)),X.S[1].F+' (раствор)')}else bk(x,w,hs(X.tm));
+ if(xg>.01){const cx=x+w/2,cy=y+h*.65,r=100+xg*Math.min(w,h)*.5,gr=g.createRadialGradient(cx,cy,0,cx,cy,r);gr.addColorStop(0,`rgba(255,170,60,${xg*.7})`);gr.addColorStop(1,'rgba(255,80,0,0)');g.fillStyle=gr;g.fillRect(x,y,w,h)}
+ if(!X.ok){g.fillStyle='#ffb4ab';g.font='600 15px system-ui';g.textAlign='center';g.fillText('Нужны два растворимых вещества — выбери другие ионы',x+w/2,y+h/2)}
+ [...ions].sort((a,b)=>b.R-a.R).forEach(p=>{const rl=xst&&p.r>=0?X.P[p.r]:null;ionDot(g,p,rl&&isPP(rl.t)&&X.done?(PC[rl.F]||(rl.t=='dec'?'#8b8b96':'#e2e8f0')):null)});
+ g.strokeStyle='rgba(255,255,255,.55)';g.lineWidth=1.5;bub.forEach(b=>{g.beginPath();g.arc(b.x,b.y,b.r,0,6.3);g.stroke()});
+ g.textAlign='center';if(xst&&xt>40){g.globalAlpha=Math.min(1,(xt-40)/30);g.fillStyle='#fff';g.font='900 22px system-ui';g.fillText(X.vd,x+w/2,y+h*.14);g.globalAlpha=1}
+ if(!xst&&X.ok){g.fillStyle='rgba(203,195,212,'+(.55+.25*Math.sin(tw*2))+')';g.font='500 14px system-ui';g.fillText('Подумай, что получится, и жми «Смешать растворы»',x+w/2,y+h-22)}}
+function stTable(hl){const cols=ans.filter(a=>a.s!='O');return'<table class="st"><tr><th></th>'+cols.map(a=>`<th>${a.s}</th>`).join('')+'</tr>'+cats.map(c=>`<tr><th>${lab(c,'c')}</th>`+cols.map(a=>{const s=sol(c,a);return`<td class="s${s=='р'?'r':s=='м'?'m':s=='н'?'n':'g'}${hl.has(c.s+a.s)?' hl':''}">${s=='г'?'—':s}</td>`}).join('')+'</tr>').join('')+'</table><div class="note">р — растворим · м — малорастворим · н — нерастворим · — не существует / разлагается. Рамкой выделены твои вещества.</div>'}
+function xTxt(){const P=X.P;if(!P.some(x=>x.t!='aq'))return'Ионы могли бы поменяться партнёрами, но новые вещества остаются растворёнными — ионы просто перемешались. Реакции нет.';
+ return'Ионы поменялись партнёрами. '+P.map(x=>x.t=='pp'?`Получилось ${x.F}${x.s=='м'?' (малорастворимое)':''} — оно не растворяется, поэтому выпало в осадок. `:x.t=='gas'?'Получился газ — он улетает пузырьками. ':x.t=='wat'?'Получилась вода — это нейтрализация, при ней выделяется тепло. ':x.t=='dec'?`Получилось нестойкое вещество ${x.F} — оно сразу распадается. `:'').join('')}
+function xPanel(){const e=$('xp'),{S,P,k}=X,nm=x=>(x.c.s=='H'?HN[x.a.s]:(x.a.n+' '+x.c.n)).replace(/^./,m=>m.toUpperCase());
+ if(!X.ok){const b=!X.ok1?S[0]:S[1];e.innerHTML=`<div class="fact">⚠️ ${b.F} (${nm(b)}) — ${SOL[b.s]||'нельзя взять как раствор'}. Для реакции обмена нужны два растворимых вещества: выбери другие ионы.</div><details class="l2" open><summary>Таблица растворимости</summary>${stTable(new Set([S[0],S[1]].map(x=>x.c.s+x.a.s)))}</details>`;return}
+ const hl=new Set([...S,...P].map(x=>x.c.s+x.a.s)),cf=n=>n>1?n:'',rhs=(x,n)=>x.R.map(r=>cf(n)+r).join(' + '),ion=(x,n)=>`${cf(n*x.p)}${lab(x.c,'c')} + ${cf(n*x.q)}${lab(x.a,'a')}`,rx=P.some(x=>x.t!='aq');
+ const mol=`${cf(k[0])}${S[0].F} + ${cf(k[1])}${S[1].F} → ${rhs(P[0],k[2])} + ${rhs(P[1],k[3])}`,full=`${ion(S[0],k[0])} + ${ion(S[1],k[1])} → ${P[0].t=='aq'?ion(P[0],k[2]):rhs(P[0],k[2])} + ${P[1].t=='aq'?ion(P[1],k[3]):rhs(P[1],k[3])}`,net=P.filter(x=>x.t!='aq').map(x=>`${cf(x.p)}${lab(x.c,'c')} + ${cf(x.q)}${lab(x.a,'a')} → ${x.R.join(' + ')}`),sp=[...new Set(P.filter(x=>x.t=='aq').flatMap(x=>[lab(x.c,'c'),lab(x.a,'a')]))].join(', ');
+ e.innerHTML=`<div style="--acc:${S[0].c.c}"><div class="hero"><div class="orb" style="background:radial-gradient(circle at 32% 30%,#fff9,${S[1].c.c} 40%,${S[0].c.c} 125%)"></div><div><div class="kind">Реакция обмена</div><h2 style="font-size:23px">${S[0].F} + ${S[1].F}</h2><div class="nm">${nm(S[0])} + ${nm(S[1]).toLowerCase()}</div></div></div></div>
+ <div class="fact">${xst?xTxt():'Два прозрачных раствора. Что будет, если их смешать? Ионы могут поменяться партнёрами — подумай, получится ли что-то нерастворимое!'}</div>
+ ${xst?`<div class="section"><h3>${X.vd}</h3><div class="grid">${P.map((x,i)=>`<div class="tile l2"><small>Новое вещество ${i+1}</small><b>${x.F}: ${x.t=='wat'?'вода':x.t=='gas'?'газ':SOL[x.s]}</b></div>`).join('')}</div></div>
+ <div class="section l2"><h3>🧩 Уравнение</h3>${rx?`<div class="eq">${mol}</div>${P.some(x=>x.t=='wat')?'<div class="note">Нейтрализация идёт с выделением тепла (≈ 57 кДж на моль воды).</div>':''}<div class="l3"><div class="note">Полное ионное:</div><div class="eq">${full}</div><div class="note">Сокращённое ионное — то, что реально произошло:</div>${net.map(n=>`<div class="eq">${n}</div>`).join('')}${sp?`<div class="note">Ионы ${sp} не изменились — это «зрители», их в сокращённом уравнении нет.</div>`:''}</div>`:'<div class="note">Реакция не идёт: в продуктах нет осадка, газа или воды.</div>'}</div>`:''}
+ <details class="l2" ${xst?'':'open'}><summary>Таблица растворимости</summary>${stTable(hl)}</details>`}
+if(innerWidth>760)document.body.classList.add('po');
+rs();setLv();setMode(0);
+(function loop(){if(mode==1)drawAtom();else if(mode==2){xStep();xDraw()}else{step();draw()}requestAnimationFrame(loop)})();
+</script></body></html>
