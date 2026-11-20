@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Невидимки — естественный отбор</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0912;--s1:#1d1a24;--s2:#272330;--s3:#322d3d;--on:#e8e0ee;--on2:#cbc3d4;--ol:#4b4556;--pr:#d0bcff;--ok:#9be3a8;--er:#ffb4ab;box-sizing:border-box}
+*{box-sizing:border-box;margin:0}html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--on);font:400 14px/1.45 "Roboto Flex",Roboto,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+canvas#f{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:block;cursor:crosshair}
+button,input{font:inherit;color:inherit}button{border:0;background:none;cursor:pointer}button:focus-visible,input:focus-visible{outline:2px solid var(--pr);outline-offset:2px}
+.glass{background:rgba(29,26,36,.94);border:1px solid rgba(255,255,255,.09);box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#top{position:fixed;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:10px;padding:9px 12px 9px 18px;border-radius:28px;z-index:5}
+#top h1{font:900 19px/1 "Roboto Flex",system-ui;letter-spacing:-.4px;flex:1;white-space:nowrap;background:linear-gradient(90deg,#b9f6a0,#ffe29a,var(--pr));-webkit-background-clip:text;background-clip:text;color:transparent}
+.pill{padding:8px 13px;border-radius:16px;background:var(--s2);font-weight:500;white-space:nowrap}
+#nav{position:fixed;left:12px;right:12px;top:calc(70px + env(safe-area-inset-top,0px));display:flex;gap:8px;overflow-x:auto;padding:2px;z-index:4;scrollbar-width:none}#nav::-webkit-scrollbar{display:none}
+.chip{display:flex;align-items:center;gap:8px;height:34px;padding:0 14px 0 10px;border-radius:10px;border:1px solid var(--ol);background:rgba(29,26,36,.8);white-space:nowrap;font-weight:500}.chip i{width:14px;height:14px;border-radius:50%;box-shadow:0 0 8px currentColor}.chip.on{background:var(--pr);color:#14101c;border-color:transparent}
+#dock{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:30px;z-index:5;max-width:calc(100% - 16px);flex-wrap:wrap;justify-content:center}
+.tg{height:40px;padding:0 13px;border-radius:12px;border:1px solid var(--ol);font-weight:500}.tg.on{background:#4a4458;color:#eaddff;border-color:transparent}.tg.primary{background:var(--pr);color:#27154d;border-color:transparent;font-weight:700}
+#status{position:fixed;left:14px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:3;padding:11px 15px;border-radius:16px;color:var(--on2);font-size:13px;max-width:min(460px,calc(100% - 28px));pointer-events:none}#status b{color:var(--on)}
+#panel{position:fixed;z-index:6;background:var(--s1);border-radius:28px;overflow:auto;right:12px;top:calc(116px + env(safe-area-inset-top,0px));bottom:92px;width:350px;transform:translateX(120%);padding:20px;transition:transform .45s cubic-bezier(.2,0,0,1);box-shadow:0 20px 60px #000a}
+body.po #panel{transform:none}
+.hero{display:flex;gap:14px;align-items:center}.orb{width:54px;height:54px;flex:none;border-radius:50%;box-shadow:inset -10px -8px 16px #000a}
+h2{font:900 26px/1.05 "Roboto Flex",system-ui;letter-spacing:-.6px}.kind{color:var(--pr);font-weight:700;font-size:12px}
+h3{font-size:14px;margin:18px 0 8px}
+.fact{margin:14px 0;padding:12px 14px;border-radius:18px 18px 18px 6px;background:var(--s2);color:var(--on2)}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.tile{padding:10px 13px;border-radius:15px;background:var(--s2)}.tile small{display:block;color:var(--on2);font-size:12px}.tile b{font-weight:600;font-size:16px}
+.bar{height:10px;border-radius:5px;background:var(--s3);margin-top:12px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#9be3a8,#ffe29a);transition:width .25s}
+.note{font-size:12px;color:var(--on2);margin-top:5px}
+canvas.g{width:100%;display:block;border-radius:12px;background:var(--s2)}
+.l1,.l2{display:none}body:not(.lv0) .l1{display:block}body.lv2 .l2{display:block}
+details{background:var(--s2);border-radius:12px;margin:6px 0;padding:9px 12px}summary{cursor:pointer;font-weight:500}details p{margin-top:6px;color:var(--on2);font-size:13px}
+.field{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:12px 0 4px;color:var(--on2)}.field b{color:var(--on);font-weight:500}
+input[type=range]{width:100%;accent-color:var(--pr)}
+.calc{font:12.5px/1.7 ui-monospace,Menlo,monospace;background:var(--s2);padding:10px 12px;border-radius:12px;color:var(--on2)}.calc b{color:var(--on)}
+table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}th,td{padding:4px 3px;text-align:right}th{color:var(--on2);font-weight:500;border-bottom:1px solid var(--ol)}tr:nth-child(even) td{background:rgba(255,255,255,.03)}
+.btn{width:100%;height:42px;border-radius:22px;background:var(--s3);font-weight:600;margin-top:10px}
+#toast{position:fixed;left:50%;top:calc(116px + env(safe-area-inset-top,0px));transform:translate(-50%,-20px);opacity:0;transition:.3s;z-index:9;padding:10px 18px;border-radius:20px;background:var(--pr);color:#27154d;font-weight:700;pointer-events:none;white-space:nowrap}#toast.on{opacity:1;transform:translate(-50%,0)}
+.sep{width:1px;background:var(--ol);margin:4px 2px;flex:none}
+#intro{position:fixed;left:14px;top:calc(116px + env(safe-area-inset-top,0px));width:280px;z-index:4;padding:16px;border-radius:22px;max-height:calc(100% - 230px);overflow:auto}
+#intro h3{margin:0 0 8px;font-size:15px}#intro ol{padding-left:20px;color:var(--on2);font-size:13px}#intro li{margin:6px 0}#intro li b{color:var(--on)}
+#intro .try{margin-top:10px;padding:9px 11px;border-radius:12px;background:var(--s2);font-size:12.5px;color:var(--on2)}#intro .try b{color:var(--on)}
+#intro .btn{height:38px;margin-top:10px;background:var(--pr);color:#27154d}
+#ihelp{position:fixed;left:14px;top:calc(116px + env(safe-area-inset-top,0px));z-index:4;display:none}
+body.ci #intro{display:none}body.ci #ihelp{display:block}
+@media(max-width:900px){#panel{left:12px;right:12px;width:auto;top:auto;height:50%;transform:translateY(130%)}.pill.hide{display:none}#intro{left:12px;right:12px;width:auto;z-index:8;max-height:60%}}
+</style>
+</head>
+<body class="lv0">
+<canvas id="f" aria-label="Поле с жуками: нажимай на жуков, которых видишь"></canvas>
+<header id="top" class="glass"><h1>Невидимки</h1><span class="pill hide">Поколение <b id="gen">1</b></span><button class="pill" id="pbtn">📊 Данные</button></header>
+<nav id="nav"></nav>
+<div id="status" class="glass"></div>
+<div id="intro" class="glass"><h3>👋 Что тут происходит?</h3><ol><li>Это <b>жуки</b>. Цвет и размер достались им от родителей, поэтому все немного разные.</li><li>Ты — <b>хищник</b>, сначала птица 🐦. Нажимай на жуков, которых видишь, и «съедай» их. Другие хищники (сверху) ведут себя иначе.</li><li>Кого не заметили, тот выживает и заводит <b>малышей</b>, очень похожих на родителей.</li><li>Так заметные жуки пропадают, а <b>незаметные остаются</b>. Это и есть <b>естественный отбор</b>.</li></ol><div class="try" id="try"></div><button class="btn" id="iok">Понятно, играть!</button></div><button class="tg glass" id="ihelp">❓ Что тут происходит?</button>
+<aside id="panel">
+ <div class="hero"><div class="orb" id="orb"></div><div><div class="kind">СРЕДА ОБИТАНИЯ</div><h2 id="pn"></h2></div></div>
+ <p class="fact" id="pf"></p><p class="fact" id="pd" style="margin-top:-4px"></p>
+ <div class="grid"><div class="tile"><small>Поколение</small><b id="tg">1</b></div><div class="tile"><small>Жуков</small><b id="tn">0</b></div><div class="tile"><small>Хищник</small><b id="tp">🐦</b></div><div class="tile"><small>Заметность</small><b id="tv">0%</b></div><div class="tile"><small>Размер</small><b id="tz">1.0×</b></div><div class="tile"><small>Промахи</small><b id="tm">0</b></div></div>
+ <div class="bar"><i id="qb"></i></div><div class="note" id="qt"></div>
+
+ <div class="l1">
+  <h3>Какого цвета жуки сейчас</h3><canvas class="g" id="hist" style="height:110px"></canvas>
+  <div class="note">Столбики — жуки каждого цвета. Контур — первое поколение. Белая метка — цвет фона.</div>
+  <h3>Какого размера жуки</h3><canvas class="g" id="hist2" style="height:90px"></canvas>
+  <h3>Как менялись заметность и размер</h3><canvas class="g" id="trend" style="height:100px"></canvas>
+  <h3>Термины</h3>
+  <details><summary>Изменчивость</summary><p>Жуки одного вида немного отличаются друг от друга, например цветом.</p></details>
+  <details><summary>Наследственность</summary><p>Потомки получают окраску родителей, иногда с небольшими случайными изменениями (мутациями).</p></details>
+  <details><summary>Естественный отбор</summary><p>Заметные для хищников особи гибнут чаще, незаметные чаще оставляют потомство. Так признаки среды закрепляются в популяции.</p></details>
+  <details><summary>Приспособленность</summary><p>Способность выжить и оставить потомство в данных условиях. Для другого фона она другая.</p></details>
+  <details><summary>Покровительственная окраска</summary><p>Цвет, сливающийся с фоном и скрывающий животное от хищника.</p></details>
+  <details><summary>Виды отбора</summary><p>Если хищник ест только мелких, жуки крупнеют: это движущий отбор. Если едят и мелких, и крупных, выживают средние: это стабилизирующий отбор.</p></details>
+ </div>
+
+ <div class="l2">
+  <details><summary>Мутация и дрейф генов</summary><p>Мутация — случайное изменение признака у потомка. Дрейф — случайные колебания состава небольшой популяции, не связанные с отбором: при малом числе жуков результат менее предсказуем.</p></details>
+  <details><summary>Давление отбора</summary><p>Доля особей, которых хищник изымает за одно поколение.</p></details>
+  <h3>Параметры опыта</h3>
+  <div class="field"><span>Жуков в популяции</span><b id="vN">40</b></div><input type="range" id="sN" min="20" max="150" step="10" value="40">
+  <div class="field"><span>Давление отбора</span><b id="vp">40%</b></div><input type="range" id="sp" min="10" max="80" step="5" value="40">
+  <div class="field"><span>Вероятность мутации</span><b id="vr">60%</b></div><input type="range" id="sr" min="0" max="100" step="5" value="60">
+  <div class="field"><span>Размах мутации σ</span><b id="vs">9°</b></div><input type="range" id="ss" min="1" max="30" step="1" value="9">
+  <div class="note">Изменения N вступают в силу со следующего поколения.</div>
+  <h3>Расчёт</h3><div class="calc" id="calc"></div>
+  <h3>Журнал опыта</h3><table id="tab"></table>
+  <button class="btn" id="csv">Скопировать таблицу (CSV)</button>
+  <h3>Задание</h3>
+  <p class="fact">1) На фоне «Кора» запустите авто при давлении 20% и запишите, за сколько поколений заметность упадёт ниже 25%. 2) Повторите при 60%. 3) Повторите при N = 20. Сравните скорость и разброс результатов и объясните разницу. 4) Выберите «Две среды»: почему в левой и правой половине выживают жуки разного цвета? 5) Сравните, как меняется размер жуков при охоте птицы, жабы и ежа, и объясните различия.</p>
+ </div>
+</aside>
+<div id="dock" class="glass"><button class="tg primary" id="auto">▶ Авто</button><button class="tg" id="spd">Скорость ×1</button><button class="tg" id="skip">⏭ Поколение</button><button class="tg" id="lvl">Режим: кратко</button><button class="tg" id="reset">↺ Сброс</button></div>
+<div id="toast"></div>
+<script>
+(()=>{
+const $=s=>document.querySelector(s),cv=$('#f'),cx=cv.getContext('2d'),bg=document.createElement('canvas'),R=Math.random;
+const PRE={
+bark:{n:'Кора',h:28,s:32,l:30,k:'b',f:'Тёмная кора дерева. Здесь незаметны коричневые жуки, а зелёные и синие видны издалека.'},
+leaf:{n:'Листва',h:112,s:42,l:34,k:'l',f:'Густая зелень. Зелёные жуки сливаются с листьями, красные и фиолетовые бросаются в глаза.'},
+sand:{n:'Песок',h:44,s:48,l:62,k:'s',f:'Светлый песок. Охристые жуки почти невидимы, а яркие цвета выдают себя сразу.'},
+petal:{n:'Цветы',h:332,s:50,l:58,k:'p',f:'Розовая поляна. Розовые жуки прячутся среди лепестков.'},
+mix:{n:'Две среды',h:70,s:40,l:40,k:'m',f:'Слева листва, справа кора. Один и тот же жук в одной половине невидим, а в другой заметен.'}};
+const P={N:40,p:.4,mr:.6,ms:9},LV=['кратко','средне','подробно'];
+const PR={bird:{e:'🐦',n:'Птица',d:'видит цвет: яркие жуки заметнее. Крупных найти чуть легче.',w:b=>(.12+.88*vis(b))*b.z},
+toad:{e:'🐸',n:'Жаба',d:'проглатывает только мелких: крупный жук ей не по рту. Цвет почти не важен.',w:b=>Math.min(1,Math.max(.08,1.7-b.z))*(b.pause>0?.35:1)},
+hog:{e:'🦔',n:'Ёж',d:'охотится ночью и не различает цвета. Крупных жуков находит по запаху легче.',w:b=>b.z*b.z},
+all:{e:'🎲',n:'Все вместе',d:'охотятся все сразу: и заметных, и мелких, и крупных. Выживает золотая середина.'}};
+let W,H,D=1,SZ=14,area,cur,beetles=[],fx=[],hist=[],hist0=[],hist0z=[],ci=false,pr='bird',gen=1,eaten=0,miss=0,genN=40,pend=0,lv=0,auto=false,spd=1,ac=0,po=false,lastMsg='';
+const INFO={bird:{how:'Нажимай на самых заметных жуков: тех, что выделяются на фоне.',why:'Птица охотится глазами. Чем сильнее жук отличается от фона и чем он крупнее, тем легче его найти.',ai:'ловит самых заметных'},
+toad:{how:'Выбирай мелких жуков и тех, что ползут. Замершие почти не видны: смотри, как они потускнели.',why:'Жаба хватает добычу и глотает целиком, поэтому крупный жук ей не по рту. Она реагирует на движение и почти не замечает неподвижное.',ai:'ловит мелких и подвижных'},
+hog:{how:'Мир стал чёрно-белым: ёж не различает цвета. Выбирай самых крупных жуков.',why:'Ёж охотится ночью по запаху и звукам. Крупный жук пахнет и шуршит сильнее, а цвет ёжику ни к чему.',ai:'ловит самых крупных'},
+all:{how:'Здесь охотятся сразу все, и кликать нельзя. Прочитай про каждого хищника, потом нажми ▶ Авто и смотри.',why:'Птица выбирает заметных и крупных, жаба мелких и подвижных, ёж крупных. Выживают те, кто не слишком заметен и не слишком крупен.',ai:'охотятся по очереди'}};
+let fb='',fbT=0;
+function judge(b){const a=alive(),w=PR[pr].w,r=w(b)/Math.max(...a.map(w)),I={bird:['✓ Так и охотится птица: этот жук хорошо виден на фоне.','Птица вряд ли заметила бы этого жука: он слишком похож на фон. В жизни она выбрала бы поярче.'],toad:['✓ Мелкий жук как раз по рту жабе.',b.z>1.1?'Такого крупного жаба вряд ли проглотила бы. В жизни она выбрала бы помельче.':'Этот жук замер, и жаба заметила бы его с трудом. В жизни она ловит тех, кто движется.'],hog:['✓ Ёж находит по запаху именно таких, крупных.','Мелкого жука ёж почуял бы хуже. В жизни он выбрал бы покрупнее.']}[pr];
+ fb=r>=.65?I[0]:r<.35?I[1]:'';fbT=performance.now()+4500}
+const SPD=[1,4,16],cd=(a,b)=>{const d=Math.abs(a-b)%360;return d>180?360-d:d},sdf=(a,b)=>((a-b+540)%360)-180,gauss=()=>{let u=0;for(let i=0;i<4;i++)u+=R();return(u-2)/.577};
+const envAt=x=>cur.k=='m'?(x<W/2?PRE.leaf:PRE.bark):cur,vis=b=>Math.min(1,cd(b.h,envAt(b.x).h)/70),alive=()=>beetles.filter(b=>!b.die),quota=()=>Math.max(1,Math.round(genN*P.p));
+function mul(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function paint(g,p,x0,x1,rn){g.fillStyle=`hsl(${p.h} ${p.s}% ${p.l}%)`;g.fillRect(x0,0,x1-x0,H);
+ const n=Math.round((x1-x0)*H/({b:1400,l:2200,s:450,p:2000}[p.k]||1400));
+ for(let i=0;i<n;i++){const x=x0+rn()*(x1-x0),y=rn()*H,c=`hsl(${p.h+(rn()-.5)*12} ${p.s}% ${p.l+(rn()-.5)*14}%)`;g.fillStyle=g.strokeStyle=c;g.beginPath();
+  if(p.k=='b'){g.lineWidth=2+rn()*4;g.lineCap='round';g.moveTo(x,y);g.lineTo(x+(rn()-.5)*8,y+20+rn()*50);g.stroke()}
+  else if(p.k=='l'){const w=14+rn()*18;g.ellipse(x,y,w,w*.45,rn()*6.3,0,6.3);g.fill()}
+  else if(p.k=='s'){g.arc(x,y,1+rn()*2,0,6.3);g.fill()}
+  else{g.arc(x,y,3+rn()*6,0,6.3);g.fill()}}}
+function fit(){D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;bg.width=W*D;bg.height=H*D;SZ=Math.max(11,Math.min(22,Math.min(W,H)/38));paintBG();setArea()}
+function paintBG(){const g=bg.getContext('2d');g.setTransform(D,0,0,D,0,0);const rn=mul(7);
+ if(cur.k=='m'){paint(g,PRE.leaf,0,W/2,rn);paint(g,PRE.bark,W/2,W,rn);g.fillStyle='rgba(0,0,0,.35)';g.fillRect(W/2-2,0,4,H)}else paint(g,cur,0,W,rn)}
+function setArea(){area={x0:(!ci&&W>900?306:16),x1:W-(po&&W>900?366:16),y0:W>700?122:128,y1:H-(W>700?96:100)}}
+const mk=(h,x,y,z=.6+R())=>({x,y,h,z,a:R()*6.28,sp:10+R()*16,ph:R()*9,pause:0,sc:0,die:0});
+const rx=()=>area.x0+R()*(area.x1-area.x0),ry=()=>area.y0+R()*(area.y1-area.y0);
+function stat(a){let s=0,c=0,v=0,z=0;const bins=Array(36).fill(0),zb=Array(13).fill(0);a.forEach(b=>{const r=b.h*Math.PI/180;s+=Math.sin(r);c+=Math.cos(r);v+=vis(b);z+=b.z;zb[Math.min(12,Math.max(0,Math.floor((b.z-.5)*10)))]++;bins[Math.floor(((b.h%360)+360)%360/10)%36]++});
+ const n=a.length||1,r=Math.hypot(s,c)/n;return{z:z/n,zb,n:a.length,mean:(Math.atan2(s,c)*180/Math.PI+360)%360,sd:r>.001?Math.sqrt(-2*Math.log(Math.min(r,.9999)))*180/Math.PI:180,vis:v/n,bins}}
+function snap(){const s=stat(alive());hist.push({g:gen,n:s.n,mean:s.mean,sd:s.sd,vis:s.vis,z:s.z,S:null});if(gen==1){hist0=s.bins;hist0z=s.zb}}
+function setPre(k){cur=PRE[k];gen=1;eaten=0;miss=0;pend=0;hist=[];fx=[];genN=P.N;beetles=[];paintBG();
+ for(let i=0;i<P.N;i++){const b=mk(R()*360,rx(),ry());b.sc=1;beetles.push(b)}snap();
+ document.querySelectorAll('.chip[data-k]').forEach(c=>c.classList.toggle('on',c.dataset.k==k));$('#try').innerHTML='<b>Здесь:</b> '+cur.f+'<br>Сверху можно сменить хищника и смотреть, кто теперь выживает.';
+ $('#pn').textContent=cur.n;$('#pf').textContent=cur.f;$('#orb').style.background=cur.k=='m'?'linear-gradient(90deg,hsl(112 42% 34%) 50%,hsl(28 32% 30%) 50%)':`hsl(${cur.h} ${cur.s}% ${cur.l}%)`;ui()}
+function eat(b,e){b.die=.001;eaten++;fx.push({x:b.x,y:b.y,t:0,e:e||PR[pr].e});ui()}
+function eatW(){const a=alive();if(!a.length)return;const k=pr=='all'?['bird','toad','hog'][R()*3|0]:pr,w=a.map(b=>PR[k].w(b));let r=R()*w.reduce((x,y)=>x+y,0),i=0;while(i<a.length-1&&(r-=w[i])>0)i++;eat(a[i],PR[k].e)}
+function setAuto(on){auto=on;const e=$('#auto');e.textContent=auto?'⏸ Пауза':'▶ Авто';e.classList.toggle('on',auto)}
+function setPred(k){pr=k;fb='';document.querySelectorAll('.pc').forEach(c=>c.classList.toggle('on',c.dataset.p==k));setAuto(false);cv.style.filter=k=='hog'?'grayscale(1) brightness(.8) contrast(1.1)':'';toast(PR[k].e+' '+PR[k].n);ui()}
+function endGen(){const sv=alive(),s=stat(sv),h=hist[hist.length-1];h.S=sdf(s.mean,h.mean);const kids=[];
+ for(let i=0;i<P.N;i++){const p=sv[R()*sv.length|0];let nh=p.h,nz=p.z;if(R()<P.mr){nh+=gauss()*P.ms;nz=Math.min(1.8,Math.max(.5,nz+gauss()*P.ms/80))}
+  kids.push(mk((nh%360+360)%360,Math.min(area.x1,Math.max(area.x0,p.x+(R()-.5)*70)),Math.min(area.y1,Math.max(area.y0,p.y+(R()-.5)*70)),nz))}
+ sv.forEach(b=>b.die=.001);beetles=beetles.concat(kids);gen++;eaten=0;pend=0;genN=kids.length;snap();toast(`Поколение ${gen}: выжило ${sv.length}, родилось ${kids.length}`);ui()}
+function step(dt){
+ beetles.forEach(b=>{if(b.die){b.die+=dt*3;return}if(b.sc<1)b.sc=Math.min(1,b.sc+dt*2.5);
+  b.pause-=dt;if(b.pause<=0&&R()<dt*.4)b.pause=1+R()*3;
+  if(b.pause<=0){b.a+=(R()-.5)*dt*4;b.x+=Math.cos(b.a)*b.sp*dt;b.y+=Math.sin(b.a)*b.sp*dt;b.ph+=dt*b.sp*.1;
+   if(b.x<area.x0||b.x>area.x1){b.x=Math.min(area.x1,Math.max(area.x0,b.x));b.a=Math.PI-b.a}
+   if(b.y<area.y0||b.y>area.y1){b.y=Math.min(area.y1,Math.max(area.y0,b.y));b.a=-b.a}}});
+ beetles=beetles.filter(b=>b.die<1);
+ fx.forEach(f=>f.t+=dt*2);fx=fx.filter(f=>f.t<1);
+ if(!pend&&eaten>0&&eaten>=quota())pend=.7;
+ if(auto&&!pend&&eaten<quota()){ac+=dt*SPD[spd]*quota()/1.4;while(ac>=1&&eaten<quota()){ac--;eatW()}}
+ if(pend>0){pend-=dt*(auto?SPD[spd]:1);if(pend<=0){pend=0;endGen()}}}
+function bug(b){const e=envAt(b.x),v=vis(b),L=SZ*.85*b.z*Math.min(1,b.sc)*(1-Math.min(b.die,1));if(L<.8)return;
+ const s=e.s+36*v,l=e.l-3+13*v;cx.save();cx.globalAlpha=pr=='toad'&&b.pause>0?.3:1;cx.translate(b.x,b.y);cx.rotate(b.a);
+ cx.fillStyle='rgba(0,0,0,.18)';cx.beginPath();cx.ellipse(L*.15,L*.2,L,L*.6,0,0,6.3);cx.fill();
+ cx.strokeStyle=`hsl(${b.h} ${s}% ${l-16}%)`;cx.lineWidth=Math.max(1,L*.09);cx.beginPath();
+ for(let i=-1;i<=1;i++){const x=i*L*.45,w=Math.sin(b.ph*3+i*2)*L*.2;cx.moveTo(x,-L*.45);cx.lineTo(x+w,-L*.95);cx.moveTo(x,L*.45);cx.lineTo(x-w,L*.95)}cx.stroke();
+ cx.fillStyle=`hsl(${b.h} ${s}% ${l}%)`;cx.strokeStyle=`hsl(${b.h} ${s}% ${l-14}%)`;cx.lineWidth=Math.max(1,L*.07);
+ cx.beginPath();cx.ellipse(0,0,L,L*.62,0,0,6.3);cx.fill();cx.stroke();cx.beginPath();cx.moveTo(-L*.9,0);cx.lineTo(L*.35,0);cx.stroke();
+ cx.beginPath();cx.ellipse(L*.95,0,L*.35,L*.3,0,0,6.3);cx.fillStyle=`hsl(${b.h} ${s}% ${l-8}%)`;cx.fill();cx.stroke();cx.restore()}
+function draw(){cx.setTransform(D,0,0,D,0,0);cx.drawImage(bg,0,0,W,H);beetles.forEach(bug);
+ fx.forEach(f=>{cx.globalAlpha=1-f.t;cx.strokeStyle=f.m?'#ccc':'#fff';cx.lineWidth=2;cx.beginPath();cx.arc(f.x,f.y,SZ*(.5+f.t*1.8),0,6.3);cx.stroke();
+  if(!f.m){cx.beginPath();for(let i=0;i<6;i++){const a=i*1.05+.3,r1=SZ*(.8+f.t*1.5),r2=r1+SZ*.5;cx.moveTo(f.x+Math.cos(a)*r1,f.y+Math.sin(a)*r1);cx.lineTo(f.x+Math.cos(a)*r2,f.y+Math.sin(a)*r2)}cx.stroke()}if(f.e){cx.font=(SZ*1.7)+'px serif';cx.fillText(f.e,f.x-SZ*.8,f.y-SZ*.6-f.t*SZ*2)}cx.globalAlpha=1})}
+cv.addEventListener('pointerdown',e=>{if(pr=='all'){toast('Здесь охотятся все сразу: нажми ▶ Авто и наблюдай');return}if(pend||eaten>=quota())return;let best=null,bd=SZ*1.5;alive().forEach(b=>{const d=Math.hypot(b.x-e.clientX,b.y-e.clientY);if(d<bd){bd=d;best=b}});
+ if(best){judge(best);eat(best)}else{miss++;fx.push({x:e.clientX,y:e.clientY,t:0,m:1});ui()}});
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2200)}
+function ui(){const a=alive(),s=stat(a),q=quota();
+ $('#gen').textContent=$('#tg').textContent=gen;$('#tn').textContent=a.length;$('#tv').textContent=Math.round(s.vis*100)+'%';$('#tm').textContent=miss;$('#tz').textContent=s.z.toFixed(2)+'×';$('#tp').textContent=PR[pr].e;$('#pd').textContent=PR[pr].e+' '+PR[pr].n+': '+INFO[pr].why;
+ $('#qb').style.width=Math.min(100,eaten/q*100)+'%';$('#qt').textContent=`Съедено ${eaten} из ${q} — тогда выжившие размножатся`;
+ const m=s.vis>.6?'Жуки яркие и заметные: птице легко. <b>Охоться!</b>':s.vis>.3?'Остались жуки, похожие на фон. <b>Искать труднее.</b>':'Жуки почти слились с фоном! <b>Так работает естественный отбор.</b>';
+ $('#status').innerHTML=`<b>${PR[pr].e} ${PR[pr].n}. Как играть:</b> ${INFO[pr].how}<br>`+(auto?`Охота идёт сама (${PR[pr].n}): ${INFO[pr].ai}.`:performance.now()<fbT?fb:pr=='bird'?m:pr=='all'?'':'Цвет для этого хищника не важен: яркие и неприметные жуки выживают одинаково.');
+ if(lv>0){drawHist(s);drawHist2(s);drawTrend()}
+ if(lv>1){const e=cur.k=='m'?'112° и 28°':cur.h+'°',h=hist[hist.length-2];
+  $('#calc').innerHTML=`Цвет жуков x̄ = <b>${s.mean.toFixed(0)}°</b>, σ = <b>${s.sd.toFixed(0)}°</b><br>Размер z̄ = <b>${s.z.toFixed(2)}×</b><br>Цвет фона θ = <b>${e}</b><br>Заметность v = min(1, |x − θ| / 70°) → v̄ = <b>${s.vis.toFixed(2)}</b><br>Давление p = <b>${Math.round(P.p*100)}%</b> → съедают ${q} из ${genN}<br>`+(h?`S = x̄выж − x̄ = <b>${h.S.toFixed(1)}°</b><br>R = x̄потомков − x̄ = <b>${sdf(hist[hist.length-1].mean,h.mean).toFixed(1)}°</b><br>(поколение ${h.g}→${h.g+1})`:'S и R появятся после первого поколения');
+  let r='<tr><th>№</th><th>x̄°</th><th>σ°</th><th>v̄</th><th>z̄</th><th>S°</th><th>R°</th></tr>';
+  for(let i=Math.max(0,hist.length-10);i<hist.length;i++){const h=hist[i],n=hist[i+1];r+=`<tr><td>${h.g}</td><td>${h.mean.toFixed(0)}</td><td>${h.sd.toFixed(0)}</td><td>${h.vis.toFixed(2)}</td><td>${h.z.toFixed(2)}</td><td>${h.S==null?'—':h.S.toFixed(1)}</td><td>${n?sdf(n.mean,h.mean).toFixed(1):'—'}</td></tr>`}
+  $('#tab').innerHTML=r}}
+function gfx(id,h){const c=$(id),w=c.clientWidth;if(!w)return null;c.width=w*D;c.height=h*D;const g=c.getContext('2d');g.setTransform(D,0,0,D,0,0);g.font='10px system-ui';return{g,w}}
+function drawHist(s){const o=gfx('#hist',110);if(!o)return;const{g,w}=o,m=Math.max(8,...s.bins,...hist0),bw=w/36;
+ hist0.forEach((n,i)=>{g.strokeStyle='rgba(255,255,255,.4)';g.strokeRect(i*bw+1,98-n/m*88,bw-2,n/m*88)});
+ s.bins.forEach((n,i)=>{const h=n/m*88;g.fillStyle=`hsl(${i*10+5} 60% 55%)`;g.fillRect(i*bw+1,98-h,bw-2,h)});
+ g.fillStyle='#fff';(cur.k=='m'?[112,28]:[cur.h]).forEach(h=>{const x=h/360*w;g.beginPath();g.moveTo(x,99);g.lineTo(x-5,108);g.lineTo(x+5,108);g.fill()});
+ g.fillStyle='#cbc3d4';g.fillText('0°',2,10);g.fillText('цвет жука (оттенок) → 360°',w-135,10)}
+function drawTrend(){const o=gfx('#trend',100);if(!o)return;const{g,w}=o,n=hist.length;g.strokeStyle='rgba(255,255,255,.12)';g.beginPath();g.moveTo(0,50);g.lineTo(w,50);g.stroke();
+ g.fillStyle='#cbc3d4';g.fillText('100%',3,10);g.fillText('0%',3,96);if(n<2){g.fillText('Нужно хотя бы 2 поколения',w/2-70,55);return}
+ const X=i=>12+i/(n-1)*(w-24),Y=v=>92-v*84;g.strokeStyle='#9be3a8';g.lineWidth=2;g.beginPath();hist.forEach((h,i)=>i?g.lineTo(X(i),Y(h.vis)):g.moveTo(X(i),Y(h.vis)));g.stroke();
+ g.fillStyle='#ffe29a';hist.forEach((h,i)=>{g.beginPath();g.arc(X(i),Y(h.vis),n>40?1.5:3,0,6.3);g.fill()});g.strokeStyle='#8edcff';g.beginPath();hist.forEach((h,i)=>{const y=Y((h.z-.5)/1.3);i?g.lineTo(X(i),y):g.moveTo(X(i),y)});g.stroke();g.fillStyle='#9be3a8';g.fillText('— заметность цвета',38,10);g.fillStyle='#8edcff';g.fillText('— размер',w-60,10)}
+function drawHist2(s){const o=gfx('#hist2',90);if(!o)return;const{g,w}=o,m=Math.max(8,...s.zb,...hist0z),bw=w/13;
+ hist0z.forEach((n,i)=>{g.strokeStyle='rgba(255,255,255,.4)';g.strokeRect(i*bw+1,70-n/m*60,bw-2,n/m*60)});
+ s.zb.forEach((n,i)=>{const h=n/m*60;g.fillStyle='#8edcff';g.fillRect(i*bw+1,70-h,bw-2,h)});
+ g.fillStyle='#cbc3d4';g.fillText('мелкие',2,84);g.fillText('крупные',w-42,84)}
+const nav=$('#nav');Object.entries(PRE).forEach(([k,p])=>{const b=document.createElement('button');b.className='chip';b.dataset.k=k;const c=k=='m'?'#8aa66a':`hsl(${p.h} ${p.s}% ${p.l}%)`;b.innerHTML=`<i style="color:${c};background:${c}"></i>${p.n}`;b.onclick=()=>setPre(k);nav.appendChild(b)});
+nav.insertAdjacentHTML('beforeend','<i class="sep"></i>');
+Object.entries(PR).forEach(([k,p])=>{const b=document.createElement('button');b.className='chip pc';b.dataset.p=k;b.innerHTML=p.e+' '+p.n;b.onclick=()=>setPred(k);nav.appendChild(b)});
+const sl=(id,key,lab,f)=>$(id).oninput=e=>{P[key]=f(+e.target.value);$(lab).textContent=({N:P.N,p:Math.round(P.p*100)+'%',mr:Math.round(P.mr*100)+'%',ms:P.ms+'°'})[key];ui()};
+sl('#sN','N','#vN',v=>v);sl('#sp','p','#vp',v=>v/100);sl('#sr','mr','#vr',v=>v/100);sl('#ss','ms','#vs',v=>v);
+$('#auto').onclick=()=>{setAuto(!auto);ui()};
+const intro=c=>{ci=c;document.body.classList.toggle('ci',c);setArea()};$('#iok').onclick=()=>intro(true);$('#ihelp').onclick=()=>intro(false);
+$('#spd').onclick=e=>{spd=(spd+1)%3;e.target.textContent='Скорость ×'+SPD[spd]};
+$('#skip').onclick=()=>{if(pend)return;while(eaten<quota())eatW()};
+$('#lvl').onclick=e=>{lv=(lv+1)%3;document.body.classList.remove('lv0','lv1','lv2');document.body.classList.add('lv'+lv);e.target.textContent='Режим: '+LV[lv];ui()};
+$('#reset').onclick=()=>setPre(Object.keys(PRE).find(k=>PRE[k]==cur));
+$('#pbtn').onclick=()=>{po=!po;document.body.classList.toggle('po',po);setArea();setTimeout(ui,460)};
+$('#csv').onclick=()=>{const t='gen,n,mean_deg,sd_deg,vis,size,S,R\n'+hist.map((h,i)=>[h.g,h.n,h.mean.toFixed(1),h.sd.toFixed(1),h.vis.toFixed(3),h.z.toFixed(2),h.S==null?'':h.S.toFixed(1),hist[i+1]?sdf(hist[i+1].mean,h.mean).toFixed(1):''].join(',')).join('\n');
+ try{navigator.clipboard.writeText(t).then(()=>toast('Таблица скопирована'),()=>toast('Не удалось скопировать'))}catch(e){toast('Не удалось скопировать')}};
+addEventListener('resize',()=>{fit();ui()});
+po=innerWidth>900;document.body.className=(po?'po ':'')+'lv0';cur=PRE.bark;fit();setPre('bark');document.querySelector('.pc').classList.add('on');
+let last=performance.now();(function loop(t){const dt=Math.min(.05,(t-last)/1000);last=t;step(dt);draw();requestAnimationFrame(loop)})(last);
+setInterval(ui,500);
+})();
+</script>
+</body>
+</html>
