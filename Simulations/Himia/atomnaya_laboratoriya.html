@@ -44,10 +44,10 @@ body:not([data-mode=atom]) #side,body:not([data-mode=atom]) #dock,body:not([data
 .lg i.sq{border-radius:2px}
 @media(max-width:840px){.tab .lb{display:none}.tab{padding:8px 10px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
-</style></head>
+</style><style data-sim-back>#top .sim-back{display:inline-flex;align-items:center;gap:6px;flex:none;text-decoration:none;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}#top .sim-back:hover{filter:brightness(1.25)}#top .sim-back:focus-visible{outline:2px solid #d0bcff;outline-offset:2px}#top .sim-back b{font-weight:700;line-height:1}@media (max-width:640px){#top .sim-back span{display:none}#top .sim-back{position:relative;margin-left:-8px;margin-right:-2px;padding:8px 10px}#top .sim-back::after{content:"";position:absolute;inset:-6px -4px}#top{gap:6px}#top>.pill{padding-left:10px;padding-right:10px}}</style></head>
 <body data-mode="atom">
 <canvas id="scene" aria-label="Модель атома: ядро из протонов и нейтронов и электроны на оболочках"></canvas>
-<header id="top" class="glass"><h1>Атомная лаборатория</h1><button class="pill tab on" data-m="atom">⚛<span class="lb"> Атом</span></button><button class="pill tab" data-m="fus">☀<span class="lb"> Синтез</span></button><button class="pill tab" data-m="fis">☢<span class="lb"> Деление</span></button><span class="pill" id="readout">⚛</span></header>
+<header id="top" class="glass"><a class="pill sim-back" data-sim-back href="../../index.html" title="Назад в каталог" aria-label="Назад в каталог" onclick="try{var r=document.referrer;if(r&&history.length>1&&r.indexOf(location.origin)===0&&r.indexOf('/Simulations/')<0){history.back();return false}}catch(e){}"><b aria-hidden="true">←</b><span>Каталог</span></a><h1>Атомная лаборатория</h1><button class="pill tab on" data-m="atom">⚛<span class="lb"> Атом</span></button><button class="pill tab" data-m="fus">☀<span class="lb"> Синтез</span></button><button class="pill tab" data-m="fis">☢<span class="lb"> Деление</span></button><span class="pill" id="readout">⚛</span></header>
 <nav id="nav"></nav>
 <div id="side" class="glass"><div id="ctl"></div><div id="hud"></div></div>
 <aside id="panel"></aside>

@@ -81,6 +81,31 @@ async function isFile(filePath) {
 }
 
 
+// Кнопка «назад в каталог» в шапке каждой симуляции. Вставляется один раз (по маркеру data-sim-back),
+// поэтому работает и для новых симуляций. Если страница открыта из каталога, возвращает на него
+// через history.back(), так что прокрутка и выбранный предмет сохраняются.
+const BACK_STYLE = '<style data-sim-back>'
+  + '#top .sim-back{display:inline-flex;align-items:center;gap:6px;flex:none;text-decoration:none;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}'
+  + '#top .sim-back:hover{filter:brightness(1.25)}'
+  + '#top .sim-back:focus-visible{outline:2px solid #d0bcff;outline-offset:2px}'
+  + '#top .sim-back b{font-weight:700;line-height:1}'
+  // Телефоны: кнопка только со стрелкой, а промежутки в шапке чуть уже, чтобы остальные кнопки не сдвинулись.
+  + '@media (max-width:640px){#top .sim-back span{display:none}#top .sim-back{position:relative;margin-left:-8px;margin-right:-2px;padding:8px 10px}#top .sim-back::after{content:"";position:absolute;inset:-6px -4px}#top{gap:6px}#top>.pill{padding-left:10px;padding-right:10px}}</style>';
+
+function backButton(hrefToIndex) {
+  const onclick = "try{var r=document.referrer;if(r&&history.length>1&&r.indexOf(location.origin)===0&&r.indexOf('/Simulations/')<0){history.back();return false}}catch(e){}";
+  return `<a class="pill sim-back" data-sim-back href="${hrefToIndex}" title="Назад в каталог" aria-label="Назад в каталог" onclick="${onclick}"><b aria-hidden="true">←</b><span>Каталог</span></a>`;
+}
+
+function addBackButton(html, hrefToIndex) {
+  // Сначала убираем прежнюю версию кнопки и её стили, чтобы обновления применялись и повторный запуск ничего не дублировал.
+  html = html.replace(/<a\b[^>]*\bdata-sim-back\b[^>]*>[\s\S]*?<\/a>/i, '').replace(/<style data-sim-back>[\s\S]*?<\/style>/i, '');
+  const opening = /<(header|div)\b[^>]*\bid=["']top["'][^>]*>/i;
+  if (!opening.test(html)) return html; // нестандартная шапка: ничего не трогаем
+  html = html.replace(opening, match => match + backButton(hrefToIndex));
+  return /<\/head>/i.test(html) ? html.replace(/<\/head>/i, BACK_STYLE + '</head>') : BACK_STYLE + html;
+}
+
 // Страховка: новые симуляции часто приходят с подключением шрифта с Google Fonts.
 // Из некоторых сетей (в т.ч. в РФ) он грузится очень долго и страница «зависает».
 // Перед сборкой заменяем его на локальный шрифт из папки fonts/ и добавляем noindex.
@@ -104,6 +129,7 @@ async function normalizeSimulationPages() {
         }
       }
       if (!/name=["']robots["']/i.test(html)) html = html.replace(/<meta charset=["']?utf-8["']?\s*\/?>/i, match => `${match}<meta name="robots" content="noindex, nofollow">`);
+      html = addBackButton(html, path.relative(dir, path.join(ROOT, 'index.html')).split(path.sep).join('/'));
       if (html !== original) { await fs.writeFile(file, html, 'utf8'); console.log(`Исправлена страница: ${path.relative(ROOT, file)}`); }
     }
   }

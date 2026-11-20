@@ -83,10 +83,10 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:li
 #loadpop h4{font-size:14px;margin-bottom:4px}#loadpop .note2{font-size:11px;color:var(--on2);line-height:1.45;margin-bottom:8px}
 #loadpop .lrow{margin:10px 0}#loadpop .lrow>div{display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--on2);font-size:12px}#loadpop .lrow b{color:var(--on);font-variant-numeric:tabular-nums}#loadpop input[type=range]{width:100%;accent-color:var(--pr);margin-top:4px}
 #loadpop .lreset{margin-top:6px;padding:7px 12px;border-radius:12px;background:var(--s2);font-size:12px;font-weight:500}
-</style></head>
+</style><style data-sim-back>#top .sim-back{display:inline-flex;align-items:center;gap:6px;flex:none;text-decoration:none;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}#top .sim-back:hover{filter:brightness(1.25)}#top .sim-back:focus-visible{outline:2px solid #d0bcff;outline-offset:2px}#top .sim-back b{font-weight:700;line-height:1}@media (max-width:640px){#top .sim-back span{display:none}#top .sim-back{position:relative;margin-left:-8px;margin-right:-2px;padding:8px 10px}#top .sim-back::after{content:"";position:absolute;inset:-6px -4px}#top{gap:6px}#top>.pill{padding-left:10px;padding-right:10px}}</style></head>
 <body>
 <canvas id="scene" aria-label="Интерактивная оптическая скамья"></canvas>
-<header id="top" class="glass"><h1>Оптическая лаборатория</h1><span class="pill">⚛ <span class="lb">Физика света</span></span><span class="pill" id="readout">λ 650 нм</span><button class="pill pill-btn" id="loadbtn" aria-expanded="false" title="Лимиты лучей и отражений">⚙ <span class="lb">Нагрузка</span></button></header>
+<header id="top" class="glass"><a class="pill sim-back" data-sim-back href="../../index.html" title="Назад в каталог" aria-label="Назад в каталог" onclick="try{var r=document.referrer;if(r&&history.length>1&&r.indexOf(location.origin)===0&&r.indexOf('/Simulations/')<0){history.back();return false}}catch(e){}"><b aria-hidden="true">←</b><span>Каталог</span></a><h1>Оптическая лаборатория</h1><span class="pill">⚛ <span class="lb">Физика света</span></span><span class="pill" id="readout">λ 650 нм</span><button class="pill pill-btn" id="loadbtn" aria-expanded="false" title="Лимиты лучей и отражений">⚙ <span class="lb">Нагрузка</span></button></header>
 <div id="loadpop" class="glass" role="dialog" aria-label="Нагрузка"></div>
 <nav id="nav"></nav>
 <div id="status" class="glass">Геометрическая оптика · координаты и расстояния в условных мм модели</div>

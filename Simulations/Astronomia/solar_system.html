@@ -121,10 +121,10 @@ body.open #dock{transform:translate(-50%,160%)}
 #top h1{font-size:16px}.pill.d{display:none}.lb{display:none}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
-</head>
+<style data-sim-back>#top .sim-back{display:inline-flex;align-items:center;gap:6px;flex:none;text-decoration:none;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}#top .sim-back:hover{filter:brightness(1.25)}#top .sim-back:focus-visible{outline:2px solid #d0bcff;outline-offset:2px}#top .sim-back b{font-weight:700;line-height:1}@media (max-width:640px){#top .sim-back span{display:none}#top .sim-back{position:relative;margin-left:-8px;margin-right:-2px;padding:8px 10px}#top .sim-back::after{content:"";position:absolute;inset:-6px -4px}#top{gap:6px}#top>.pill{padding-left:10px;padding-right:10px}}</style></head>
 <body>
 <canvas id="c"></canvas>
-<header id="top" class="glass"><h1>Солнечная система</h1><button class="pill rp" id="tReal" aria-label="Реальный масштаб">📏<span class="lb"> Реальный масштаб</span></button><button class="pill rp" id="tNB" aria-label="Физика орбит">🌌<span class="lb"> Физика орбит</span></button><span class="pill d" id="date"></span><span class="pill" id="score">★ 0/8</span></header>
+<header id="top" class="glass"><a class="pill sim-back" data-sim-back href="../../index.html" title="Назад в каталог" aria-label="Назад в каталог" onclick="try{var r=document.referrer;if(r&&history.length>1&&r.indexOf(location.origin)===0&&r.indexOf('/Simulations/')<0){history.back();return false}}catch(e){}"><b aria-hidden="true">←</b><span>Каталог</span></a><h1>Солнечная система</h1><button class="pill rp" id="tReal" aria-label="Реальный масштаб">📏<span class="lb"> Реальный масштаб</span></button><button class="pill rp" id="tNB" aria-label="Физика орбит">🌌<span class="lb"> Физика орбит</span></button><span class="pill d" id="date"></span><span class="pill" id="score">★ 0/8</span></header>
 <nav id="nav"></nav>
 <div id="lc"><div id="rl" class="glass"></div><div id="sc" class="glass"><b>📏 Реальный масштаб</b><div id="sbar"><i></i><span></span></div>Если Солнце — мяч диаметром 20 см, то Земля — песчинка 1,8 мм в 21 м от него, Юпитер — шарик 2 см в 112 м, а Нептун — 7 мм в 645 м.<br>Свет летит от Солнца до Земли 8 мин 20 с, а до Нептуна — 4 ч 10 мин.</div><div id="vc" class="glass"><b>☄ Скорость запуска</b><input type="range" id="vs" min="1.9" max="4.5" step=".01"><span id="vt"></span></div></div>
 <aside id="sheet" aria-live="polite"></aside>

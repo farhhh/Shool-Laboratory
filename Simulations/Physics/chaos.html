@@ -32,10 +32,10 @@ select{background:var(--s2);border:1px solid var(--ol);padding:7px 9px;border-ra
 .x{position:absolute;right:12px;top:12px;width:36px;height:36px;border-radius:50%;background:var(--s2)}
 @media(max-width:760px){.lb{display:none}#top h1{font-size:15px}#side{left:8px;right:8px;width:auto;top:auto;bottom:calc(66px + env(safe-area-inset-bottom,0px));max-height:42vh;padding:10px}}
 </style>
-</head>
+<style data-sim-back>#top .sim-back{display:inline-flex;align-items:center;gap:6px;flex:none;text-decoration:none;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}#top .sim-back:hover{filter:brightness(1.25)}#top .sim-back:focus-visible{outline:2px solid #d0bcff;outline-offset:2px}#top .sim-back b{font-weight:700;line-height:1}@media (max-width:640px){#top .sim-back span{display:none}#top .sim-back{position:relative;margin-left:-8px;margin-right:-2px;padding:8px 10px}#top .sim-back::after{content:"";position:absolute;inset:-6px -4px}#top{gap:6px}#top>.pill{padding-left:10px;padding-right:10px}}</style></head>
 <body>
 <canvas id="c" aria-label="Два почти одинаковых двойных маятника, которые постепенно расходятся"></canvas>
-<header id="top" class="glass"><h1>Хаос двойного маятника</h1><button class="pill" id="bw">❓<span class="lb"> Зачем это</span></button><button class="pill" id="ba">ℹ<span class="lb"> Допущения</span></button><span class="pill" id="rd">t = 0,0 с</span></header>
+<header id="top" class="glass"><a class="pill sim-back" data-sim-back href="../../index.html" title="Назад в каталог" aria-label="Назад в каталог" onclick="try{var r=document.referrer;if(r&&history.length>1&&r.indexOf(location.origin)===0&&r.indexOf('/Simulations/')<0){history.back();return false}}catch(e){}"><b aria-hidden="true">←</b><span>Каталог</span></a><h1>Хаос двойного маятника</h1><button class="pill" id="bw">❓<span class="lb"> Зачем это</span></button><button class="pill" id="ba">ℹ<span class="lb"> Допущения</span></button><span class="pill" id="rd">t = 0,0 с</span></header>
 <nav id="nav"></nav>
 <div id="side" class="glass"><div id="ctl"></div><div id="hud"><div id="ht"></div>
 <div id="gw"><h3>Расхождение: lg d(t)</h3><canvas class="gr" id="g1" width="540" height="180"></canvas><h3>Энергия: (E − E₀) / E_масш</h3><canvas class="gr" id="g2" width="540" height="180"></canvas></div></div></div>

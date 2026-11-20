@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-18T11:30:08.819Z",
+  "generatedAt": "2026-11-20T11:52:08.749Z",
   "categories": [
     {
       "id": "astronomy",
@@ -26,6 +26,12 @@
           "description": "Смотрите как работает атом и регулируйте его протоны, нейтроны, электроны, а также занимайтесь синтезом и делением",
           "url": "Simulations/Himia/atomnaya_laboratoriya.html",
           "image": "Simulations/Himia/atomnaya_laboratoriya.webp"
+        },
+        {
+          "title": "Ионариум",
+          "description": "Смешивайте ионы и смотрите, что получится",
+          "url": "Simulations/Himia/ionarium.html",
+          "image": "Simulations/Himia/ionarium.webp"
         }
       ]
     },
@@ -35,6 +41,12 @@
       "folder": "Physics",
       "icon": "⚛️",
       "items": [
+        {
+          "title": "Хаос двойного маятника",
+          "description": "Это простой эксперемент, который показывает на идеальном маятнике, почему любой расчет в какой-то момент начинает расходится с действительностью",
+          "url": "Simulations/Physics/chaos.html",
+          "image": "Simulations/Physics/chaos.webp"
+        },
         {
           "title": "Электрическая лаборатория",
           "description": "Стройте свои электронные схемы и смотрите что получилось",
@@ -69,6 +81,12 @@
       "folder": "Biology",
       "icon": "🧬",
       "items": [
+        {
+          "title": "Невидимки",
+          "description": "Станьте хищником и поохотьтесь на жуков. Кого не заметили, тот выживает и оставляет потомство, так на ваших глазах работает естественный отбор.",
+          "url": "Simulations/Biology/nevidimki.html",
+          "image": "Simulations/Biology/nevidimki.webp"
+        },
         {
           "title": "Живая клетка",
           "description": "Изучите строение растительной и животной клетки",

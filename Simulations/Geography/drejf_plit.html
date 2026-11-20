@@ -37,10 +37,10 @@ body{background:radial-gradient(900px 620px at 12% 18%,rgba(120,70,200,.24),tran
 #panel{left:8px;right:8px;width:auto;top:auto;bottom:8px;max-height:57vh;transform:translateY(120%)}body.panel-open #dock{transform:translate(-50%,160%)}#top h1{font-size:15px}
 #side{left:8px;right:8px;width:auto;top:auto;bottom:calc(66px + env(safe-area-inset-bottom,0px));max-height:34vh;padding:10px}
 #dock{left:8px;right:8px;transform:none;max-width:none;flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;padding:8px;gap:6px;scrollbar-width:none}.tg{height:36px;padding:0 10px;font-size:12px}}
-</style></head>
+</style><style data-sim-back>#top .sim-back{display:inline-flex;align-items:center;gap:6px;flex:none;text-decoration:none;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}#top .sim-back:hover{filter:brightness(1.25)}#top .sim-back:focus-visible{outline:2px solid #d0bcff;outline-offset:2px}#top .sim-back b{font-weight:700;line-height:1}@media (max-width:640px){#top .sim-back span{display:none}#top .sim-back{position:relative;margin-left:-8px;margin-right:-2px;padding:8px 10px}#top .sim-back::after{content:"";position:absolute;inset:-6px -4px}#top{gap:6px}#top>.pill{padding-left:10px;padding-right:10px}}</style></head>
 <body>
 <canvas id="scene" aria-label="Модель литосферных плит: глобус или карта, границы, скорости, вулканы и землетрясения"></canvas>
-<header id="top" class="glass"><h1>Дрейф плит</h1><button class="pill" id="vb">🌍 Глобус</button><span class="pill" id="readout">⏱ сегодня</span></header>
+<header id="top" class="glass"><a class="pill sim-back" data-sim-back href="../../index.html" title="Назад в каталог" aria-label="Назад в каталог" onclick="try{var r=document.referrer;if(r&&history.length>1&&r.indexOf(location.origin)===0&&r.indexOf('/Simulations/')<0){history.back();return false}}catch(e){}"><b aria-hidden="true">←</b><span>Каталог</span></a><h1>Дрейф плит</h1><button class="pill" id="vb">🌍 Глобус</button><span class="pill" id="readout">⏱ сегодня</span></header>
 <nav id="nav"></nav>
 <div id="side" class="glass"></div>
 <aside id="panel"></aside>

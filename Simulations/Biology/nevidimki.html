@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Невидимки — естественный отбор</title>
 <style>
 :root{color-scheme:dark;--bg:#0b0912;--s1:#1d1a24;--s2:#272330;--s3:#322d3d;--on:#e8e0ee;--on2:#cbc3d4;--ol:#4b4556;--pr:#d0bcff;--ok:#9be3a8;--er:#ffb4ab;box-sizing:border-box}
@@ -44,10 +44,10 @@ table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:ta
 body.ci #intro{display:none}body.ci #ihelp{display:block}
 @media(max-width:900px){#panel{left:12px;right:12px;width:auto;top:auto;height:50%;transform:translateY(130%)}.pill.hide{display:none}#intro{left:12px;right:12px;width:auto;z-index:8;max-height:60%}}
 </style>
-</head>
+<style data-sim-back>#top .sim-back{display:inline-flex;align-items:center;gap:6px;flex:none;text-decoration:none;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}#top .sim-back:hover{filter:brightness(1.25)}#top .sim-back:focus-visible{outline:2px solid #d0bcff;outline-offset:2px}#top .sim-back b{font-weight:700;line-height:1}@media (max-width:640px){#top .sim-back span{display:none}#top .sim-back{position:relative;margin-left:-8px;margin-right:-2px;padding:8px 10px}#top .sim-back::after{content:"";position:absolute;inset:-6px -4px}#top{gap:6px}#top>.pill{padding-left:10px;padding-right:10px}}</style></head>
 <body class="lv0">
 <canvas id="f" aria-label="Поле с жуками: нажимай на жуков, которых видишь"></canvas>
-<header id="top" class="glass"><h1>Невидимки</h1><span class="pill hide">Поколение <b id="gen">1</b></span><button class="pill" id="pbtn">📊 Данные</button></header>
+<header id="top" class="glass"><a class="pill sim-back" data-sim-back href="../../index.html" title="Назад в каталог" aria-label="Назад в каталог" onclick="try{var r=document.referrer;if(r&&history.length>1&&r.indexOf(location.origin)===0&&r.indexOf('/Simulations/')<0){history.back();return false}}catch(e){}"><b aria-hidden="true">←</b><span>Каталог</span></a><h1>Невидимки</h1><span class="pill hide">Поколение <b id="gen">1</b></span><button class="pill" id="pbtn">📊 Данные</button></header>
 <nav id="nav"></nav>
 <div id="status" class="glass"></div>
 <div id="intro" class="glass"><h3>👋 Что тут происходит?</h3><ol><li>Это <b>жуки</b>. Цвет и размер достались им от родителей, поэтому все немного разные.</li><li>Ты — <b>хищник</b>, сначала птица 🐦. Нажимай на жуков, которых видишь, и «съедай» их. Другие хищники (сверху) ведут себя иначе.</li><li>Кого не заметили, тот выживает и заводит <b>малышей</b>, очень похожих на родителей.</li><li>Так заметные жуки пропадают, а <b>незаметные остаются</b>. Это и есть <b>естественный отбор</b>.</li></ol><div class="try" id="try"></div><button class="btn" id="iok">Понятно, играть!</button></div><button class="tg glass" id="ihelp">❓ Что тут происходит?</button>
